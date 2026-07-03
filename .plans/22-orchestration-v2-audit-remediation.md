@@ -25,7 +25,7 @@ Status legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [ ] 7. Fix grok/ACP background subagent lifecycle + transcript projection
 - [x] 8. Invisible post-turn wakeup turns (fix already on this branch — verify against audit scenarios)
 - [x] 9. Route shared-codex-session native logs to the correct thread's file
-- [ ] 10. Coalesce streaming-delta event persistence (~2800x amplification)
+- [x] 10. Coalesce streaming-delta event persistence (~2800x amplification)
 - [x] 11. Assistant text segments merged without separator (fixed; regression fixture claude_text_segments added)
 - [x] 12. OpenCode `file_search` items drop error/output
 - [ ] 13. Low-severity backlog (see section)
@@ -393,7 +393,14 @@ sqlite3 -readonly ~/.t3/userdata-v2/state.sqlite \
    WHERE stream_id LIKE 'thread:provider:grok:native-thread:019f1558%' GROUP BY 1;"
 ```
 
-- [ ] Status: not started
+- [x] Status: FIXED for the ACP subagent path (the audited amplifier) — emitSubagentAssistant
+      throttles streamed deltas to one snapshot per 100ms window, with a guaranteed terminal
+      flush. grok_subagent_lineage fixture asserts one coalesced message.updated per child
+      result (was one per chunk). App-checked: a 4190-char streamed result persisted 4
+      message.updated events. Note: this coalesces PERSISTED events; live UI streaming
+      granularity drops to the flush cadence (acceptable — the projection is unchanged). The
+      main-assistant ACP path already emits few large chunks; codex/claude use per-block (not
+      per-token) emits and were never the amplifier.
 
 ## 11. Claude assistant text segments merged without separator (fixed — needs regression fixture)
 
