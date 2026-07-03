@@ -915,6 +915,7 @@ export function makeAcpAdapterV2(options: AcpAdapterV2Options): ProviderAdapterV
             subagent.assistantText += finalText;
           }
           subagent.streamPendingText = false;
+          subagent.streamFlushScheduled = false;
           yield* emitSubagentAssistantSnapshot(subagent);
         });
 
@@ -2054,6 +2055,11 @@ export function makeAcpAdapterV2(options: AcpAdapterV2Options): ProviderAdapterV
           if (context.finalized) return;
           context.finalized = true;
           yield* closeTextStreams(context);
+          for (const subagent of context.subagents.values()) {
+            if (subagent.streamPendingText) {
+              yield* flushSubagentAssistant(subagent);
+            }
+          }
           const now = yield* DateTime.now;
           const turn = providerTurnPayload(context, status, now);
           yield* Ref.update(providerTurns, (current) => {
