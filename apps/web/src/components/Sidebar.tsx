@@ -1592,6 +1592,7 @@ const SidebarProjectItem = memo(function SidebarProjectItem(props: SidebarProjec
       shouldShowThreadPanel: projectExpanded || pinnedCollapsedThread !== null,
     };
   }, [
+    activeRouteThreadKey,
     isThreadListExpanded,
     pinnedCollapsedThread,
     projectExpanded,
