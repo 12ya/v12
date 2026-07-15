@@ -69,6 +69,9 @@ export interface WorkLogEntry {
   command?: string;
   rawCommand?: string;
   changedFiles?: ReadonlyArray<string>;
+  cwd?: string;
+  durationMs?: number;
+  exitCode?: number;
   tone: "thinking" | "tool" | "info" | "error";
   toolTitle?: string;
   toolData?: unknown;
@@ -680,6 +683,7 @@ function toDerivedWorkLogEntry(activity: OrchestrationThreadActivity): DerivedWo
       ? (activity.payload as Record<string, unknown>)
       : null;
   const commandPreview = extractToolCommand(payload);
+  const executionMetadata = extractToolExecutionMetadata(payload);
   const changedFiles = extractChangedFiles(payload);
   const title = extractToolTitle(payload);
   const isTaskActivity = activity.kind === "task.progress" || activity.kind === "task.completed";
@@ -731,6 +735,11 @@ function toDerivedWorkLogEntry(activity: OrchestrationThreadActivity): DerivedWo
   if (changedFiles.length > 0) {
     entry.changedFiles = changedFiles;
   }
+  if (executionMetadata.cwd) entry.cwd = executionMetadata.cwd;
+  if (executionMetadata.durationMs !== undefined) {
+    entry.durationMs = executionMetadata.durationMs;
+  }
+  if (executionMetadata.exitCode !== undefined) entry.exitCode = executionMetadata.exitCode;
   if (title) {
     entry.toolTitle = title;
   }
@@ -818,6 +827,9 @@ function mergeDerivedWorkLogEntries(
   const toolCallId = next.toolCallId ?? previous.toolCallId;
   const toolLifecycleStatus = next.toolLifecycleStatus ?? previous.toolLifecycleStatus;
   const toolData = next.toolData ?? previous.toolData;
+  const cwd = next.cwd ?? previous.cwd;
+  const durationMs = next.durationMs ?? previous.durationMs;
+  const exitCode = next.exitCode ?? previous.exitCode;
   return {
     ...previous,
     ...next,
@@ -832,6 +844,45 @@ function mergeDerivedWorkLogEntries(
     ...(toolCallId ? { toolCallId } : {}),
     ...(toolLifecycleStatus !== undefined ? { toolLifecycleStatus } : {}),
     ...(toolData !== undefined ? { toolData } : {}),
+    ...(cwd ? { cwd } : {}),
+    ...(durationMs !== undefined ? { durationMs } : {}),
+    ...(exitCode !== undefined ? { exitCode } : {}),
+  };
+}
+
+function extractToolExecutionMetadata(payload: Record<string, unknown> | null): {
+  readonly cwd?: string;
+  readonly durationMs?: number;
+  readonly exitCode?: number;
+} {
+  const data = asRecord(payload?.data);
+  const item = asRecord(data?.item) ?? data;
+  const result = asRecord(item?.result) ?? asRecord(data?.result);
+  const rawOutput = asRecord(item?.rawOutput) ?? asRecord(result?.rawOutput);
+  const cwd =
+    asTrimmedString(item?.cwd) ?? asTrimmedString(data?.cwd) ?? asTrimmedString(payload?.cwd);
+  const durationMs =
+    asNumber(item?.durationMs) ??
+    asNumber(item?.duration_ms) ??
+    asNumber(result?.durationMs) ??
+    asNumber(result?.duration_ms) ??
+    asNumber(data?.durationMs);
+  const detailExitCode =
+    typeof payload?.detail === "string"
+      ? stripTrailingExitCode(payload.detail).exitCode
+      : undefined;
+  const exitCode =
+    asNumber(result?.exitCode) ??
+    asNumber(item?.exitCode) ??
+    asNumber(rawOutput?.exitCode) ??
+    asNumber(data?.exitCode) ??
+    detailExitCode;
+  return {
+    ...(cwd ? { cwd } : {}),
+    ...(durationMs !== null && durationMs >= 0 ? { durationMs } : {}),
+    ...(exitCode !== null && exitCode !== undefined && Number.isInteger(exitCode)
+      ? { exitCode }
+      : {}),
   };
 }
 

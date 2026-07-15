@@ -37,7 +37,7 @@ export const SidebarThreadPreviewCount = Schema.Int.check(
   }),
 );
 export type SidebarThreadPreviewCount = typeof SidebarThreadPreviewCount.Type;
-export const DEFAULT_SIDEBAR_THREAD_PREVIEW_COUNT: SidebarThreadPreviewCount = 6;
+export const DEFAULT_SIDEBAR_THREAD_PREVIEW_COUNT: SidebarThreadPreviewCount = 10;
 
 export const ClientSettingsSchema = Schema.Struct({
   autoOpenPlanSidebar: Schema.Boolean.pipe(Schema.withDecodingDefault(Effect.succeed(false))),
@@ -325,7 +325,7 @@ export const OpenCodeSettings = makeProviderSettingsSchema(
       Schema.withDecodingDefault(Effect.succeed("")),
       Schema.annotateKey({
         title: "Server URL",
-        description: "Leave blank to let T3 Code spawn the server when needed.",
+        description: "Leave blank to let V12 spawn the server when needed.",
         providerSettingsForm: {
           placeholder: "http://127.0.0.1:4096",
           clearWhenEmpty: "omit",

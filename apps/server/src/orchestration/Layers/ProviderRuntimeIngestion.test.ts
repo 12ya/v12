@@ -807,6 +807,42 @@ describe("ProviderRuntimeIngestion", () => {
     expect(rawOutput?.content).toBe('import * as Effect from "effect/Effect"\n');
   });
 
+  it("keeps useful live tool output while enforcing a hard projection bound", async () => {
+    const harness = await createHarness();
+    const detail = "x".repeat(30_000);
+
+    harness.emit({
+      type: "item.updated",
+      eventId: asEventId("evt-tool-output-bounded"),
+      provider: ProviderDriverKind.make("codex"),
+      createdAt: "2026-01-01T00:00:00.000Z",
+      threadId: asThreadId("thread-1"),
+      turnId: asTurnId("turn-tool-output-bounded"),
+      itemId: asItemId("item-tool-output-bounded"),
+      payload: {
+        itemType: "command_execution",
+        status: "inProgress",
+        title: "Run command",
+        detail,
+      },
+    });
+
+    const thread = await waitForThread(harness.readModel, (entry) =>
+      entry.activities.some(
+        (activity: ProviderRuntimeTestActivity) => activity.id === "evt-tool-output-bounded",
+      ),
+    );
+    const activity = thread.activities.find(
+      (entry: ProviderRuntimeTestActivity) => entry.id === "evt-tool-output-bounded",
+    );
+    const payload = activity?.payload as Record<string, unknown> | undefined;
+    const projectedDetail = payload?.detail;
+
+    expect(typeof projectedDetail).toBe("string");
+    expect(String(projectedDetail)).toHaveLength(24_025);
+    expect(String(projectedDetail).endsWith("[tool output truncated]")).toBe(true);
+  });
+
   it("normalizes command execution activities to ran-command summaries", async () => {
     const harness = await createHarness();
     const now = "2026-01-01T00:00:00.000Z";

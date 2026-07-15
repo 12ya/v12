@@ -26,6 +26,7 @@ import { LegendList, type LegendListRef } from "@legendapp/list/react";
 import { FileDiff } from "@pierre/diffs/react";
 import {
   deriveTimelineEntries,
+  formatDuration,
   workEntryIndicatesToolFailure,
   workEntryIndicatesToolNeutralStatus,
   workEntryIndicatesToolSuccess,
@@ -46,6 +47,7 @@ import {
   ChevronRightIcon,
   CircleAlertIcon,
   EyeIcon,
+  GitForkIcon,
   GlobeIcon,
   HammerIcon,
   MessageCircleIcon,
@@ -54,7 +56,7 @@ import {
   MinusIcon,
   SquarePenIcon,
   TerminalIcon,
-  Undo2Icon,
+  Trash2Icon,
   WrenchIcon,
   XIcon,
   ZapIcon,
@@ -82,6 +84,7 @@ import {
 } from "./MessagesTimeline.logic";
 import { TerminalContextInlineChip } from "./TerminalContextInlineChip";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
+import { Popover, PopoverPopup } from "../ui/popover";
 import {
   deriveDisplayedUserMessageState,
   type ParsedTerminalContextEntry,
@@ -129,7 +132,17 @@ interface TimelineRowSharedState {
   workspaceRoot: string | undefined;
   skills: ReadonlyArray<Pick<ServerProviderSkill, "name" | "displayName">>;
   activeThreadEnvironmentId: EnvironmentId;
+  anchorMessageId: MessageId | null;
+  sourceHighlightMessageId: MessageId | null;
   onRevertUserMessage: (messageId: MessageId) => void;
+  onForkMessage: (messageId: MessageId, initialPrompt?: string) => void;
+  onAddSelectionTask: (input: {
+    messageId: MessageId;
+    author: "user" | "assistant";
+    createdAt: string;
+    quote: string;
+    instruction: string;
+  }) => void;
   onImageExpand: (preview: ExpandedImagePreview) => void;
   onOpenTurnDiff: (turnId: TurnId, filePath?: string) => void;
   onToggleTurnFold: (turnId: TurnId) => void;
@@ -147,6 +160,7 @@ const TimelineRowActivityCtx = createContext<TimelineRowActivityState>(null!);
 const TIMELINE_LIST_HEADER = <div className="h-3 sm:h-4" />;
 const TIMELINE_LIST_FOOTER = <div className="h-3 sm:h-4" />;
 const EMPTY_TIMELINE_SKILLS: ReadonlyArray<Pick<ServerProviderSkill, "name" | "displayName">> = [];
+const NOOP_ADD_SELECTION_TASK: TimelineRowSharedState["onAddSelectionTask"] = () => {};
 
 // ---------------------------------------------------------------------------
 // Props (public API)
@@ -165,6 +179,8 @@ interface MessagesTimelineProps {
   onOpenTurnDiff: (turnId: TurnId, filePath?: string) => void;
   revertTurnCountByUserMessageId: Map<MessageId, number>;
   onRevertUserMessage: (messageId: MessageId) => void;
+  onForkMessage: (messageId: MessageId, initialPrompt?: string) => void;
+  onAddSelectionTask?: TimelineRowSharedState["onAddSelectionTask"];
   isRevertingCheckpoint: boolean;
   onImageExpand: (preview: ExpandedImagePreview) => void;
   activeThreadEnvironmentId: EnvironmentId;
@@ -174,6 +190,7 @@ interface MessagesTimelineProps {
   workspaceRoot: string | undefined;
   skills?: ReadonlyArray<Pick<ServerProviderSkill, "name" | "displayName">>;
   anchorMessageId: MessageId | null;
+  sourceHighlightMessageId?: MessageId | null;
   onAnchorReady: (messageId: MessageId, anchorIndex: number) => void;
   onAnchorSizeChanged: (messageId: MessageId, size: number) => void;
   contentInsetEndAdjustment: number;
@@ -198,6 +215,8 @@ export const MessagesTimeline = memo(function MessagesTimeline({
   onOpenTurnDiff,
   revertTurnCountByUserMessageId,
   onRevertUserMessage,
+  onForkMessage,
+  onAddSelectionTask = NOOP_ADD_SELECTION_TASK,
   isRevertingCheckpoint,
   onImageExpand,
   activeThreadEnvironmentId,
@@ -207,6 +226,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
   workspaceRoot,
   skills = EMPTY_TIMELINE_SKILLS,
   anchorMessageId,
+  sourceHighlightMessageId = null,
   onAnchorReady,
   onAnchorSizeChanged,
   contentInsetEndAdjustment,
@@ -416,7 +436,11 @@ export const MessagesTimeline = memo(function MessagesTimeline({
       workspaceRoot,
       skills,
       activeThreadEnvironmentId,
+      anchorMessageId,
+      sourceHighlightMessageId,
       onRevertUserMessage,
+      onForkMessage,
+      onAddSelectionTask,
       onImageExpand,
       onOpenTurnDiff,
       onToggleTurnFold,
@@ -430,7 +454,11 @@ export const MessagesTimeline = memo(function MessagesTimeline({
       workspaceRoot,
       skills,
       activeThreadEnvironmentId,
+      anchorMessageId,
+      sourceHighlightMessageId,
       onRevertUserMessage,
+      onForkMessage,
+      onAddSelectionTask,
       onImageExpand,
       onOpenTurnDiff,
       onToggleTurnFold,
@@ -827,6 +855,14 @@ const TimelineRowContent = memo(function TimelineRowContent({ row }: { row: Time
 
 function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" }> }) {
   const ctx = use(TimelineRowCtx);
+  const isSourceHighlighted = ctx.sourceHighlightMessageId === row.message.id;
+  const {
+    selectionContainerRef,
+    selectedQuote,
+    selectionAnchorRect,
+    clearSelection,
+    captureSelection,
+  } = useMessageTaskSelection();
   const userImages = row.message.attachments ?? [];
   const displayedUserMessage = deriveDisplayedUserMessageState(row.message.text);
   const terminalContexts = displayedUserMessage.contexts;
@@ -849,7 +885,16 @@ function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" 
 
   return (
     <div className="group flex flex-col items-end gap-1">
-      <div className="relative max-w-[80%] rounded-2xl border border-border bg-secondary p-3">
+      <div
+        ref={selectionContainerRef}
+        className={cn(
+          "relative max-w-[80%] rounded-2xl border border-border bg-secondary p-3 transition-[box-shadow,background-color]",
+          isSourceHighlighted ? "bg-accent/45 ring-2 ring-primary/45" : null,
+        )}
+        data-source-highlight={isSourceHighlighted ? "true" : undefined}
+        onPointerUp={captureSelection}
+        onKeyUp={captureSelection}
+      >
         {regularImages.length > 0 && (
           <div className="mb-2 grid max-w-[420px] grid-cols-2 gap-2">
             {regularImages.map((image: NonNullable<TimelineMessage["attachments"]>[number]) => (
@@ -907,7 +952,7 @@ function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" 
           markdownCwd={ctx.markdownCwd}
         />
       </div>
-      <div className="flex w-full max-w-[80%] items-center justify-end pe-1 text-xs tabular-nums opacity-0 transition-opacity duration-200 focus-within:opacity-100 group-hover:opacity-100">
+      <div className="flex w-full max-w-[80%] items-center justify-end pe-1 text-xs tabular-nums opacity-0 transition-opacity duration-200 focus-within:opacity-100 group-hover:opacity-100 max-sm:opacity-100">
         <div className="flex shrink-0 items-center gap-2">
           <Tooltip>
             <TooltipTrigger render={<p className="text-muted-foreground text-xs tabular-nums" />}>
@@ -918,6 +963,7 @@ function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" 
             </TooltipPopup>
           </Tooltip>
           <div className="flex items-center gap-0.5">
+            <ForkMessageButton messageId={row.message.id} />
             {canRevertAgentWork && <RevertUserMessageButton messageId={row.message.id} />}
             {displayedUserMessage.copyText && (
               <MessageCopyButton text={displayedUserMessage.copyText} variant="ghost" />
@@ -925,6 +971,23 @@ function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" 
           </div>
         </div>
       </div>
+      {selectedQuote && selectionAnchorRect ? (
+        <SelectionActionBar
+          quote={selectedQuote}
+          anchorRect={selectionAnchorRect}
+          onCancel={clearSelection}
+          onSave={(instruction) => {
+            ctx.onAddSelectionTask({
+              messageId: row.message.id,
+              author: "user",
+              createdAt: row.message.createdAt,
+              quote: selectedQuote,
+              instruction,
+            });
+            clearSelection();
+          }}
+        />
+      ) : null}
     </div>
   );
 }
@@ -941,15 +1004,40 @@ function RevertUserMessageButton({ messageId }: { messageId: MessageId }) {
             type="button"
             size="xs"
             variant="ghost"
-            disabled={activity.isRevertingCheckpoint || activity.isWorking}
+            className="gap-1 px-1.5"
+            disabled={activity.isRevertingCheckpoint}
             onClick={() => ctx.onRevertUserMessage(messageId)}
-            aria-label="Revert to this message"
+            aria-label="Edit and rerun"
           />
         }
       >
-        <Undo2Icon className="size-3" />
+        <SquarePenIcon className="size-3" />
+        <span className="hidden sm:inline">Edit &amp; rerun</span>
       </TooltipTrigger>
-      <TooltipPopup side="top">Revert to this message</TooltipPopup>
+      <TooltipPopup side="top">Edit and rerun</TooltipPopup>
+    </Tooltip>
+  );
+}
+
+function ForkMessageButton({ messageId }: { messageId: MessageId }) {
+  const ctx = use(TimelineRowCtx);
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
+            type="button"
+            size="xs"
+            variant="ghost"
+            onClick={() => ctx.onForkMessage(messageId)}
+            aria-label="Fork chat from here"
+          />
+        }
+      >
+        <GitForkIcon className="size-3" />
+      </TooltipTrigger>
+      <TooltipPopup side="top">Fork chat from here</TooltipPopup>
     </Tooltip>
   );
 }
@@ -976,11 +1064,28 @@ function TurnFoldTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "turn-
 
 function AssistantTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" }> }) {
   const ctx = use(TimelineRowCtx);
+  const isSourceHighlighted = ctx.sourceHighlightMessageId === row.message.id;
+  const {
+    selectionContainerRef,
+    selectedQuote,
+    selectionAnchorRect,
+    clearSelection,
+    captureSelection,
+  } = useMessageTaskSelection();
   const messageText = row.message.text || (row.message.streaming ? "" : "(empty response)");
 
   return (
     <>
-      <div className="relative min-w-0 px-1 py-0.5">
+      <div
+        ref={selectionContainerRef}
+        className={cn(
+          "relative min-w-0 rounded-lg px-1 py-0.5 transition-[box-shadow,background-color]",
+          isSourceHighlighted ? "bg-accent/35 ring-2 ring-primary/45" : null,
+        )}
+        data-source-highlight={isSourceHighlighted ? "true" : undefined}
+        onPointerUp={captureSelection}
+        onKeyUp={captureSelection}
+      >
         <ChatMarkdown
           text={messageText}
           cwd={ctx.markdownCwd}
@@ -997,6 +1102,7 @@ function AssistantTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "mess
         {row.showAssistantMeta ? (
           <div className="mt-1.5 flex items-center gap-2 text-xs tabular-nums opacity-0 transition-opacity duration-200 focus-within:opacity-100 group-hover/assistant:opacity-100">
             <AssistantCopyButton row={row} />
+            {!row.message.streaming ? <ForkMessageButton messageId={row.message.id} /> : null}
             {!row.message.streaming && (
               <Tooltip>
                 <TooltipTrigger
@@ -1012,8 +1118,200 @@ function AssistantTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "mess
           </div>
         ) : null}
       </div>
+      {selectedQuote && selectionAnchorRect ? (
+        <SelectionActionBar
+          quote={selectedQuote}
+          anchorRect={selectionAnchorRect}
+          onCancel={clearSelection}
+          onSave={(instruction) => {
+            ctx.onAddSelectionTask({
+              messageId: row.message.id,
+              author: "assistant",
+              createdAt: row.message.createdAt,
+              quote: selectedQuote,
+              instruction,
+            });
+            clearSelection();
+          }}
+        />
+      ) : null}
     </>
   );
+}
+
+function useMessageTaskSelection() {
+  const selectionContainerRef = useRef<HTMLDivElement>(null);
+  const [selectedQuote, setSelectedQuote] = useState<string | null>(null);
+  const [selectionAnchorRect, setSelectionAnchorRect] = useState<SelectionAnchorRect | null>(null);
+  const selectionTimerRef = useRef<number | null>(null);
+  const captureSelection = useCallback(() => {
+    if (selectionTimerRef.current !== null) window.clearTimeout(selectionTimerRef.current);
+    selectionTimerRef.current = window.setTimeout(() => {
+      selectionTimerRef.current = null;
+      const container = selectionContainerRef.current;
+      if (!container) return;
+      const selection = readSelectionWithin(container);
+      if (selection) {
+        setSelectedQuote(selection.quote);
+        setSelectionAnchorRect(selection.anchorRect);
+      }
+    }, 0);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (selectionTimerRef.current !== null) window.clearTimeout(selectionTimerRef.current);
+    };
+  }, []);
+
+  const clearSelection = useCallback(() => {
+    setSelectedQuote(null);
+    setSelectionAnchorRect(null);
+  }, []);
+
+  return {
+    selectionContainerRef,
+    selectedQuote,
+    selectionAnchorRect,
+    clearSelection,
+    captureSelection,
+  };
+}
+
+interface SelectionAnchorRect {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+  readonly top: number;
+  readonly right: number;
+  readonly bottom: number;
+  readonly left: number;
+}
+
+function readSelectionWithin(
+  container: HTMLElement,
+): { readonly quote: string; readonly anchorRect: SelectionAnchorRect } | null {
+  const selection = window.getSelection();
+  const quote = selection?.toString().trim() ?? "";
+  if (!selection || selection.isCollapsed || quote.length === 0) return null;
+  const anchor = selection.anchorNode;
+  const focus = selection.focusNode;
+  if (!anchor || !focus || !container.contains(anchor) || !container.contains(focus)) return null;
+  const rangeRect = selection.getRangeAt(0).getBoundingClientRect();
+  return {
+    quote,
+    anchorRect: {
+      x: rangeRect.x,
+      y: rangeRect.y,
+      width: rangeRect.width,
+      height: rangeRect.height,
+      top: rangeRect.top,
+      right: rangeRect.right,
+      bottom: rangeRect.bottom,
+      left: rangeRect.left,
+    },
+  };
+}
+
+function SelectionActionBar(props: {
+  quote: string;
+  anchorRect: SelectionAnchorRect;
+  onSave: (instruction: string) => void;
+  onCancel: () => void;
+}) {
+  const [instruction, setInstruction] = useState("");
+  const [editingContext, setEditingContext] = useState(false);
+  const virtualAnchor = useMemo(
+    () => ({ getBoundingClientRect: () => props.anchorRect }),
+    [props.anchorRect],
+  );
+  return (
+    <Popover open onOpenChange={(open) => !open && props.onCancel()}>
+      <PopoverPopup
+        anchor={virtualAnchor}
+        side={editingContext ? "right" : "top"}
+        align="center"
+        sideOffset={editingContext ? 14 : 6}
+        positionerClassName="transition-none"
+        className={cn(
+          "max-w-[calc(100vw-1rem)] transition-none data-ending-style:scale-100 data-starting-style:scale-100 data-starting-style:opacity-100",
+          editingContext ? "w-[min(19rem,calc(100vw-2rem))] rounded-2xl" : "w-auto rounded-md",
+        )}
+        viewportClassName="overflow-visible p-0 [--viewport-inline-padding:0px]"
+      >
+        <div onPointerUp={(event) => event.stopPropagation()}>
+          {editingContext ? (
+            <div className="relative flex min-h-32 flex-col p-3">
+              <span className="absolute top-1/2 -left-8 flex size-6 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white bg-blue-500 font-semibold text-[11px] text-white shadow-sm">
+                1
+              </span>
+              <textarea
+                autoFocus
+                value={instruction}
+                onChange={(event) => setInstruction(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") props.onCancel();
+                  if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+                    props.onSave(resolveSelectionTaskInstruction(props.quote, instruction));
+                  }
+                }}
+                placeholder="Add an optional comment…"
+                aria-label="Optional task context"
+                className="min-h-20 w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground/55"
+              />
+              <div className="mt-2 flex items-center justify-between">
+                <Button
+                  type="button"
+                  size="icon-xs"
+                  variant="ghost"
+                  aria-label="Discard task context"
+                  onClick={props.onCancel}
+                >
+                  <Trash2Icon className="size-3.5" />
+                </Button>
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    type="button"
+                    size="xs"
+                    variant="outline"
+                    className="rounded-full"
+                    onClick={() => setEditingContext(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    size="xs"
+                    className="rounded-full"
+                    onClick={() =>
+                      props.onSave(resolveSelectionTaskInstruction(props.quote, instruction))
+                    }
+                  >
+                    Save
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex h-8 items-stretch whitespace-nowrap">
+              <button
+                type="button"
+                className="rounded-md px-2.5 text-xs transition-colors hover:bg-accent"
+                onClick={() => setEditingContext(true)}
+              >
+                Add to task
+              </button>
+            </div>
+          )}
+        </div>
+      </PopoverPopup>
+    </Popover>
+  );
+}
+
+export function resolveSelectionTaskInstruction(quote: string, optionalContext: string): string {
+  return optionalContext.trim() || quote;
 }
 
 function AssistantCopyButton({ row }: { row: Extract<TimelineRow, { kind: "message" }> }) {
@@ -1846,7 +2144,65 @@ function buildToolCallExpandedBody(
         .join("\n"),
     );
   }
+  const metadata = [
+    workEntry.cwd ? `cwd: ${workEntry.cwd}` : null,
+    workEntry.durationMs !== undefined ? `duration: ${formatDuration(workEntry.durationMs)}` : null,
+    workEntry.exitCode !== undefined ? `exit code: ${workEntry.exitCode}` : null,
+  ].filter((value): value is string => value !== null);
+  if (metadata.length > 0) blocks.unshift(metadata.join(" · "));
   return blocks.length > 0 ? blocks.join("\n\n") : null;
+}
+
+function workEntryCategory(
+  workEntry: TimelineWorkEntry,
+): "command" | "file-read" | "file-change" | "web" | "other" {
+  if (workEntry.requestKind === "command" || workEntry.itemType === "command_execution") {
+    return "command";
+  }
+  if (workEntry.requestKind === "file-read" || workEntry.itemType === "image_view") {
+    return "file-read";
+  }
+  if (
+    workEntry.requestKind === "file-change" ||
+    workEntry.itemType === "file_change" ||
+    (workEntry.changedFiles?.length ?? 0) > 0
+  ) {
+    return "file-change";
+  }
+  if (workEntry.itemType === "web_search") return "web";
+  return "other";
+}
+
+function workEntryCategoryClass(workEntry: TimelineWorkEntry): string {
+  switch (workEntryCategory(workEntry)) {
+    case "command":
+      return "border-s-sky-500/45 bg-sky-500/[0.025]";
+    case "file-read":
+      return "border-s-cyan-500/45 bg-cyan-500/[0.025]";
+    case "file-change":
+      return "border-s-amber-500/45 bg-amber-500/[0.025]";
+    case "web":
+      return "border-s-indigo-500/45 bg-indigo-500/[0.025]";
+    case "other":
+      return "border-s-border/50";
+  }
+}
+
+function workEntryStatusLabel(workEntry: TimelineWorkEntry): string | null {
+  if (workEntry.sourceActivityKind === "user-input.requested") return "Waiting";
+  switch (workEntry.toolLifecycleStatus) {
+    case "inProgress":
+      return "Running";
+    case "completed":
+      return "Succeeded";
+    case "failed":
+      return "Failed";
+    case "declined":
+    case "stopped":
+      return "Canceled";
+    default:
+      return null;
+  }
 }
 
 function workEntryIconName(workEntry: TimelineWorkEntry): WorkEntryIconName {
@@ -1916,6 +2272,11 @@ const SimpleWorkEntryRow = memo(function SimpleWorkEntryRow(props: {
       ? null
       : rawPreview;
   const displayText = preview ? `${heading} - ${preview}` : heading;
+  const statusLabel = workEntryStatusLabel(workEntry);
+  const compactMetadata = [
+    workEntry.durationMs !== undefined ? formatDuration(workEntry.durationMs) : null,
+    workEntry.exitCode !== undefined ? `exit ${workEntry.exitCode}` : null,
+  ].filter((value): value is string => value !== null);
   const expandedBody = buildToolCallExpandedBody(workEntry, workspaceRoot);
   const canExpand = expandedBody !== null;
   const showFailedIndicator = workEntryIndicatesToolFailure(workEntry);
@@ -1960,7 +2321,8 @@ const SimpleWorkEntryRow = memo(function SimpleWorkEntryRow(props: {
   return (
     <div
       className={cn(
-        "flex flex-col rounded-md px-0.5 py-0.5 transition-colors",
+        "flex flex-col rounded-md border-s-2 px-1.5 py-1 transition-colors",
+        workEntryCategoryClass(workEntry),
         canExpand &&
           "cursor-pointer hover:bg-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70",
       )}
@@ -1983,6 +2345,24 @@ const SimpleWorkEntryRow = memo(function SimpleWorkEntryRow(props: {
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-px text-muted-foreground/55">
+            {compactMetadata.length > 0 ? (
+              <span className="me-1 text-[10px] tabular-nums">{compactMetadata.join(" · ")}</span>
+            ) : null}
+            {statusLabel ? (
+              <span className="me-1 text-[10px] font-medium uppercase tracking-wide">
+                {statusLabel}
+              </span>
+            ) : null}
+            {expandedBody ? (
+              <span onClick={stopRowToggle} onPointerDown={stopRowToggle}>
+                <MessageCopyButton
+                  text={expandedBody}
+                  size="icon-xs"
+                  variant="ghost"
+                  className="size-4"
+                />
+              </span>
+            ) : null}
             <span
               className="flex size-4 shrink-0 items-center justify-center"
               aria-hidden={!canExpand}

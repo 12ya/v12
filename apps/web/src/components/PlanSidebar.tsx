@@ -1,4 +1,4 @@
-import { memo, useState, useCallback } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import {
   isAtomCommandInterrupted,
   squashAtomCommandFailure,
@@ -10,11 +10,14 @@ import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
 import ChatMarkdown from "./ChatMarkdown";
 import {
+  ArrowDownIcon,
+  ArrowUpIcon,
   CheckIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   EllipsisIcon,
   LoaderIcon,
+  XIcon,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
 import type { ActivePlanState } from "../session-logic";
@@ -64,7 +67,10 @@ interface PlanSidebarProps {
   markdownCwd: string | undefined;
   workspaceRoot: string | undefined;
   timestampFormat: TimestampFormat;
-  mode?: "sheet" | "sidebar" | "embedded";
+  mode?: "sheet" | "sidebar" | "embedded" | "popover";
+  onToggleStep?: ((index: number) => void) | undefined;
+  onRemoveStep?: ((index: number) => void) | undefined;
+  onMoveStep?: ((index: number, direction: -1 | 1) => void) | undefined;
 }
 
 const PlanSidebar = memo(function PlanSidebar({
@@ -77,6 +83,9 @@ const PlanSidebar = memo(function PlanSidebar({
   workspaceRoot,
   timestampFormat,
   mode = "sidebar",
+  onToggleStep,
+  onRemoveStep,
+  onMoveStep,
 }: PlanSidebarProps) {
   const [proposedPlanExpanded, setProposedPlanExpanded] = useState(false);
   const [isSavingToWorkspace, setIsSavingToWorkspace] = useState(false);
@@ -88,6 +97,14 @@ const PlanSidebar = memo(function PlanSidebar({
   const planMarkdown = activeProposedPlan?.planMarkdown ?? null;
   const displayedPlanMarkdown = planMarkdown ? stripDisplayedPlanMarkdown(planMarkdown) : null;
   const planTitle = planMarkdown ? proposedPlanTitle(planMarkdown) : null;
+  const renderedPlanSteps = useMemo(() => {
+    const occurrenceByText = new Map<string, number>();
+    return (activePlan?.steps ?? []).map((step) => {
+      const occurrence = occurrenceByText.get(step.step) ?? 0;
+      occurrenceByText.set(step.step, occurrence + 1);
+      return { key: `${step.step}\u0000${occurrence}`, step };
+    });
+  }, [activePlan?.steps]);
 
   const handleCopyPlan = useCallback(() => {
     if (!planMarkdown) return;
@@ -208,19 +225,34 @@ const PlanSidebar = memo(function PlanSidebar({
               <p className="mb-2 text-[10px] font-semibold tracking-widest text-muted-foreground/40 uppercase">
                 Steps
               </p>
-              {activePlan.steps.map((step) => (
+              {renderedPlanSteps.map(({ key, step }, index) => (
                 <div
-                  key={`${step.status}:${step.step}`}
+                  key={key}
                   className={cn(
-                    "flex items-center gap-2.5 rounded-lg px-2.5 py-2 transition-colors duration-200",
+                    "group/task flex items-center gap-2 rounded-lg px-2 py-2 transition-colors duration-200",
                     step.status === "inProgress" && "bg-blue-500/5",
                     step.status === "completed" && "bg-emerald-500/5",
                   )}
                 >
-                  {stepStatusIcon(step.status)}
+                  {onToggleStep ? (
+                    <button
+                      type="button"
+                      aria-label={
+                        step.status === "completed"
+                          ? `Mark task incomplete: ${step.step}`
+                          : `Mark task complete: ${step.step}`
+                      }
+                      className="shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      onClick={() => onToggleStep(index)}
+                    >
+                      {stepStatusIcon(step.status)}
+                    </button>
+                  ) : (
+                    stepStatusIcon(step.status)
+                  )}
                   <p
                     className={cn(
-                      "text-[13px] leading-snug",
+                      "min-w-0 flex-1 text-[13px] leading-snug",
                       step.status === "completed"
                         ? "text-muted-foreground/50 line-through decoration-muted-foreground/20"
                         : step.status === "inProgress"
@@ -230,6 +262,45 @@ const PlanSidebar = memo(function PlanSidebar({
                   >
                     {step.step}
                   </p>
+                  {onMoveStep || onRemoveStep ? (
+                    <div className="flex shrink-0 items-center opacity-0 transition-opacity group-hover/task:opacity-100 group-focus-within/task:opacity-100">
+                      {onMoveStep ? (
+                        <>
+                          <Button
+                            type="button"
+                            size="icon-xs"
+                            variant="ghost"
+                            aria-label={`Move task up: ${step.step}`}
+                            disabled={index === 0}
+                            onClick={() => onMoveStep(index, -1)}
+                          >
+                            <ArrowUpIcon className="size-3" />
+                          </Button>
+                          <Button
+                            type="button"
+                            size="icon-xs"
+                            variant="ghost"
+                            aria-label={`Move task down: ${step.step}`}
+                            disabled={index === activePlan.steps.length - 1}
+                            onClick={() => onMoveStep(index, 1)}
+                          >
+                            <ArrowDownIcon className="size-3" />
+                          </Button>
+                        </>
+                      ) : null}
+                      {onRemoveStep ? (
+                        <Button
+                          type="button"
+                          size="icon-xs"
+                          variant="ghost"
+                          aria-label={`Remove task: ${step.step}`}
+                          onClick={() => onRemoveStep(index)}
+                        >
+                          <XIcon className="size-3" />
+                        </Button>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               ))}
             </div>

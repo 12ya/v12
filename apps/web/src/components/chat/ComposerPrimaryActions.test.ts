@@ -1,6 +1,8 @@
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vite-plus/test";
 
-import { formatPendingPrimaryActionLabel } from "./ComposerPrimaryActions";
+import { ComposerPrimaryActions, formatPendingPrimaryActionLabel } from "./ComposerPrimaryActions";
 
 describe("formatPendingPrimaryActionLabel", () => {
   it("returns 'Submitting...' while responding", () => {
@@ -89,5 +91,30 @@ describe("formatPendingPrimaryActionLabel", () => {
         questionIndex: 5,
       }),
     ).toBe("Submit answers");
+  });
+});
+
+describe("ComposerPrimaryActions", () => {
+  it("shows queue and stop actions while a run is active and a draft is ready", () => {
+    const markup = renderToStaticMarkup(
+      createElement(ComposerPrimaryActions, {
+        compact: false,
+        pendingAction: null,
+        isRunning: true,
+        showPlanFollowUpPrompt: false,
+        promptHasText: true,
+        isSendBusy: false,
+        isConnecting: false,
+        isEnvironmentUnavailable: false,
+        isPreparingWorktree: false,
+        hasSendableContent: true,
+        onPreviousPendingQuestion: () => {},
+        onInterrupt: () => {},
+        onImplementPlanInNewThread: () => {},
+      }),
+    );
+
+    expect(markup).toContain("Queue message behind the active run");
+    expect(markup).toContain("Stop generation");
   });
 });

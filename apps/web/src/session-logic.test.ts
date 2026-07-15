@@ -1103,7 +1103,9 @@ describe("deriveWorkLogEntries", () => {
               result: {
                 content: '{ "dev": "vite dev --port 3000" } <exited with exit code 0>',
                 exitCode: 0,
+                durationMs: 1_250,
               },
+              cwd: "/workspace/v12",
             },
           },
         },
@@ -1116,6 +1118,9 @@ describe("deriveWorkLogEntries", () => {
       detail: '{ "dev": "vite dev --port 3000" }',
       itemType: "command_execution",
       toolTitle: "bash",
+      cwd: "/workspace/v12",
+      durationMs: 1_250,
+      exitCode: 0,
     });
   });
 

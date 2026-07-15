@@ -26,6 +26,43 @@ type SidebarProject = {
 
 export type ThreadTraversalDirection = "previous" | "next";
 
+export function prioritizeThreadsByPinnedKeys<T>(
+  threads: readonly T[],
+  pinnedKeys: readonly string[],
+  getKey: (thread: T) => string,
+): T[] {
+  if (pinnedKeys.length === 0) return [...threads];
+  const pinned = new Set(pinnedKeys);
+  return [
+    ...threads.filter((thread) => pinned.has(getKey(thread))),
+    ...threads.filter((thread) => !pinned.has(getKey(thread))),
+  ];
+}
+
+export type ThreadPinDropAction = "pin" | "unpin";
+
+export function resolveThreadPinCrossingAction(input: {
+  activeIsPinned: boolean;
+  draggedCenterY: number;
+  dividerCenterY: number;
+}): ThreadPinDropAction | null {
+  if (input.activeIsPinned) {
+    return input.draggedCenterY > input.dividerCenterY ? "unpin" : null;
+  }
+  return input.draggedCenterY < input.dividerCenterY ? "pin" : null;
+}
+
+export function shouldShowPinnedThreadDivider(input: {
+  isDragging: boolean;
+  pinnedCount: number;
+  regularCount: number;
+}): boolean {
+  return (
+    (input.pinnedCount > 0 && input.regularCount > 0) ||
+    (input.isDragging && input.pinnedCount + input.regularCount > 0)
+  );
+}
+
 export interface ThreadStatusPill {
   label:
     | "Working"
@@ -166,6 +203,21 @@ export function hasUnseenCompletion(thread: ThreadStatusInput): boolean {
 export function shouldClearThreadSelectionOnMouseDown(target: HTMLElement | null): boolean {
   if (target === null) return true;
   return !target.closest(THREAD_SELECTION_SAFE_SELECTOR);
+}
+
+const THREAD_DRAG_BLOCKED_SELECTOR =
+  "input, textarea, select, button, a, [contenteditable='true'], [data-thread-selection-safe]";
+
+export function shouldBlockThreadDragActivation(target: HTMLElement | null): boolean {
+  return target !== null && target.closest(THREAD_DRAG_BLOCKED_SELECTOR) !== null;
+}
+
+export function shouldHideThreadMeta(input: {
+  isConfirmingArchive: boolean;
+  isMobile: boolean;
+  showRowActions: boolean;
+}): boolean {
+  return input.isConfirmingArchive || (!input.isMobile && input.showRowActions);
 }
 
 // A double-click dispatches two `click` events before `dblclick`: the first has
@@ -444,27 +496,29 @@ export function resolveProjectStatusIndicator(
 
 export function getVisibleThreadsForProject<T extends Pick<Thread, "id">>(input: {
   threads: readonly T[];
-  activeThreadId: T["id"] | undefined;
+  activeThreadId: string | undefined;
   isThreadListExpanded: boolean;
   previewLimit: number;
+  getThreadId?: (thread: T) => string;
 }): {
   hasHiddenThreads: boolean;
   visibleThreads: T[];
   hiddenThreads: T[];
 } {
   const { activeThreadId, isThreadListExpanded, previewLimit, threads } = input;
-  const hasHiddenThreads = threads.length > previewLimit;
+  const getThreadId = input.getThreadId ?? ((thread: T) => thread.id);
+  const exceedsPreviewLimit = threads.length > previewLimit;
 
-  if (!hasHiddenThreads || isThreadListExpanded) {
+  if (!exceedsPreviewLimit || isThreadListExpanded) {
     return {
-      hasHiddenThreads,
+      hasHiddenThreads: exceedsPreviewLimit,
       hiddenThreads: [],
       visibleThreads: [...threads],
     };
   }
 
   const previewThreads = threads.slice(0, previewLimit);
-  if (!activeThreadId || previewThreads.some((thread) => thread.id === activeThreadId)) {
+  if (!activeThreadId || previewThreads.some((thread) => getThreadId(thread) === activeThreadId)) {
     return {
       hasHiddenThreads: true,
       hiddenThreads: threads.slice(previewLimit),
@@ -472,7 +526,7 @@ export function getVisibleThreadsForProject<T extends Pick<Thread, "id">>(input:
     };
   }
 
-  const activeThread = threads.find((thread) => thread.id === activeThreadId);
+  const activeThread = threads.find((thread) => getThreadId(thread) === activeThreadId);
   if (!activeThread) {
     return {
       hasHiddenThreads: true,
@@ -481,12 +535,15 @@ export function getVisibleThreadsForProject<T extends Pick<Thread, "id">>(input:
     };
   }
 
-  const visibleThreadIds = new Set([...previewThreads, activeThread].map((thread) => thread.id));
+  const visibleThreadIds = new Set(
+    [...previewThreads, activeThread].map((thread) => getThreadId(thread)),
+  );
 
+  const hiddenThreads = threads.filter((thread) => !visibleThreadIds.has(getThreadId(thread)));
   return {
-    hasHiddenThreads: true,
-    hiddenThreads: threads.filter((thread) => !visibleThreadIds.has(thread.id)),
-    visibleThreads: threads.filter((thread) => visibleThreadIds.has(thread.id)),
+    hasHiddenThreads: hiddenThreads.length > 0,
+    hiddenThreads,
+    visibleThreads: threads.filter((thread) => visibleThreadIds.has(getThreadId(thread))),
   };
 }
 

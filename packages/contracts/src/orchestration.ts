@@ -352,6 +352,8 @@ export const OrchestrationThread = Schema.Struct({
   ),
   branch: Schema.NullOr(TrimmedNonEmptyString),
   worktreePath: Schema.NullOr(TrimmedNonEmptyString),
+  parentThreadId: Schema.optionalKey(Schema.NullOr(ThreadId)),
+  forkedFromMessageId: Schema.optionalKey(Schema.NullOr(MessageId)),
   latestTurn: Schema.NullOr(OrchestrationLatestTurn),
   createdAt: IsoDateTime,
   updatedAt: IsoDateTime,
@@ -398,6 +400,8 @@ export const OrchestrationThreadShell = Schema.Struct({
   ),
   branch: Schema.NullOr(TrimmedNonEmptyString),
   worktreePath: Schema.NullOr(TrimmedNonEmptyString),
+  parentThreadId: Schema.optionalKey(Schema.NullOr(ThreadId)),
+  forkedFromMessageId: Schema.optionalKey(Schema.NullOr(MessageId)),
   latestTurn: Schema.NullOr(OrchestrationLatestTurn),
   createdAt: IsoDateTime,
   updatedAt: IsoDateTime,
@@ -531,6 +535,16 @@ const ThreadDeleteCommand = Schema.Struct({
   type: Schema.Literal("thread.delete"),
   commandId: CommandId,
   threadId: ThreadId,
+});
+
+const ThreadForkCommand = Schema.Struct({
+  type: Schema.Literal("thread.fork"),
+  commandId: CommandId,
+  threadId: ThreadId,
+  sourceThreadId: ThreadId,
+  throughMessageId: MessageId,
+  title: Schema.optional(TrimmedNonEmptyString),
+  createdAt: IsoDateTime,
 });
 
 const ThreadArchiveCommand = Schema.Struct({
@@ -684,6 +698,7 @@ const DispatchableClientOrchestrationCommand = Schema.Union([
   ProjectMetaUpdateCommand,
   ProjectDeleteCommand,
   ThreadCreateCommand,
+  ThreadForkCommand,
   ThreadDeleteCommand,
   ThreadArchiveCommand,
   ThreadUnarchiveCommand,
@@ -705,6 +720,7 @@ export const ClientOrchestrationCommand = Schema.Union([
   ProjectMetaUpdateCommand,
   ProjectDeleteCommand,
   ThreadCreateCommand,
+  ThreadForkCommand,
   ThreadDeleteCommand,
   ThreadArchiveCommand,
   ThreadUnarchiveCommand,
@@ -869,6 +885,8 @@ export const ThreadCreatedPayload = Schema.Struct({
   ),
   branch: Schema.NullOr(TrimmedNonEmptyString),
   worktreePath: Schema.NullOr(TrimmedNonEmptyString),
+  parentThreadId: Schema.optionalKey(Schema.NullOr(ThreadId)),
+  forkedFromMessageId: Schema.optionalKey(Schema.NullOr(MessageId)),
   createdAt: IsoDateTime,
   updatedAt: IsoDateTime,
 });

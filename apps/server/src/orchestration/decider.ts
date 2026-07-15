@@ -1,5 +1,6 @@
 import {
   EventId,
+  MessageId,
   type OrchestrationCommand,
   type OrchestrationEvent,
   type OrchestrationReadModel,
@@ -52,6 +53,16 @@ function withEventBase(
     ),
   );
 }
+
+const randomMessageId = Crypto.Crypto.pipe(
+  Effect.flatMap((crypto) => crypto.randomUUIDv4),
+  Effect.map(MessageId.make),
+);
+
+const randomActivityId = Crypto.Crypto.pipe(
+  Effect.flatMap((crypto) => crypto.randomUUIDv4),
+  Effect.map(EventId.make),
+);
 
 type PlannedOrchestrationEvent = Omit<OrchestrationEvent, "sequence">;
 
@@ -239,10 +250,174 @@ export const decideOrchestrationCommand = Effect.fn("decideOrchestrationCommand"
           interactionMode: command.interactionMode,
           branch: command.branch,
           worktreePath: command.worktreePath,
+          parentThreadId: null,
+          forkedFromMessageId: null,
           createdAt: command.createdAt,
           updatedAt: command.createdAt,
         },
       };
+    }
+
+    case "thread.fork": {
+      const sourceThread = yield* requireThread({
+        readModel,
+        command,
+        threadId: command.sourceThreadId,
+      });
+      yield* requireThreadAbsent({
+        readModel,
+        command,
+        threadId: command.threadId,
+      });
+      const throughMessageIndex = sourceThread.messages.findIndex(
+        (message) => message.id === command.throughMessageId,
+      );
+      if (throughMessageIndex < 0) {
+        return yield* new OrchestrationCommandInvariantError({
+          commandType: command.type,
+          detail: `Message '${command.throughMessageId}' does not exist on thread '${command.sourceThreadId}'.`,
+        });
+      }
+      const throughMessage = sourceThread.messages[throughMessageIndex];
+      if (!throughMessage || throughMessage.streaming) {
+        return yield* new OrchestrationCommandInvariantError({
+          commandType: command.type,
+          detail: `Message '${command.throughMessageId}' is still streaming and cannot be used as a fork point.`,
+        });
+      }
+
+      const includedMessages = sourceThread.messages.slice(0, throughMessageIndex + 1);
+      const messageIdBySourceId = new Map<string, MessageId>();
+      for (const message of includedMessages) {
+        messageIdBySourceId.set(message.id, yield* randomMessageId);
+      }
+      const cutoff = throughMessage.updatedAt;
+      const includedPlans = sourceThread.proposedPlans.filter((plan) => plan.createdAt <= cutoff);
+      const includedCheckpoints = sourceThread.checkpoints.filter(
+        (checkpoint) => checkpoint.completedAt <= cutoff,
+      );
+      const includedActivities = sourceThread.activities.filter(
+        (activity) => activity.createdAt <= cutoff,
+      );
+
+      const createdEvent: PlannedOrchestrationEvent = {
+        ...(yield* withEventBase({
+          aggregateKind: "thread",
+          aggregateId: command.threadId,
+          occurredAt: command.createdAt,
+          commandId: command.commandId,
+        })),
+        type: "thread.created",
+        payload: {
+          threadId: command.threadId,
+          projectId: sourceThread.projectId,
+          title: command.title ?? `${sourceThread.title} (fork)`,
+          modelSelection: sourceThread.modelSelection,
+          runtimeMode: sourceThread.runtimeMode,
+          interactionMode: sourceThread.interactionMode,
+          branch: sourceThread.branch,
+          worktreePath: sourceThread.worktreePath,
+          parentThreadId: sourceThread.id,
+          forkedFromMessageId: command.throughMessageId,
+          createdAt: command.createdAt,
+          updatedAt: command.createdAt,
+        },
+      };
+
+      const messageEvents: PlannedOrchestrationEvent[] = [];
+      for (const message of includedMessages) {
+        messageEvents.push({
+          ...(yield* withEventBase({
+            aggregateKind: "thread",
+            aggregateId: command.threadId,
+            occurredAt: command.createdAt,
+            commandId: command.commandId,
+          })),
+          type: "thread.message-sent",
+          payload: {
+            threadId: command.threadId,
+            messageId: messageIdBySourceId.get(message.id)!,
+            role: message.role,
+            text: message.text,
+            ...(message.attachments !== undefined ? { attachments: message.attachments } : {}),
+            turnId: message.turnId,
+            streaming: false,
+            createdAt: message.createdAt,
+            updatedAt: message.updatedAt,
+          },
+        });
+      }
+
+      const planEvents: PlannedOrchestrationEvent[] = [];
+      for (const proposedPlan of includedPlans) {
+        planEvents.push({
+          ...(yield* withEventBase({
+            aggregateKind: "thread",
+            aggregateId: command.threadId,
+            occurredAt: command.createdAt,
+            commandId: command.commandId,
+          })),
+          type: "thread.proposed-plan-upserted",
+          payload: {
+            threadId: command.threadId,
+            proposedPlan,
+          },
+        });
+      }
+
+      const checkpointEvents: PlannedOrchestrationEvent[] = [];
+      for (const checkpoint of includedCheckpoints) {
+        checkpointEvents.push({
+          ...(yield* withEventBase({
+            aggregateKind: "thread",
+            aggregateId: command.threadId,
+            occurredAt: command.createdAt,
+            commandId: command.commandId,
+          })),
+          type: "thread.turn-diff-completed",
+          payload: {
+            threadId: command.threadId,
+            turnId: checkpoint.turnId,
+            checkpointTurnCount: checkpoint.checkpointTurnCount,
+            checkpointRef: checkpoint.checkpointRef,
+            status: checkpoint.status,
+            files: checkpoint.files,
+            assistantMessageId:
+              checkpoint.assistantMessageId === null
+                ? null
+                : (messageIdBySourceId.get(checkpoint.assistantMessageId) ?? null),
+            completedAt: checkpoint.completedAt,
+          },
+        });
+      }
+
+      const activityEvents: PlannedOrchestrationEvent[] = [];
+      for (const activity of includedActivities) {
+        activityEvents.push({
+          ...(yield* withEventBase({
+            aggregateKind: "thread",
+            aggregateId: command.threadId,
+            occurredAt: command.createdAt,
+            commandId: command.commandId,
+          })),
+          type: "thread.activity-appended",
+          payload: {
+            threadId: command.threadId,
+            activity: {
+              ...activity,
+              id: yield* randomActivityId,
+            },
+          },
+        });
+      }
+
+      return [
+        createdEvent,
+        ...messageEvents,
+        ...planEvents,
+        ...checkpointEvents,
+        ...activityEvents,
+      ];
     }
 
     case "thread.delete": {

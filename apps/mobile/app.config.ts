@@ -36,16 +36,16 @@ const VARIANT_CONFIG: Record<
   }
 > = {
   development: {
-    appName: "T3 Code Dev",
+    appName: "V12 Dev",
     scheme: "t3code-dev",
-    iosIcon: "./assets/icon-composer-dev.icon",
-    splashIcon: "./assets/splash-icon-dev.png",
+    iosIcon: "./assets/icon-composer-prod.icon",
+    splashIcon: "./assets/splash-icon-prod.png",
     iosBundleIdentifier: "com.t3tools.t3code.dev",
     androidPackage: "com.t3tools.t3code.dev",
     relyingParty: "clerk.t3.codes",
   },
   preview: {
-    appName: "T3 Code Preview",
+    appName: "V12 Preview",
     scheme: "t3code-preview",
     iosIcon: "./assets/icon-composer-prod.icon",
     splashIcon: "./assets/splash-icon-prod.png",
@@ -54,7 +54,7 @@ const VARIANT_CONFIG: Record<
     relyingParty: "clerk.t3.codes",
   },
   production: {
-    appName: "T3 Code",
+    appName: "V12",
     scheme: "t3code",
     iosIcon: "./assets/icon-composer-prod.icon",
     splashIcon: "./assets/splash-icon-prod.png",
@@ -96,7 +96,7 @@ const widgetsPlugin: NonNullable<ExpoConfig["plugins"]>[number] = [
       {
         name: "AgentActivity",
         displayName: "Agent Activity",
-        description: "Shows the current state of active T3 Code agents.",
+        description: "Shows the current state of active V12 agents.",
         supportedFamilies: ["systemSmall", "systemMedium", "accessoryRectangular"],
       },
     ],
@@ -146,7 +146,7 @@ const config: ExpoConfig = {
         NSAllowsArbitraryLoads: true,
       },
       NSLocalNetworkUsageDescription:
-        "Allow T3 Code to connect to T3 Code servers on your local network or tailnet.",
+        "Allow V12 to connect to V12 servers on your local network or tailnet.",
       ITSAppUsesNonExemptEncryption: false,
     },
   },
@@ -215,7 +215,7 @@ const config: ExpoConfig = {
     [
       "expo-camera",
       {
-        cameraPermission: "Allow T3 Code to access your camera so you can scan pairing QR codes.",
+        cameraPermission: "Allow V12 to access your camera so you can scan pairing QR codes.",
         barcodeScannerEnabled: true,
       },
     ],

@@ -135,7 +135,6 @@ import { RightPanelTabs } from "./RightPanelTabs";
 import { DiffWorkerPoolProvider } from "./DiffWorkerPoolProvider";
 import { BranchToolbar } from "./BranchToolbar";
 import { resolveShortcutCommand, shortcutLabelForCommand } from "../keybindings";
-import PlanSidebar from "./PlanSidebar";
 import ThreadTerminalDrawer from "./ThreadTerminalDrawer";
 import { ChevronDownIcon, TriangleAlertIcon, WifiOffIcon } from "lucide-react";
 import { cn, randomHex } from "~/lib/utils";
@@ -193,6 +192,7 @@ import { threadEnvironment } from "../state/threads";
 import { vcsEnvironment } from "../state/vcs";
 import { useEnvironments, usePrimaryEnvironment } from "../state/environments";
 import {
+  readThreadDetail,
   useProject,
   useProjects,
   useThread,
@@ -211,6 +211,15 @@ import { NoActiveThreadState } from "./NoActiveThreadState";
 import { resolveEffectiveEnvMode } from "./BranchToolbar.logic";
 import { ProviderStatusBanner } from "./chat/ProviderStatusBanner";
 import { ThreadErrorBanner } from "./chat/ThreadErrorBanner";
+import { deriveOpenThreadActivityPresentation } from "./OpenThreadActivityStatus";
+import { TaskHud } from "./TaskHud";
+import {
+  appendContextTasksToPrompt,
+  buildForkMessageIdMap,
+  useTaskHudStore,
+  type ContextualTask,
+} from "../taskHudState";
+import { ThreadForkBreadcrumb } from "./ThreadForkBreadcrumb";
 import { ComposerBannerStack, type ComposerBannerStackItem } from "./chat/ComposerBannerStack";
 import {
   MAX_HIDDEN_MOUNTED_TERMINAL_THREADS,
@@ -233,6 +242,7 @@ import {
   resolveSendEnvMode,
   revokeBlobPreviewUrl,
   revokeUserMessagePreviewUrls,
+  waitForSettledServerThread,
   waitForStartedServerThread,
 } from "./ChatView.logic";
 import { useLocalStorage } from "~/hooks/useLocalStorage";
@@ -1001,6 +1011,7 @@ function ChatViewContent(props: ChatViewProps) {
   const writeTerminal = useAtomCommand(terminalEnvironment.write, "terminal write");
   const closeTerminalMutation = useAtomCommand(terminalEnvironment.close, "terminal close");
   const createThread = useAtomCommand(threadEnvironment.create, { reportFailure: false });
+  const forkThread = useAtomCommand(threadEnvironment.fork, { reportFailure: false });
   const deleteThread = useAtomCommand(threadEnvironment.delete, { reportFailure: false });
   const updateThreadMetadata = useAtomCommand(threadEnvironment.updateMetadata, {
     reportFailure: false,
@@ -1110,6 +1121,7 @@ function ChatViewContent(props: ChatViewProps) {
   >({});
   const [isConnecting, _setIsConnecting] = useState(false);
   const [isRevertingCheckpoint, setIsRevertingCheckpoint] = useState(false);
+  const [planSidebarOpen, setPlanSidebarOpen] = useState(false);
   const [maximizedRightPanelThreadKey, setMaximizedRightPanelThreadKey] = useState<string | null>(
     null,
   );
@@ -1287,14 +1299,42 @@ function ChatViewContent(props: ChatViewProps) {
     [activeThread],
   );
   const activeThreadKey = activeThreadRef ? scopedThreadKey(activeThreadRef) : null;
+  const pendingTaskSourceRef = useRef<{
+    readonly threadKey: string;
+    readonly messageId: MessageId;
+  } | null>(null);
   const [timelineAnchor, setTimelineAnchor] = useState<{
+    readonly threadKey: string | null;
+    readonly messageId: MessageId | null;
+  }>({ threadKey: activeThreadKey, messageId: null });
+  const [taskSourceHighlight, setTaskSourceHighlight] = useState<{
     readonly threadKey: string | null;
     readonly messageId: MessageId | null;
   }>({ threadKey: activeThreadKey, messageId: null });
   if (timelineAnchor.threadKey !== activeThreadKey) {
     setTimelineAnchor({ threadKey: activeThreadKey, messageId: null });
   }
+  useEffect(() => {
+    const pending = pendingTaskSourceRef.current;
+    if (!pending || pending.threadKey !== activeThreadKey) return;
+    pendingTaskSourceRef.current = null;
+    setTimelineAnchor(pending);
+    setTaskSourceHighlight(pending);
+  }, [activeThreadKey]);
   const timelineAnchorMessageId = timelineAnchor.messageId;
+  const taskSourceHighlightMessageId =
+    taskSourceHighlight.threadKey === activeThreadKey ? taskSourceHighlight.messageId : null;
+  useEffect(() => {
+    if (taskSourceHighlightMessageId === null) return;
+    const timeout = window.setTimeout(() => {
+      setTaskSourceHighlight((current) =>
+        current.threadKey === activeThreadKey && current.messageId === taskSourceHighlightMessageId
+          ? { threadKey: activeThreadKey, messageId: null }
+          : current,
+      );
+    }, 1800);
+    return () => window.clearTimeout(timeout);
+  }, [activeThreadKey, taskSourceHighlightMessageId]);
   const activeRightPanelKind = useRightPanelStore((state) =>
     selectActiveRightPanel(state.byThreadKey, activeThreadRef),
   );
@@ -1331,7 +1371,18 @@ function ChatViewContent(props: ChatViewProps) {
       .reconcileBrowserSurfaces(activeThreadRef, Object.keys(activePreviewState.sessions));
   }, [activePreviewState.sessions, activeThreadRef]);
 
-  const planSidebarOpen = activeRightPanelKind === "plan";
+  // Release 2 moved plan/task content out of the resizable right panel. Clean
+  // up persisted plan surfaces while preserving the user's open state in the
+  // floating HUD.
+  useEffect(() => {
+    if (!activeThreadRef) return;
+    const persistedPlan = rightPanelState.surfaces.find((surface) => surface.kind === "plan");
+    if (!persistedPlan) return;
+    if (rightPanelState.activeSurfaceId === persistedPlan.id) {
+      setPlanSidebarOpen(true);
+    }
+    useRightPanelStore.getState().closeSurface(activeThreadRef, persistedPlan.id);
+  }, [activeThreadRef, rightPanelState.activeSurfaceId, rightPanelState.surfaces]);
 
   const existingOpenTerminalThreadKeys = useMemo(() => {
     const existingThreadKeys = new Set<string>([...serverThreadKeys, ...draftThreadKeys]);
@@ -1817,6 +1868,33 @@ function ChatViewContent(props: ChatViewProps) {
     activeLatestTurn,
     activeThread?.session ?? null,
     localDispatchStartedAt,
+  );
+  const openThreadActivityStatus = useMemo(
+    () =>
+      deriveOpenThreadActivityPresentation({
+        session: activeThread?.session ?? null,
+        latestTurn: activeLatestTurn,
+        activities: threadActivities,
+        queued: isSendBusy || isConnecting,
+        running: phase === "running" || isRevertingCheckpoint,
+        activeWorkStartedAt,
+        pendingApprovalCreatedAt: activePendingApproval?.createdAt ?? null,
+        pendingUserInputCreatedAt: activePendingUserInput?.createdAt ?? null,
+        error: threadError ?? null,
+      }),
+    [
+      activeLatestTurn,
+      activePendingApproval?.createdAt,
+      activePendingUserInput?.createdAt,
+      activeThread?.session,
+      activeWorkStartedAt,
+      isConnecting,
+      isRevertingCheckpoint,
+      isSendBusy,
+      phase,
+      threadActivities,
+      threadError,
+    ],
   );
   useEffect(() => {
     attachmentPreviewHandoffByMessageIdRef.current = attachmentPreviewHandoffByMessageId;
@@ -2751,20 +2829,17 @@ function ChatViewContent(props: ChatViewProps) {
       activePlan?.turnId ?? sidebarProposedPlan?.turnId ?? "__dismissed__";
   }, [activePlan?.turnId, sidebarProposedPlan?.turnId]);
   const togglePlanSidebar = useCallback(() => {
-    if (!activeThreadRef) return;
     if (planSidebarOpen) {
       dismissPlanSidebarForCurrentTurn();
     } else {
       planSidebarDismissedForTurnRef.current = null;
     }
-    useRightPanelStore.getState().toggle(activeThreadRef, "plan");
-  }, [activeThreadRef, dismissPlanSidebarForCurrentTurn, planSidebarOpen]);
+    setPlanSidebarOpen((open) => !open);
+  }, [dismissPlanSidebarForCurrentTurn, planSidebarOpen]);
   const closePlanSidebar = useCallback(() => {
-    if (!activeThreadRef) return;
-    setMaximizedRightPanelThreadKey(null);
-    useRightPanelStore.getState().close(activeThreadRef);
+    setPlanSidebarOpen(false);
     dismissPlanSidebarForCurrentTurn();
-  }, [activeThreadRef, dismissPlanSidebarForCurrentTurn]);
+  }, [dismissPlanSidebarForCurrentTurn]);
   const createBrowserSurface = useCallback(() => {
     if (!activeThreadRef) return;
     void addBrowserSurface({ threadRef: activeThreadRef, openPreview });
@@ -2909,8 +2984,9 @@ function ChatViewContent(props: ChatViewProps) {
       if (!activeThreadRef) return;
       if (surface.kind === "plan") {
         planSidebarDismissedForTurnRef.current = null;
-      } else if (planSidebarOpen) {
-        dismissPlanSidebarForCurrentTurn();
+        setPlanSidebarOpen(true);
+        useRightPanelStore.getState().closeSurface(activeThreadRef, surface.id);
+        return;
       }
       useRightPanelStore.getState().activateSurface(activeThreadRef, surface.id);
       if (surface.kind === "preview" && surface.resourceId) {
@@ -2923,20 +2999,16 @@ function ChatViewContent(props: ChatViewProps) {
         onDiffPanelOpen?.();
       }
     },
-    [activeThreadRef, diffOpen, dismissPlanSidebarForCurrentTurn, onDiffPanelOpen, planSidebarOpen],
+    [activeThreadRef, diffOpen, onDiffPanelOpen],
   );
   const toggleRightPanel = useCallback(() => {
     if (!activeThreadRef) return;
     if (rightPanelOpen) {
-      if (planSidebarOpen) {
-        closePlanSidebar();
-      } else {
-        closePreviewPanel();
-      }
+      closePreviewPanel();
       return;
     }
     useRightPanelStore.getState().toggleVisibility(activeThreadRef);
-  }, [activeThreadRef, closePlanSidebar, closePreviewPanel, planSidebarOpen, rightPanelOpen]);
+  }, [activeThreadRef, closePreviewPanel, rightPanelOpen]);
   const toggleRightPanelMaximized = useCallback(() => {
     if (!canMaximizeRightPanel) return;
     setMaximizedRightPanelThreadKey((threadKey) =>
@@ -3475,9 +3547,9 @@ function ChatViewContent(props: ChatViewProps) {
     setShowScrollToBottom(false);
     if (planSidebarOpenOnNextThreadRef.current) {
       planSidebarOpenOnNextThreadRef.current = false;
-      if (activeThreadRef) {
-        useRightPanelStore.getState().open(activeThreadRef, "plan");
-      }
+      setPlanSidebarOpen(true);
+    } else {
+      setPlanSidebarOpen(false);
     }
     planSidebarDismissedForTurnRef.current = null;
     // activeThreadRef resets transitively with the active thread.
@@ -3493,13 +3565,10 @@ function ChatViewContent(props: ChatViewProps) {
     if (latestTurnId && activePlan.turnId !== latestTurnId) return;
     const turnKey = activePlan.turnId ?? sidebarProposedPlan?.turnId ?? "__dismissed__";
     if (planSidebarDismissedForTurnRef.current === turnKey) return;
-    if (activeThreadRef) {
-      useRightPanelStore.getState().open(activeThreadRef, "plan");
-    }
+    setPlanSidebarOpen(true);
   }, [
     activePlan,
     activeLatestTurn?.turnId,
-    activeThreadRef,
     autoOpenPlanSidebar,
     planSidebarOpen,
     sidebarProposedPlan?.turnId,
@@ -3816,27 +3885,29 @@ function ChatViewContent(props: ChatViewProps) {
     composerRef,
   ]);
 
-  const onRevertToTurnCount = useCallback(
-    async (turnCount: number) => {
+  const onEditAndRerun = useCallback(
+    async (messageId: MessageId, turnCount: number) => {
       const localApi = readLocalApi();
       if (!localApi || !activeThread || isRevertingCheckpoint) return;
+
+      const originalMessage = displayServerMessages.find(
+        (entry) => entry.id === messageId && entry.role === "user",
+      );
+      if (!originalMessage) return;
 
       if (activeEnvironmentUnavailable && activeEnvironmentUnavailableLabel) {
         setThreadError(
           activeThread.id,
-          `Reconnect ${activeEnvironmentUnavailableLabel} before reverting checkpoints.`,
+          `Reconnect ${activeEnvironmentUnavailableLabel} before editing history.`,
         );
         return;
       }
-      if (phase === "running" || isSendBusy || isConnecting) {
-        setThreadError(activeThread.id, "Interrupt the current turn before reverting checkpoints.");
-        return;
-      }
+      const hasActiveWork = phase === "running" || isSendBusy || isConnecting;
       const confirmed = await localApi.dialogs.confirm(
         [
-          `Revert this thread to checkpoint ${turnCount}?`,
-          "This will discard newer messages and turn diffs in this thread.",
-          "This action cannot be undone.",
+          "Edit and rerun this request?",
+          "V12 will preserve the current conversation in a recovery chat, then replace later history in this chat.",
+          ...(hasActiveWork ? ["The active run will be stopped first."] : []),
         ].join("\n"),
       );
       if (!confirmed) {
@@ -3845,33 +3916,140 @@ function ChatViewContent(props: ChatViewProps) {
 
       setIsRevertingCheckpoint(true);
       setThreadError(activeThread.id, null);
-      const result = await revertThreadCheckpoint({
-        environmentId,
-        input: {
-          threadId: activeThread.id,
-          turnCount,
-        },
-      });
-      if (result._tag === "Failure" && !isAtomCommandInterrupted(result)) {
-        const error = squashAtomCommandFailure(result);
+      let restoredImages: ComposerImageAttachment[] = [];
+      let restoredToComposer = false;
+      try {
+        let historyThread = activeThread;
+        if (hasActiveWork) {
+          const interruptResult = await interruptThreadTurn({
+            environmentId,
+            input: buildThreadTurnInterruptInput(activeThread),
+          });
+          if (interruptResult._tag === "Failure") {
+            throw squashAtomCommandFailure(interruptResult);
+          }
+          const settledThread = await waitForSettledServerThread(routeThreadRef);
+          if (!settledThread) {
+            throw new Error("The active run did not stop in time. No history was changed.");
+          }
+          historyThread = settledThread;
+        }
+        const message = originalMessage;
+        const recoveryPoint = historyThread.messages.at(-1);
+        if (!recoveryPoint) {
+          throw new Error("No recovery point is available for this chat.");
+        }
+
+        restoredImages = await Promise.all(
+          (message.attachments ?? []).map(async (attachment): Promise<ComposerImageAttachment> => {
+            const previewUrl = attachment.previewUrl;
+            if (!previewUrl) {
+              throw new Error(`Attachment '${attachment.name}' is not available for editing.`);
+            }
+            const response = await fetch(previewUrl);
+            if (!response.ok) {
+              throw new Error(`Could not restore attachment '${attachment.name}'.`);
+            }
+            const blob = await response.blob();
+            const file = new File([blob], attachment.name, { type: attachment.mimeType });
+            return {
+              type: "image",
+              id: attachment.id,
+              name: attachment.name,
+              mimeType: attachment.mimeType,
+              sizeBytes: attachment.sizeBytes,
+              previewUrl: URL.createObjectURL(file),
+              file,
+            };
+          }),
+        );
+
+        const recoveryThreadId = newThreadId();
+        const forkResult = await forkThread({
+          environmentId,
+          input: {
+            threadId: recoveryThreadId,
+            sourceThreadId: activeThread.id,
+            throughMessageId: recoveryPoint.id,
+            title: `${historyThread.title} (recovery)`,
+          },
+        });
+        if (forkResult._tag === "Failure") {
+          throw squashAtomCommandFailure(forkResult);
+        }
+        const recoveryThreadRef = scopeThreadRef(environmentId, recoveryThreadId);
+        const recoveryReady = await waitForStartedServerThread(
+          recoveryThreadRef,
+          1_000,
+          historyThread.messages.length,
+        );
+        const recoveryThread = recoveryReady ? readThreadDetail(recoveryThreadRef) : null;
+        if (!recoveryThread) {
+          throw new Error("The recovery chat was created but did not finish loading.");
+        }
+        useTaskHudStore.getState().copyContextTasksToFork({
+          sourceThreadKey: scopedThreadKey(routeThreadRef),
+          targetThreadKey: scopedThreadKey(recoveryThreadRef),
+          sourceThreadId: historyThread.id,
+          targetThreadId: recoveryThreadId,
+          messageIdBySourceId: buildForkMessageIdMap(
+            historyThread.messages,
+            recoveryThread.messages,
+          ),
+        });
+
+        const revertResult = await revertThreadCheckpoint({
+          environmentId,
+          input: {
+            threadId: activeThread.id,
+            turnCount,
+          },
+        });
+        if (revertResult._tag === "Failure") {
+          throw squashAtomCommandFailure(revertResult);
+        }
+
+        clearComposerDraftContent(routeThreadRef);
+        setComposerDraftPrompt(routeThreadRef, message.text);
+        addComposerDraftImages(routeThreadRef, restoredImages);
+        restoredToComposer = true;
+        composerRef.current?.resetCursorState({
+          cursor: message.text.length,
+          prompt: message.text,
+        });
+        composerRef.current?.focusAtEnd();
+      } catch (error) {
+        if (!restoredToComposer) {
+          for (const image of restoredImages) revokeBlobPreviewUrl(image.previewUrl);
+        }
         setThreadError(
           activeThread.id,
-          error instanceof Error ? error.message : "Failed to revert thread state.",
+          error instanceof Error ? error.message : "Failed to prepare this request for rerun.",
         );
+      } finally {
+        setIsRevertingCheckpoint(false);
       }
-      setIsRevertingCheckpoint(false);
     },
     [
+      addComposerDraftImages,
       activeThread,
       activeEnvironmentUnavailable,
       activeEnvironmentUnavailableLabel,
+      clearComposerDraftContent,
+      displayServerMessages,
       environmentId,
+      forkThread,
+      interruptThreadTurn,
       isConnecting,
       isRevertingCheckpoint,
       isSendBusy,
       phase,
       revertThreadCheckpoint,
+      routeThreadRef,
+      setComposerDraftPrompt,
       setThreadError,
+      waitForStartedServerThread,
+      waitForSettledServerThread,
     ],
   );
 
@@ -3904,6 +4082,12 @@ function ChatViewContent(props: ChatViewProps) {
       selectedModelSelection: ctxSelectedModelSelection,
     } = sendCtx;
     const promptForSend = promptRef.current;
+    const activeThreadKeyForSend = scopedThreadKey(
+      scopeThreadRef(activeThread.environmentId, activeThread.id),
+    );
+    const pendingContextTasks = (
+      useTaskHudStore.getState().contextTasksByThreadKey[activeThreadKeyForSend] ?? []
+    ).filter((task) => task.pendingSend);
     const {
       trimmedPrompt: trimmed,
       sendableTerminalContexts: sendableComposerTerminalContexts,
@@ -3917,6 +4101,7 @@ function ChatViewContent(props: ChatViewProps) {
         composerElementContexts.length +
         composerPreviewAnnotations.length +
         composerReviewComments.length,
+      contextTaskCount: pendingContextTasks.length,
     });
     if (showPlanFollowUpPrompt && activeProposedPlan) {
       const followUp = resolvePlanFollowUpSubmission({
@@ -3937,7 +4122,8 @@ function ChatViewContent(props: ChatViewProps) {
       sendableComposerTerminalContexts.length === 0 &&
       composerElementContexts.length === 0 &&
       composerPreviewAnnotations.length === 0 &&
-      composerReviewComments.length === 0
+      composerReviewComments.length === 0 &&
+      pendingContextTasks.length === 0
         ? parseStandaloneComposerSlashCommand(trimmed)
         : null;
     if (standaloneSlashCommand) {
@@ -3996,9 +4182,12 @@ function ChatViewContent(props: ChatViewProps) {
       (text, annotation) => appendPreviewAnnotationPrompt(text, annotation),
       messageTextWithContexts,
     );
-    const messageTextForSend = appendReviewCommentsToPrompt(
-      messageTextWithPreviewAnnotations,
-      composerReviewCommentsSnapshot,
+    const messageTextForSend = appendContextTasksToPrompt(
+      appendReviewCommentsToPrompt(
+        messageTextWithPreviewAnnotations,
+        composerReviewCommentsSnapshot,
+      ),
+      pendingContextTasks,
     );
     const messageIdForSend = newMessageId();
     const messageCreatedAt = new Date().toISOString();
@@ -4086,6 +4275,8 @@ function ChatViewContent(props: ChatViewProps) {
         titleSeed = formatTerminalContextLabel(composerTerminalContextsSnapshot[0]!);
       } else if (composerElementContextsSnapshot.length > 0) {
         titleSeed = formatElementContextLabel(composerElementContextsSnapshot[0]!);
+      } else if (pendingContextTasks.length > 0) {
+        titleSeed = pendingContextTasks[0]!.instruction;
       } else {
         titleSeed = "New thread";
       }
@@ -4185,6 +4376,10 @@ function ChatViewContent(props: ChatViewProps) {
         failure = startResult;
       } else {
         turnStartSucceeded = true;
+        useTaskHudStore.getState().markContextTasksSent(
+          activeThreadKeyForSend,
+          pendingContextTasks.map((task) => task.id),
+        );
       }
     }
 
@@ -4543,9 +4738,7 @@ function ChatViewContent(props: ChatViewProps) {
         // step-tracking activities that the sidebar will display.
         if (nextInteractionMode === "default" && autoOpenPlanSidebar) {
           planSidebarDismissedForTurnRef.current = null;
-          if (activeThreadRef) {
-            useRightPanelStore.getState().open(activeThreadRef, "plan");
-          }
+          setPlanSidebarOpen(true);
         }
         sendInFlightRef.current = false;
         return;
@@ -4899,15 +5092,132 @@ function ChatViewContent(props: ChatViewProps) {
   // the callback reference is fully stable and never busts context identity.
   const revertTurnCountRef = useRef(revertTurnCountByUserMessageId);
   revertTurnCountRef.current = revertTurnCountByUserMessageId;
-  const onRevertToTurnCountRef = useRef(onRevertToTurnCount);
-  onRevertToTurnCountRef.current = onRevertToTurnCount;
+  const onEditAndRerunRef = useRef(onEditAndRerun);
+  onEditAndRerunRef.current = onEditAndRerun;
   const onRevertUserMessage = useCallback((messageId: MessageId) => {
     const targetTurnCount = revertTurnCountRef.current.get(messageId);
     if (typeof targetTurnCount !== "number") {
       return;
     }
-    void onRevertToTurnCountRef.current(targetTurnCount);
+    void onEditAndRerunRef.current(messageId, targetTurnCount);
   }, []);
+  const forkInFlightRef = useRef(false);
+  const onForkMessage = useCallback(
+    (messageId: MessageId, initialPrompt?: string) => {
+      if (!isServerThread || !activeThread || forkInFlightRef.current) return;
+      const throughMessageIndex = activeThread.messages.findIndex(
+        (message) => message.id === messageId,
+      );
+      if (throughMessageIndex < 0) return;
+      forkInFlightRef.current = true;
+      const nextThreadId = newThreadId();
+      void (async () => {
+        try {
+          const result = await forkThread({
+            environmentId: activeThread.environmentId,
+            input: {
+              threadId: nextThreadId,
+              sourceThreadId: activeThread.id,
+              throughMessageId: messageId,
+            },
+          });
+          if (result._tag === "Failure") {
+            throw squashAtomCommandFailure(result);
+          }
+
+          const forkThreadRef = scopeThreadRef(activeThread.environmentId, nextThreadId);
+          const forkReady = await waitForStartedServerThread(
+            forkThreadRef,
+            1_000,
+            throughMessageIndex + 1,
+          );
+          const forkedThread = forkReady ? readThreadDetail(forkThreadRef) : null;
+          if (!forkedThread) {
+            throw new Error("The fork was created but did not finish loading.");
+          }
+          useTaskHudStore.getState().copyContextTasksToFork({
+            sourceThreadKey: scopedThreadKey(
+              scopeThreadRef(activeThread.environmentId, activeThread.id),
+            ),
+            targetThreadKey: scopedThreadKey(forkThreadRef),
+            sourceThreadId: activeThread.id,
+            targetThreadId: nextThreadId,
+            messageIdBySourceId: buildForkMessageIdMap(
+              activeThread.messages.slice(0, throughMessageIndex + 1),
+              forkedThread.messages,
+            ),
+          });
+          if (initialPrompt) {
+            setComposerDraftPrompt(forkThreadRef, initialPrompt);
+          }
+          await navigate({
+            to: "/$environmentId/$threadId",
+            params: {
+              environmentId: activeThread.environmentId,
+              threadId: nextThreadId,
+            },
+          });
+        } catch (error) {
+          setThreadError(
+            activeThread.id,
+            error instanceof Error ? error.message : "Failed to fork chat.",
+          );
+        } finally {
+          forkInFlightRef.current = false;
+        }
+      })();
+    },
+    [activeThread, forkThread, isServerThread, navigate, setComposerDraftPrompt, setThreadError],
+  );
+  const onAddSelectionTask = useCallback(
+    (input: {
+      messageId: MessageId;
+      author: "user" | "assistant";
+      createdAt: string;
+      quote: string;
+      instruction: string;
+    }) => {
+      if (!activeThreadKey || !activeThread) return;
+      useTaskHudStore.getState().addContextTask(activeThreadKey, {
+        id: `context-task-${Date.now()}-${randomHex(6)}`,
+        instruction: input.instruction,
+        quote: input.quote,
+        sourceThreadId: activeThread.id,
+        sourceMessageId: input.messageId,
+        sourceAuthor: input.author,
+        sourceCreatedAt: input.createdAt,
+        completed: false,
+        pendingSend: true,
+      });
+      setPlanSidebarOpen(true);
+    },
+    [activeThread, activeThreadKey],
+  );
+  const onOpenTaskSource = useCallback(
+    (task: ContextualTask) => {
+      if (!activeThread) return;
+      const targetRef = scopeThreadRef(activeThread.environmentId, task.sourceThreadId);
+      const targetThreadKey = scopedThreadKey(targetRef);
+      if (targetThreadKey === activeThreadKey) {
+        setTimelineAnchor({ threadKey: targetThreadKey, messageId: task.sourceMessageId });
+        setTaskSourceHighlight({ threadKey: targetThreadKey, messageId: task.sourceMessageId });
+        setPlanSidebarOpen(false);
+        return;
+      }
+      pendingTaskSourceRef.current = {
+        threadKey: targetThreadKey,
+        messageId: task.sourceMessageId,
+      };
+      void navigate({
+        to: "/$environmentId/$threadId",
+        params: {
+          environmentId: activeThread.environmentId,
+          threadId: task.sourceThreadId,
+        },
+      });
+    },
+    [activeThread, activeThreadKey, navigate],
+  );
 
   // Empty state: no active thread
   if (!activeThread) {
@@ -4970,18 +5280,6 @@ function ChatViewContent(props: ChatViewProps) {
       <Suspense fallback={null}>
         <DiffPanel mode="embedded" composerDraftTarget={composerDraftTarget} />
       </Suspense>
-    ) : activeRightPanelSurface?.kind === "plan" ? (
-      <PlanSidebar
-        activePlan={activePlan}
-        activeProposedPlan={sidebarProposedPlan}
-        label={planSidebarLabel}
-        environmentId={environmentId}
-        threadRef={activeThreadRef}
-        markdownCwd={gitCwd ?? undefined}
-        workspaceRoot={activeWorkspaceRoot}
-        timestampFormat={timestampFormat}
-        mode="embedded"
-      />
     ) : (activeRightPanelSurface?.kind === "files" || activeRightPanelSurface?.kind === "file") &&
       activeProject &&
       activeWorkspaceRoot ? (
@@ -5056,18 +5354,54 @@ function ChatViewContent(props: ChatViewProps) {
           />
         </header>
 
+        <ThreadForkBreadcrumb
+          parentThreadId={activeThread.parentThreadId}
+          onOpenParent={(parentThreadId) => {
+            void navigate({
+              to: "/$environmentId/$threadId",
+              params: {
+                environmentId: activeThread.environmentId,
+                threadId: parentThreadId,
+              },
+            });
+          }}
+        />
         {/* Error banner */}
         <ProviderStatusBanner status={activeProviderStatus} />
         <ThreadErrorBanner
           error={threadError}
           onDismiss={() => setThreadError(activeThread.id, null)}
         />
-        {/* Main content area with optional plan sidebar */}
+        {/* Main chat content; task/plan details float above it in the HUD. */}
         <div className="flex min-h-0 min-w-0 flex-1">
           {/* Chat column */}
           <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
             {/* Messages Wrapper */}
             <div className="relative flex min-h-0 flex-1 flex-col">
+              {activeThreadRef ? (
+                <div className="pointer-events-none absolute top-2 right-2 z-30 sm:top-3 sm:right-4">
+                  <TaskHud
+                    activePlan={activePlan}
+                    activeProposedPlan={sidebarProposedPlan}
+                    label={planSidebarLabel}
+                    environmentId={environmentId}
+                    threadRef={activeThreadRef}
+                    markdownCwd={gitCwd ?? undefined}
+                    workspaceRoot={activeWorkspaceRoot}
+                    timestampFormat={timestampFormat}
+                    open={planSidebarOpen}
+                    onOpenChange={(open) => {
+                      if (open) {
+                        planSidebarDismissedForTurnRef.current = null;
+                        setPlanSidebarOpen(true);
+                      } else {
+                        closePlanSidebar();
+                      }
+                    }}
+                    onOpenTaskSource={onOpenTaskSource}
+                  />
+                </div>
+              ) : null}
               {/* Messages — LegendList handles virtualization and scrolling internally */}
               <MessagesTimeline
                 key={activeThread.id}
@@ -5088,6 +5422,8 @@ function ChatViewContent(props: ChatViewProps) {
                 onOpenTurnDiff={onOpenTurnDiff}
                 revertTurnCountByUserMessageId={revertTurnCountByUserMessageId}
                 onRevertUserMessage={onRevertUserMessage}
+                onForkMessage={onForkMessage}
+                onAddSelectionTask={onAddSelectionTask}
                 isRevertingCheckpoint={isRevertingCheckpoint}
                 onImageExpand={onExpandTimelineImage}
                 markdownCwd={gitCwd ?? undefined}
@@ -5096,6 +5432,7 @@ function ChatViewContent(props: ChatViewProps) {
                 workspaceRoot={activeWorkspaceRoot}
                 skills={activeProviderStatus?.skills ?? EMPTY_PROVIDER_SKILLS}
                 anchorMessageId={timelineAnchorMessageId}
+                sourceHighlightMessageId={taskSourceHighlightMessageId}
                 onAnchorReady={onTimelineAnchorReady}
                 onAnchorSizeChanged={onTimelineAnchorSizeChanged}
                 contentInsetEndAdjustment={composerOverlayHeight}
@@ -5157,6 +5494,7 @@ function ChatViewContent(props: ChatViewProps) {
                       isConnecting={isConnecting}
                       isSendBusy={isSendBusy}
                       isPreparingWorktree={isPreparingWorktree}
+                      openThreadActivityStatus={openThreadActivityStatus}
                       environmentUnavailable={activeEnvironmentUnavailableState}
                       activePendingApproval={activePendingApproval}
                       pendingApprovals={pendingApprovals}
@@ -5322,7 +5660,7 @@ function ChatViewContent(props: ChatViewProps) {
         </RightPanelTabs>
       ) : null}
       {shouldUsePlanSidebarSheet && rightPanelOpen && activeThreadRef ? (
-        <RightPanelSheet open onClose={planSidebarOpen ? closePlanSidebar : closePreviewPanel}>
+        <RightPanelSheet open onClose={closePreviewPanel}>
           <RightPanelTabs
             mode="sheet"
             layoutControls={panelToggleControls}

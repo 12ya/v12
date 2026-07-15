@@ -179,6 +179,7 @@ function buildProps() {
     onOpenTurnDiff: () => {},
     revertTurnCountByUserMessageId: new Map(),
     onRevertUserMessage: () => {},
+    onForkMessage: () => {},
     isRevertingCheckpoint: false,
     onImageExpand: () => {},
     activeThreadEnvironmentId: ACTIVE_THREAD_ENVIRONMENT_ID,
@@ -219,6 +220,17 @@ function buildUserTimelineEntry(text: string) {
 }
 
 describe("MessagesTimeline", () => {
+  it("allows selected text to be saved as a task without optional context", async () => {
+    const { resolveSelectionTaskInstruction } = await import("./MessagesTimeline");
+
+    expect(resolveSelectionTaskInstruction("Selected requirement", "")).toBe(
+      "Selected requirement",
+    );
+    expect(
+      resolveSelectionTaskInstruction("Selected requirement", "  Verify this behavior  "),
+    ).toBe("Verify this behavior");
+  });
+
   it("uses LegendList isNearEnd when deciding whether the live edge is visible", async () => {
     const {
       resolveTimelineIsAtEnd,
@@ -300,9 +312,25 @@ describe("MessagesTimeline", () => {
     expect(markup).toContain('data-maintain-visible-content-position="object"');
     expect(markup).toContain('data-maintain-visible-content-position-data="true"');
     expect(markup).toContain('data-maintain-visible-content-position-size="false"');
+    expect(markup).not.toContain('data-source-highlight="true"');
     expect(onAnchorReady).toHaveBeenCalledOnce();
     expect(onAnchorReady).toHaveBeenCalledWith(secondEntry.message.id, 1);
     expect(onAnchorSizeChanged).toHaveBeenCalledWith(secondEntry.message.id, 240);
+  });
+
+  it("highlights only the message surface when opening a task source", async () => {
+    const { MessagesTimeline } = await import("./MessagesTimeline");
+    const entry = buildUserTimelineEntry("Task source prompt.");
+    const markup = renderToStaticMarkup(
+      <MessagesTimeline
+        {...buildProps()}
+        sourceHighlightMessageId={entry.message.id}
+        timelineEntries={[entry]}
+      />,
+    );
+
+    expect(markup).toContain('data-source-highlight="true"');
+    expect(markup.match(/ring-primary\/45/g)).toHaveLength(1);
   });
 
   it("renders collapse controls for long user messages", async () => {
@@ -457,6 +485,40 @@ describe("MessagesTimeline", () => {
 
     expect(markup).toContain("t3code/apps/web/src/session-logic.ts");
     expect(markup).not.toContain("C:/Users/mike/dev-stuff/t3code/apps/web/src/session-logic.ts");
+  });
+
+  it("renders command cards with category, status, duration, and exit metadata", async () => {
+    const { MessagesTimeline } = await import("./MessagesTimeline");
+    const markup = renderToStaticMarkup(
+      <MessagesTimeline
+        {...buildProps()}
+        timelineEntries={[
+          {
+            id: "entry-command",
+            kind: "work",
+            createdAt: "2026-03-17T19:12:28.000Z",
+            entry: {
+              id: "work-command",
+              createdAt: "2026-03-17T19:12:28.000Z",
+              label: "Ran command",
+              tone: "tool",
+              itemType: "command_execution",
+              command: "vp run typecheck",
+              cwd: "/workspace/v12",
+              durationMs: 1_250,
+              exitCode: 0,
+              toolLifecycleStatus: "completed",
+            },
+          },
+        ]}
+      />,
+    );
+
+    expect(markup).toContain("vp run typecheck");
+    expect(markup).toContain("Succeeded");
+    expect(markup).toContain("1.3s");
+    expect(markup).toContain("exit 0");
+    expect(markup).toContain("border-s-sky-500/45");
   });
 
   it("renders review comment contexts as structured cards instead of raw tags", async () => {

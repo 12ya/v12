@@ -104,15 +104,15 @@ function formatCloudStatus(status: CloudCliStatus, options?: { readonly json?: b
       ? "pending server startup"
       : "not provisioned";
   const nextStep = !status.authenticated
-    ? "Run `t3 connect link` to authorize and enable T3 Connect."
+    ? "Run `t3 connect link` to authorize and enable V12 Connect."
     : !status.desired
-      ? "Run `t3 connect link` to enable T3 Connect."
+      ? "Run `t3 connect link` to enable V12 Connect."
       : !status.linked
-        ? "Start T3 to provision the environment link and launch its managed tunnel."
+        ? "Start V12 to provision the environment link and launch its managed tunnel."
         : undefined;
 
   return [
-    "T3 Connect",
+    "V12 Connect",
     `  Exposure: ${status.desired ? "enabled" : "disabled"}`,
     `  Authorization: ${status.authenticated ? "stored credential" : "missing"}`,
     `  Environment link: ${provisioned}`,
@@ -128,7 +128,7 @@ const CLOUD_CLI_LIVE_SERVER_TIMEOUT = Duration.seconds(5);
 const confirmRelayClientInstall = (version: string) =>
   Prompt.run(
     Prompt.confirm({
-      message: `The T3 relay client is required for T3 Connect. Download and install version ${version}?`,
+      message: `The V12 relay client is required for V12 Connect. Download and install version ${version}?`,
       initial: false,
     }),
   );
@@ -233,7 +233,7 @@ const logCloudDisconnectFailure = (
   clearAuthorization: boolean,
   cause: Cause.Cause<unknown>,
 ) =>
-  Effect.logWarning("T3 Connect disconnect operation failed.").pipe(
+  Effect.logWarning("V12 Connect disconnect operation failed.").pipe(
     Effect.annotateLogs({
       operation,
       clearAuthorization,
@@ -279,10 +279,10 @@ export const reportCloudDisconnectResults = Effect.fn("cloud.cli.report_disconne
         input.liveResult.cause,
       );
       yield* Console.warn(
-        "T3 Connect is disabled, but the running server could not stop its tunnel.\nRestart that server to stop the connector.",
+        "V12 Connect is disabled, but the running server could not stop its tunnel.\nRestart that server to stop the connector.",
       );
     } else {
-      yield* Console.log("T3 Connect is disabled locally.");
+      yield* Console.log("V12 Connect is disabled locally.");
     }
 
     if (Exit.isFailure(input.relayResult)) {
@@ -322,7 +322,7 @@ const disconnectCloud = Effect.fn("cloud.cli.disconnect")(function* (options: {
   });
 
   if (options.clearAuthorization) {
-    yield* Console.log("Signed out of T3 Connect locally.");
+    yield* Console.log("Signed out of V12 Connect locally.");
   }
 });
 
@@ -367,14 +367,14 @@ const runCloudCommand = <A, E>(
 const connectLoginCommand = Command.make("login", {
   ...projectLocationFlags,
 }).pipe(
-  Command.withDescription("Authorize the T3 Connect CLI without enabling remote access."),
+  Command.withDescription("Authorize the V12 Connect CLI without enabling remote access."),
   Command.withHandler((flags) =>
     runCloudCommand(
       flags,
       Effect.gen(function* () {
         const tokens = yield* CliTokenManager.CloudCliTokenManager;
         yield* tokens.get;
-        yield* Console.log("Signed in to T3 Connect.");
+        yield* Console.log("Signed in to V12 Connect.");
       }),
     ),
   ),
@@ -389,7 +389,7 @@ const connectLinkCommand = Command.make("link", {
     Flag.withDefault(false),
   ),
 }).pipe(
-  Command.withDescription("Authorize this environment for T3 Connect on next start."),
+  Command.withDescription("Authorize this environment for V12 Connect on next start."),
   Command.withHandler((flags) =>
     runCloudCommand(
       flags,
@@ -404,7 +404,7 @@ const connectLinkCommand = Command.make("link", {
             reportRelayClientInstallProgress,
           );
           if (Option.isNone(installed)) {
-            yield* Console.log("T3 Connect setup cancelled. The relay client was not installed.");
+            yield* Console.log("V12 Connect setup cancelled. The relay client was not installed.");
             return;
           }
           yield* Console.log(
@@ -426,8 +426,8 @@ const connectLinkCommand = Command.make("link", {
         }
         yield* Console.log(
           flags.publishOnly
-            ? "This environment will publish agent activity to your mobile clients the next time T3 starts (no managed tunnel)."
-            : "This T3 environment will be available through T3 Connect the next time T3 starts.",
+            ? "This environment will publish agent activity to your mobile clients the next time V12 starts (no managed tunnel)."
+            : "This V12 environment will be available through V12 Connect the next time V12 starts.",
         );
       }),
     ),
@@ -438,7 +438,7 @@ const connectStatusCommand = Command.make("status", {
   ...projectLocationFlags,
   json: jsonFlag,
 }).pipe(
-  Command.withDescription("Show persisted T3 Connect and relay client state."),
+  Command.withDescription("Show persisted V12 Connect and relay client state."),
   Command.withHandler((flags) =>
     runCloudCommand(
       flags,
@@ -507,7 +507,7 @@ const connectPublishCommand = Command.make("publish", {
           const linkedNow = Option.isSome(yield* secrets.get(CLOUD_LINKED_USER_ID));
           if (!linkedNow && (yield* CliState.readCliDesiredLinkMode) === "publish_only") {
             yield* CliState.setCliDesiredCloudLink(false);
-            yield* Console.log("Cancelled the pending publish-only T3 Connect link.");
+            yield* Console.log("Cancelled the pending publish-only V12 Connect link.");
           }
           yield* Console.log("Publishing agent activity disabled.");
           return;
@@ -522,7 +522,7 @@ const connectPublishCommand = Command.make("publish", {
         // Publishing needs the relay to know this environment belongs to you.
         // Establish a tunnel-free publish-only link automatically so signing in
         // is all it takes — the mobile client can still reach the environment
-        // out of band without T3 Connect.
+        // out of band without V12 Connect.
         if (!(yield* tokens.hasCredential)) {
           yield* Console.log(
             "Run `t3 connect login` first so this environment can be authorized to publish.",
@@ -535,13 +535,13 @@ const connectPublishCommand = Command.make("publish", {
         // link is pending at all.
         if (yield* CliState.readCliDesiredCloudLink) {
           yield* Console.log(
-            "A T3 Connect link is already pending. Start T3 to finish provisioning it; publishing starts once it links.",
+            "A V12 Connect link is already pending. Start V12 to finish provisioning it; publishing starts once it links.",
           );
           return;
         }
         yield* CliState.setCliDesiredCloudLink(true, "publish_only");
         yield* Console.log(
-          "Restart T3 to finish authorizing this environment to publish (no managed tunnel is created).",
+          "Restart V12 to finish authorizing this environment to publish (no managed tunnel is created).",
         );
       }),
     ),
@@ -551,7 +551,7 @@ const connectPublishCommand = Command.make("publish", {
 const connectUnlinkCommand = Command.make("unlink", {
   ...projectLocationFlags,
 }).pipe(
-  Command.withDescription("Disable T3 Connect while retaining the stored authorization."),
+  Command.withDescription("Disable V12 Connect while retaining the stored authorization."),
   Command.withHandler((flags) =>
     runCloudCommand(flags, disconnectCloud({ clearAuthorization: false })),
   ),
@@ -560,14 +560,14 @@ const connectUnlinkCommand = Command.make("unlink", {
 const connectLogoutCommand = Command.make("logout", {
   ...projectLocationFlags,
 }).pipe(
-  Command.withDescription("Disable T3 Connect and clear the stored CLI authorization."),
+  Command.withDescription("Disable V12 Connect and clear the stored CLI authorization."),
   Command.withHandler((flags) =>
     runCloudCommand(flags, disconnectCloud({ clearAuthorization: true })),
   ),
 );
 
 export const connectCommand = Command.make("connect").pipe(
-  Command.withDescription("Manage headless T3 Connect access."),
+  Command.withDescription("Manage headless V12 Connect access."),
   Command.withSubcommands([
     connectLoginCommand,
     connectLinkCommand,

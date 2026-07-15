@@ -1,11 +1,11 @@
-# T3 Code
+# V12
 
-T3 Code is a minimal web GUI for coding agents (currently Codex, Claude, Cursor, and OpenCode, more coming soon).
+V12 is a minimal web GUI for coding agents (currently Codex, Claude, Cursor, and OpenCode, more coming soon).
 
 ## Installation
 
 > [!WARNING]
-> T3 Code currently supports Codex, Claude, Cursor, and OpenCode.
+> V12 currently supports Codex, Claude, Cursor, and OpenCode.
 > Install and authenticate at least one provider before use:
 >
 > - Codex: install [Codex CLI](https://developers.openai.com/codex/cli) and run `codex login`
@@ -53,6 +53,7 @@ There's no public docs site yet, checkout the miscellaneous markdown files in [d
 
 ## Documentation
 
+- [V12 roadmap](./docs/project/roadmap.md)
 - [Getting started](./docs/getting-started/quick-start.md)
 - [Architecture overview](./docs/architecture/overview.md)
 - [Provider guides](./docs/providers/codex.md)
@@ -63,7 +64,7 @@ There's no public docs site yet, checkout the miscellaneous markdown files in [d
 
 ### Install `vp`
 
-T3 Code uses Vite+ so you'll need to install the global `vp` command-line tool.
+V12 uses Vite+ so you'll need to install the global `vp` command-line tool.
 
 #### macOS / Linux
 

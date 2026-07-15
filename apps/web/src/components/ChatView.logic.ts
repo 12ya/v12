@@ -219,6 +219,7 @@ export function deriveComposerSendState(options: {
    * contexts do: a prompt of just element chips is still a valid send.
    */
   elementContextCount?: number;
+  contextTaskCount?: number;
 }): {
   trimmedPrompt: string;
   sendableTerminalContexts: TerminalContextDraft[];
@@ -230,6 +231,7 @@ export function deriveComposerSendState(options: {
   const expiredTerminalContextCount =
     options.terminalContexts.length - sendableTerminalContexts.length;
   const elementContextCount = options.elementContextCount ?? 0;
+  const contextTaskCount = options.contextTaskCount ?? 0;
   return {
     trimmedPrompt,
     sendableTerminalContexts,
@@ -238,7 +240,8 @@ export function deriveComposerSendState(options: {
       trimmedPrompt.length > 0 ||
       options.imageCount > 0 ||
       sendableTerminalContexts.length > 0 ||
-      elementContextCount > 0,
+      elementContextCount > 0 ||
+      contextTaskCount > 0,
   };
 }
 
@@ -342,12 +345,16 @@ export function getStartedThreadModelChangeBlockReason(input: {
 export async function waitForStartedServerThread(
   threadRef: ScopedThreadRef,
   timeoutMs = 1_000,
+  minimumMessageCount = 0,
 ): Promise<boolean> {
   const threadAtom = environmentThreadDetails.detailAtom(threadRef);
   const getThread = () => appAtomRegistry.get(threadAtom);
   const thread = getThread();
 
-  if (threadHasStarted(thread)) {
+  const isReady = (candidate: ReturnType<typeof getThread>) =>
+    isServerThreadReadyForFork(candidate, minimumMessageCount);
+
+  if (isReady(thread)) {
     return true;
   }
 
@@ -367,13 +374,13 @@ export async function waitForStartedServerThread(
     };
 
     const unsubscribe = appAtomRegistry.subscribe(threadAtom, (thread) => {
-      if (!threadHasStarted(thread)) {
+      if (!isReady(thread)) {
         return;
       }
       finish(true);
     });
 
-    if (threadHasStarted(getThread())) {
+    if (isReady(getThread())) {
       finish(true);
       return;
     }
@@ -381,6 +388,57 @@ export async function waitForStartedServerThread(
     timeoutId = globalThis.setTimeout(() => {
       finish(false);
     }, timeoutMs);
+  });
+}
+
+export function isServerThreadReadyForFork(
+  thread: Thread | null | undefined,
+  minimumMessageCount: number,
+): boolean {
+  return Boolean(
+    threadHasStarted(thread) &&
+    (thread?.messages.length ?? 0) >= minimumMessageCount &&
+    thread?.messages.every((message) => !message.streaming),
+  );
+}
+
+export function isServerThreadSettled(thread: Thread | null | undefined): thread is Thread {
+  return Boolean(
+    thread &&
+    thread.session?.status !== "running" &&
+    thread.session?.status !== "starting" &&
+    thread.messages.every((message) => !message.streaming),
+  );
+}
+
+export async function waitForSettledServerThread(
+  threadRef: ScopedThreadRef,
+  timeoutMs = 5_000,
+): Promise<Thread | null> {
+  const threadAtom = environmentThreadDetails.detailAtom(threadRef);
+  const getThread = () => appAtomRegistry.get(threadAtom);
+  const current = getThread();
+  if (isServerThreadSettled(current)) return current;
+
+  return await new Promise<Thread | null>((resolve) => {
+    let settled = false;
+    let timeoutId: ReturnType<typeof globalThis.setTimeout> | null = null;
+    const finish = (result: Thread | null) => {
+      if (settled) return;
+      settled = true;
+      if (timeoutId !== null) globalThis.clearTimeout(timeoutId);
+      unsubscribe();
+      resolve(result);
+    };
+    const unsubscribe = appAtomRegistry.subscribe(threadAtom, (thread) => {
+      if (isServerThreadSettled(thread)) finish(thread);
+    });
+    const refreshed = getThread();
+    if (isServerThreadSettled(refreshed)) {
+      finish(refreshed);
+      return;
+    }
+    timeoutId = globalThis.setTimeout(() => finish(null), timeoutMs);
   });
 }
 

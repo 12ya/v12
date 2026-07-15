@@ -282,6 +282,8 @@ export function projectEvent(
             interactionMode: payload.interactionMode,
             branch: payload.branch,
             worktreePath: payload.worktreePath,
+            parentThreadId: payload.parentThreadId ?? null,
+            forkedFromMessageId: payload.forkedFromMessageId ?? null,
             latestTurn: null,
             createdAt: payload.createdAt,
             updatedAt: payload.updatedAt,

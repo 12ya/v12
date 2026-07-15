@@ -22,6 +22,7 @@ import {
   connectionStatusText,
   type EnvironmentConnectionPresentation,
 } from "@t3tools/client-runtime/connection";
+import { scopedThreadKey } from "@t3tools/client-runtime/environment";
 import { serializeComposerFileLink } from "@t3tools/shared/composerTrigger";
 import { createModelSelection, normalizeModelSlug } from "@t3tools/shared/model";
 import {
@@ -125,6 +126,11 @@ import { formatProviderSkillDisplayName } from "../../providerSkillPresentation"
 import { searchProviderSkills } from "../../providerSkillSearch";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import type { ReviewCommentContext } from "../../reviewCommentContext";
+import {
+  OpenThreadActivityStatus,
+  type OpenThreadActivityPresentation,
+} from "../OpenThreadActivityStatus";
+import { useTaskHudStore } from "../../taskHudState";
 
 const IMAGE_SIZE_LIMIT_LABEL = `${Math.round(PROVIDER_SEND_TURN_MAX_IMAGE_BYTES / (1024 * 1024))}MB`;
 
@@ -208,8 +214,8 @@ const ComposerFooterModeControls = memo(function ComposerFooterModeControls(prop
       ? "Plan mode — click to return to normal build mode"
       : "Default mode — click to enter plan mode";
   const planSidebarTooltip = props.planSidebarOpen
-    ? `Hide ${props.planSidebarLabel.toLowerCase()} sidebar`
-    : `Show ${props.planSidebarLabel.toLowerCase()} sidebar`;
+    ? `Hide ${props.planSidebarLabel.toLowerCase()}`
+    : `Show ${props.planSidebarLabel.toLowerCase()}`;
 
   const interactionModeToggle = props.showInteractionModeToggle ? (
     <>
@@ -332,6 +338,7 @@ const ComposerFooterPrimaryActions = memo(function ComposerFooterPrimaryActions(
   activeContextWindow: ReturnType<typeof deriveLatestContextWindowSnapshot>;
   activeThreadProviderDisplayName: string | null;
   isPreparingWorktree: boolean;
+  openThreadActivityStatus: OpenThreadActivityPresentation | null;
   pendingAction: {
     questionIndex: number;
     isLastQuestion: boolean;
@@ -353,6 +360,7 @@ const ComposerFooterPrimaryActions = memo(function ComposerFooterPrimaryActions(
 }) {
   return (
     <>
+      <OpenThreadActivityStatus status={props.openThreadActivityStatus} variant="composer" />
       {props.activeContextWindow ? (
         <ContextWindowMeter
           usage={props.activeContextWindow}
@@ -447,6 +455,7 @@ export interface ChatComposerProps {
   isConnecting: boolean;
   isSendBusy: boolean;
   isPreparingWorktree: boolean;
+  openThreadActivityStatus: OpenThreadActivityPresentation | null;
   environmentUnavailable: {
     readonly label: string;
     readonly connection: EnvironmentConnectionPresentation;
@@ -556,6 +565,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
     isConnecting,
     isSendBusy,
     isPreparingWorktree,
+    openThreadActivityStatus,
     environmentUnavailable,
     activePendingApproval,
     pendingApprovals,
@@ -900,6 +910,11 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
   const mobileComposerExpandInFlightRef = useRef(false);
   const dragDepthRef = useRef(0);
 
+  const pendingContextTaskCount = useTaskHudStore((state) => {
+    const tasks = state.contextTasksByThreadKey[scopedThreadKey(routeThreadRef)] ?? [];
+    return tasks.reduce((count, task) => count + (task.pendingSend ? 1 : 0), 0);
+  });
+
   // ------------------------------------------------------------------
   // Derived: composer send state
   // ------------------------------------------------------------------
@@ -913,6 +928,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
           composerElementContexts.length +
           composerPreviewAnnotations.length +
           composerReviewComments.length,
+        contextTaskCount: pendingContextTaskCount,
       }),
     [
       composerElementContexts.length,
@@ -920,6 +936,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
       composerPreviewAnnotations.length,
       composerReviewComments.length,
       composerTerminalContexts,
+      pendingContextTaskCount,
       prompt,
     ],
   );
@@ -1135,8 +1152,9 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
     [activePendingIsResponding, activePendingProgress, activePendingResolvedAnswers],
   );
   const collapsedComposerPrimaryActionDisabled =
-    phase === "running" || isSendBusy || isConnecting || !composerSendState.hasSendableContent;
-  const collapsedComposerPrimaryActionLabel = "Send message";
+    isSendBusy || isConnecting || !composerSendState.hasSendableContent;
+  const collapsedComposerPrimaryActionLabel =
+    phase === "running" ? "Queue message behind the active run" : "Send message";
   const showMobilePendingAnswerActions =
     isMobileViewport && !isComposerCollapsedMobile && pendingPrimaryAction !== null;
 
@@ -2549,6 +2567,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                   isConnecting={isConnecting}
                   isEnvironmentUnavailable={environmentUnavailable !== null}
                   isPreparingWorktree={isPreparingWorktree}
+                  openThreadActivityStatus={openThreadActivityStatus}
                   hasSendableContent={composerSendState.hasSendableContent}
                   preserveComposerFocusOnPointerDown={isMobileViewport}
                   onPreviousPendingQuestion={onPreviousActivePendingUserInputQuestion}

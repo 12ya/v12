@@ -166,6 +166,13 @@ function truncateDetail(value: string, limit = 180): string {
   return value.length > limit ? `${value.slice(0, limit - 3)}...` : value;
 }
 
+const MAX_TOOL_DETAIL_CHARS = 24_000;
+
+function truncateToolDetail(value: string): string {
+  if (value.length <= MAX_TOOL_DETAIL_CHARS) return value;
+  return `${value.slice(0, MAX_TOOL_DETAIL_CHARS)}\n\n[tool output truncated]`;
+}
+
 function normalizeProposedPlanMarkdown(planMarkdown: string | undefined): string | undefined {
   const trimmed = planMarkdown?.trim();
   if (!trimmed) {
@@ -568,7 +575,7 @@ function runtimeEventToActivities(
           payload: {
             itemType: event.payload.itemType,
             ...(event.payload.status ? { status: event.payload.status } : {}),
-            ...(event.payload.detail ? { detail: truncateDetail(event.payload.detail) } : {}),
+            ...(event.payload.detail ? { detail: truncateToolDetail(event.payload.detail) } : {}),
             ...(event.payload.data !== undefined ? { data: event.payload.data } : {}),
           },
           turnId: toTurnId(event.turnId) ?? null,
@@ -590,7 +597,8 @@ function runtimeEventToActivities(
           summary: event.payload.title ?? "Tool",
           payload: {
             itemType: event.payload.itemType,
-            ...(event.payload.detail ? { detail: truncateDetail(event.payload.detail) } : {}),
+            ...(event.payload.status ? { status: event.payload.status } : {}),
+            ...(event.payload.detail ? { detail: truncateToolDetail(event.payload.detail) } : {}),
             ...(event.payload.data !== undefined ? { data: event.payload.data } : {}),
           },
           turnId: toTurnId(event.turnId) ?? null,

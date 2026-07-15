@@ -11,6 +11,8 @@ import {
   deriveComposerSendState,
   getStartedThreadModelChangeBlockReason,
   hasServerAcknowledgedLocalDispatch,
+  isServerThreadReadyForFork,
+  isServerThreadSettled,
   reconcileMountedTerminalThreadIds,
   reconcileRetainedMountedThreadIds,
   resolveSendEnvMode,
@@ -94,6 +96,57 @@ describe("buildThreadTurnInterruptInput", () => {
   });
 });
 
+describe("history rewrite readiness", () => {
+  it("waits for the complete fork projection instead of accepting a partial snapshot", () => {
+    const thread = makeThread({
+      messages: [
+        {
+          id: "message-1" as never,
+          role: "user",
+          text: "first",
+          turnId: null,
+          createdAt: now,
+          updatedAt: now,
+          streaming: false,
+        },
+      ],
+    });
+
+    expect(isServerThreadReadyForFork(thread, 2)).toBe(false);
+    expect(isServerThreadReadyForFork(thread, 1)).toBe(true);
+  });
+
+  it("rejects streaming history even when the expected message count is present", () => {
+    const thread = makeThread({
+      messages: [
+        {
+          id: "message-streaming" as never,
+          role: "assistant",
+          text: "partial",
+          turnId: TurnId.make("turn-streaming"),
+          createdAt: now,
+          updatedAt: now,
+          streaming: true,
+        },
+      ],
+    });
+
+    expect(isServerThreadReadyForFork(thread, 1)).toBe(false);
+    expect(isServerThreadSettled(thread)).toBe(false);
+  });
+
+  it("accepts history only after the active session and all streams settle", () => {
+    expect(isServerThreadSettled(makeThread({ session: readySession }))).toBe(true);
+    expect(
+      isServerThreadSettled(
+        makeThread({
+          session: { ...readySession, status: "running", activeTurnId: TurnId.make("turn-2") },
+        }),
+      ),
+    ).toBe(false);
+  });
+});
+
 describe("deriveComposerSendState", () => {
   it("treats expired terminal pills as non-sendable content", () => {
     const state = deriveComposerSendState({
@@ -164,6 +217,17 @@ describe("deriveComposerSendState", () => {
         elementContextCount: 0,
       }).hasSendableContent,
     ).toBe(false);
+  });
+
+  it("treats a pending contextual task as sendable without prompt text", () => {
+    expect(
+      deriveComposerSendState({
+        prompt: "",
+        imageCount: 0,
+        terminalContexts: [],
+        contextTaskCount: 1,
+      }).hasSendableContent,
+    ).toBe(true);
   });
 });
 
