@@ -1,4 +1,4 @@
-const REPO = "12ya/V12";
+const REPO = "12ya/v12";
 
 export const RELEASES_URL = `https://github.com/${REPO}/releases`;
 

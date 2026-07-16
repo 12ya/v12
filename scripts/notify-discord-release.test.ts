@@ -15,7 +15,7 @@ const latestAnnouncement = {
   releaseName: "V12 v1.2.3",
   version: "1.2.3",
   tag: "v1.2.3",
-  releaseUrl: new URL("https://github.com/12ya/V12/releases/tag/v1.2.3"),
+  releaseUrl: new URL("https://github.com/12ya/v12/releases/tag/v1.2.3"),
   timestamp: "2026-05-01T01:41:00.000Z",
 } as const;
 
@@ -29,7 +29,7 @@ it("builds a prerelease Discord announcement for nightly subscribers", () => {
       releaseName: "V12 Nightly 1.2.4-nightly.20260501.17 (abcdef123456)",
       version: "1.2.4-nightly.20260501.17",
       tag: "v1.2.4-nightly.20260501.17",
-      releaseUrl: new URL("https://github.com/12ya/V12/releases/tag/v1.2.4-nightly.20260501.17"),
+      releaseUrl: new URL("https://github.com/12ya/v12/releases/tag/v1.2.4-nightly.20260501.17"),
       timestamp: "2026-05-01T01:41:00.000Z",
     }),
     {
@@ -41,7 +41,7 @@ it("builds a prerelease Discord announcement for nightly subscribers", () => {
       embeds: [
         {
           title: "V12 Nightly 1.2.4-nightly.20260501.17 (abcdef123456)",
-          url: "https://github.com/12ya/V12/releases/tag/v1.2.4-nightly.20260501.17",
+          url: "https://github.com/12ya/v12/releases/tag/v1.2.4-nightly.20260501.17",
           description: "A new V12 prerelease is available for nightly testers.",
           color: 0x5865f2,
           fields: [
@@ -72,7 +72,7 @@ it("builds a latest Discord announcement for stable subscribers", () => {
     embeds: [
       {
         title: "V12 v1.2.3",
-        url: "https://github.com/12ya/V12/releases/tag/v1.2.3",
+        url: "https://github.com/12ya/v12/releases/tag/v1.2.3",
         description: "A new V12 latest release is available.",
         color: 0x2ecc71,
         fields: [

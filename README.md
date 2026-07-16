@@ -25,7 +25,7 @@ Tip: Use `npx v12@latest --help` for the full CLI reference.
 
 ### Desktop app
 
-Install the latest version of the desktop app from [GitHub Releases](https://github.com/12ya/t3code/releases), or from your favorite package registry:
+Install the latest version of the desktop app from [GitHub Releases](https://github.com/12ya/v12/releases), or from your favorite package registry:
 
 #### Windows (`winget`)
 
@@ -88,4 +88,4 @@ Checkout their getting started guide for more information: https://viteplus.dev/
 vp i
 ```
 
-Need support? [Open an issue](https://github.com/12ya/t3code/issues).
+Need support? [Open an issue](https://github.com/12ya/v12/issues).

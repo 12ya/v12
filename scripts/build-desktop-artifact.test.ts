@@ -109,7 +109,7 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
           ConfigProvider.layer(
             ConfigProvider.fromEnv({
               env: {
-                V12_DESKTOP_UPDATE_REPOSITORY: "12ya/V12",
+                V12_DESKTOP_UPDATE_REPOSITORY: "12ya/v12",
               },
             }),
           ),
@@ -120,7 +120,7 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
           ConfigProvider.layer(
             ConfigProvider.fromEnv({
               env: {
-                GITHUB_REPOSITORY: "12ya/V12",
+                GITHUB_REPOSITORY: "12ya/v12",
               },
             }),
           ),
@@ -129,13 +129,13 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
 
       assert.deepStrictEqual(latestConfig, {
         provider: "github",
-        owner: "pingdotgg",
+        owner: "12ya",
         repo: "v12",
         releaseType: "release",
       });
       assert.deepStrictEqual(nightlyConfig, {
         provider: "github",
-        owner: "pingdotgg",
+        owner: "12ya",
         repo: "v12",
         releaseType: "prerelease",
         channel: "nightly",
