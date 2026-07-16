@@ -122,6 +122,81 @@ type PlannedEvent = OrchestrationEvent extends infer Event
   : never;
 
 it.layer(NodeServices.layer)("thread fork decider", (it) => {
+  it.effect("creates a child thread without copying parent history", () =>
+    Effect.gen(function* () {
+      const result = yield* decideOrchestrationCommand({
+        command: {
+          type: "thread.create",
+          commandId: CommandId.make("command-create-child"),
+          threadId: targetThreadId,
+          projectId: ProjectId.make("project-1"),
+          title: "Background child",
+          modelSelection: {
+            instanceId: ProviderInstanceId.make("codex"),
+            model: "gpt-5-codex",
+          },
+          runtimeMode: "full-access",
+          interactionMode: "default",
+          branch: "v12/background-child",
+          worktreePath: "/tmp/background-child",
+          parentThreadId: sourceThreadId,
+          createdAt: "2026-07-15T00:01:00.000Z",
+        },
+        readModel,
+      });
+
+      const events: ReadonlyArray<PlannedEvent> = Array.isArray(result)
+        ? result
+        : [result as PlannedEvent];
+      expect(events).toHaveLength(1);
+      expect(events[0]?.type).toBe("thread.created");
+      if (events[0]?.type !== "thread.created") return;
+      expect(events[0].payload).toMatchObject({
+        threadId: targetThreadId,
+        parentThreadId: sourceThreadId,
+        forkedFromMessageId: null,
+      });
+    }),
+  );
+
+  it.effect("rejects child threads whose parent belongs to another project", () =>
+    Effect.gen(function* () {
+      const error = yield* Effect.flip(
+        decideOrchestrationCommand({
+          command: {
+            type: "thread.create",
+            commandId: CommandId.make("command-create-cross-project-child"),
+            threadId: targetThreadId,
+            projectId: ProjectId.make("project-other"),
+            title: "Invalid child",
+            modelSelection: {
+              instanceId: ProviderInstanceId.make("codex"),
+              model: "gpt-5-codex",
+            },
+            runtimeMode: "full-access",
+            interactionMode: "default",
+            branch: null,
+            worktreePath: null,
+            parentThreadId: sourceThreadId,
+            createdAt: "2026-07-15T00:01:00.000Z",
+          },
+          readModel: {
+            ...readModel,
+            projects: [
+              ...readModel.projects,
+              {
+                ...readModel.projects[0]!,
+                id: ProjectId.make("project-other"),
+                workspaceRoot: "/tmp/project-other",
+              },
+            ],
+          },
+        }),
+      );
+      expect(error.message).toContain("belongs to project");
+    }),
+  );
+
   it.effect("atomically copies only the selected history prefix with new identities", () =>
     Effect.gen(function* () {
       const result = yield* decideOrchestrationCommand({

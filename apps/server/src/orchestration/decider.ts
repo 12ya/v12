@@ -248,6 +248,26 @@ export const decideOrchestrationCommand = Effect.fn("decideOrchestrationCommand"
         command,
         threadId: command.threadId,
       });
+      if (command.parentThreadId === command.threadId) {
+        return yield* new OrchestrationCommandInvariantError({
+          commandType: command.type,
+          detail: `Thread '${command.threadId}' cannot be its own parent.`,
+        });
+      }
+      const parentThread =
+        command.parentThreadId == null
+          ? null
+          : yield* requireThread({
+              readModel,
+              command,
+              threadId: command.parentThreadId,
+            });
+      if (parentThread !== null && parentThread.projectId !== command.projectId) {
+        return yield* new OrchestrationCommandInvariantError({
+          commandType: command.type,
+          detail: `Parent thread '${parentThread.id}' belongs to project '${parentThread.projectId}', not '${command.projectId}'.`,
+        });
+      }
       return {
         ...(yield* withEventBase({
           aggregateKind: "thread",
@@ -265,7 +285,7 @@ export const decideOrchestrationCommand = Effect.fn("decideOrchestrationCommand"
           interactionMode: command.interactionMode,
           branch: command.branch,
           worktreePath: command.worktreePath,
-          parentThreadId: null,
+          parentThreadId: parentThread?.id ?? null,
           forkedFromMessageId: null,
           createdAt: command.createdAt,
           updatedAt: command.createdAt,

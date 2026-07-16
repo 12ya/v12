@@ -1,13 +1,16 @@
 import {
   CommandId,
   EnvironmentId,
+  MessageId,
   ORCHESTRATION_WS_METHODS,
   ProjectId,
+  ProviderInstanceId,
   ThreadId,
   type ClientOrchestrationCommand,
 } from "@v12/contracts";
 import { describe, expect, it } from "@effect/vitest";
 import * as Crypto from "effect/Crypto";
+import * as Deferred from "effect/Deferred";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Option from "effect/Option";
@@ -21,7 +24,12 @@ import {
 import * as EnvironmentSupervisor from "../connection/supervisor.ts";
 import * as RpcSession from "../rpc/session.ts";
 import type { WsRpcProtocolClient } from "../rpc/protocol.ts";
-import { archiveThread, createProject, stopThreadSession } from "./commands.ts";
+import {
+  archiveThread,
+  createProject,
+  startLocalMultitask,
+  stopThreadSession,
+} from "./commands.ts";
 
 const TEST_CRYPTO_LAYER = Layer.succeed(
   Crypto.Crypto,
@@ -40,9 +48,13 @@ const TARGET = new PrimaryConnectionTarget({
 
 const makeSupervisor = Effect.fn("TestEnvironmentCommands.makeSupervisor")(function* (
   dispatched: ClientOrchestrationCommand[],
+  dispatchOverride?: (
+    command: ClientOrchestrationCommand,
+  ) => Effect.Effect<{ readonly sequence: number }>,
 ) {
   const client = {
     [ORCHESTRATION_WS_METHODS.dispatchCommand]: (command: ClientOrchestrationCommand) =>
+      dispatchOverride?.(command) ??
       Effect.sync(() => {
         dispatched.push(command);
         return { sequence: dispatched.length };
@@ -132,6 +144,82 @@ describe("environment commands", () => {
           threadId: "thread-1",
         },
       ]);
+    }).pipe(Effect.provide(TEST_CRYPTO_LAYER)),
+  );
+
+  it.effect("starts local child turns with bounded concurrency", () =>
+    Effect.gen(function* () {
+      const dispatched: ClientOrchestrationCommand[] = [];
+      const twoStarted = yield* Deferred.make<void>();
+      let active = 0;
+      let maxActive = 0;
+      const supervisor = yield* makeSupervisor(dispatched, (command) =>
+        Effect.gen(function* () {
+          dispatched.push(command);
+          active += 1;
+          maxActive = Math.max(maxActive, active);
+          if (active === 2) yield* Deferred.succeed(twoStarted, undefined);
+          yield* Deferred.await(twoStarted);
+          yield* Effect.yieldNow;
+          active -= 1;
+          return { sequence: dispatched.length };
+        }),
+      );
+      const parentThreadId = ThreadId.make("thread-parent");
+      const modelSelection = {
+        instanceId: ProviderInstanceId.make("codex"),
+        model: "gpt-5-codex",
+      };
+      const turns = [1, 2, 3, 4].map((index) => ({
+        commandId: CommandId.make(`command-child-${index}`),
+        threadId: ThreadId.make(`thread-child-${index}`),
+        message: {
+          messageId: MessageId.make(`message-child-${index}`),
+          role: "user" as const,
+          text: `Task ${index}`,
+          attachments: [],
+        },
+        runtimeMode: "full-access" as const,
+        interactionMode: "default" as const,
+        bootstrap: {
+          createThread: {
+            projectId: ProjectId.make("project-1"),
+            title: `Child ${index}`,
+            modelSelection,
+            runtimeMode: "full-access" as const,
+            interactionMode: "default" as const,
+            branch: "main",
+            worktreePath: null,
+            parentThreadId,
+            createdAt: "2026-06-06T00:00:00.000Z",
+          },
+          prepareWorktree: {
+            projectCwd: "/workspace/project",
+            baseBranch: "main",
+            branch: `v12/child-${index}`,
+          },
+        },
+        createdAt: "2026-06-06T00:00:00.000Z",
+      }));
+
+      const result = yield* startLocalMultitask({
+        turns,
+        maxConcurrency: 2,
+      }).pipe(Effect.provideService(EnvironmentSupervisor.EnvironmentSupervisor, supervisor));
+
+      expect(maxActive).toBe(2);
+      expect(result.map((entry) => entry.status)).toEqual([
+        "started",
+        "started",
+        "started",
+        "started",
+      ]);
+      expect(
+        dispatched.map(
+          (command) =>
+            command.type === "thread.turn.start" && command.bootstrap?.createThread?.parentThreadId,
+        ),
+      ).toEqual([parentThreadId, parentThreadId, parentThreadId, parentThreadId]);
     }).pipe(Effect.provide(TEST_CRYPTO_LAYER)),
   );
 });

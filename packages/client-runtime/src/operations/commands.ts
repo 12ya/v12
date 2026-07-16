@@ -6,6 +6,7 @@ import {
 import * as Crypto from "effect/Crypto";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
+import * as Schema from "effect/Schema";
 
 import type { EnvironmentSupervisor } from "../connection/supervisor.ts";
 import {
@@ -45,6 +46,18 @@ export type RespondToThreadApprovalInput = CommandInput<"thread.approval.respond
 export type RespondToThreadUserInputInput = CommandInput<"thread.user-input.respond">;
 export type RevertThreadCheckpointInput = CommandInput<"thread.checkpoint.revert">;
 export type StopThreadSessionInput = CommandInput<"thread.session.stop">;
+
+export interface StartLocalMultitaskInput {
+  /** Worktree-backed child turns to start. Each turn keeps its own thread identity. */
+  readonly turns: ReadonlyArray<StartThreadTurnInput>;
+  /** Bounds local worktree setup and provider startup pressure. Defaults to 3, max 8. */
+  readonly maxConcurrency?: number;
+}
+
+export class LocalMultitaskConfigError extends Schema.TaggedErrorClass<LocalMultitaskConfigError>()(
+  "LocalMultitaskConfigError",
+  { message: Schema.String },
+) {}
 
 type DispatchTag = typeof ORCHESTRATION_WS_METHODS.dispatchCommand;
 type CommandEffect = Effect.Effect<
@@ -209,6 +222,53 @@ export const startThreadTurn: (input: StartThreadTurnInput) => CommandEffect = E
     commandId: metadata.commandId,
     createdAt: metadata.createdAt,
   });
+});
+
+/**
+ * Starts independent child turns locally without adding a second orchestration path.
+ * Individual dispatch failures are returned per child so one bad worktree does not
+ * cancel siblings that are already starting.
+ */
+export const startLocalMultitask = Effect.fn("EnvironmentCommands.startLocalMultitask")(function* (
+  input: StartLocalMultitaskInput,
+) {
+  const maxConcurrency = input.maxConcurrency ?? 3;
+  if (!Number.isInteger(maxConcurrency) || maxConcurrency < 1 || maxConcurrency > 8) {
+    return yield* new LocalMultitaskConfigError({
+      message: "maxConcurrency must be an integer between 1 and 8.",
+    });
+  }
+  if (input.turns.length === 0) {
+    return yield* new LocalMultitaskConfigError({
+      message: "Local multitask requires at least one child turn.",
+    });
+  }
+  const threadIds = new Set(input.turns.map((turn) => turn.threadId));
+  if (threadIds.size !== input.turns.length) {
+    return yield* new LocalMultitaskConfigError({
+      message: "Local multitask child thread IDs must be unique.",
+    });
+  }
+
+  return yield* Effect.forEach(
+    input.turns,
+    (turn) =>
+      startThreadTurn(turn).pipe(
+        Effect.match({
+          onFailure: (error) => ({
+            threadId: turn.threadId,
+            status: "failed" as const,
+            error,
+          }),
+          onSuccess: (result) => ({
+            threadId: turn.threadId,
+            status: "started" as const,
+            sequence: result.sequence,
+          }),
+        }),
+      ),
+    { concurrency: maxConcurrency },
+  );
 });
 
 export const interruptThreadTurn: (input: InterruptThreadTurnInput) => CommandEffect = Effect.fn(
