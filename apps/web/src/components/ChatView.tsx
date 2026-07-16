@@ -65,7 +65,6 @@ import {
 import * as Cause from "effect/Cause";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { isElectron } from "../env";
-import { readLocalApi } from "../localApi";
 import { useDiffPanelStore } from "../diffPanelStore";
 import {
   collapseExpandedComposerCursor,
@@ -1165,6 +1164,7 @@ function ChatViewContent(props: ChatViewProps) {
   >({});
   const [isConnecting, _setIsConnecting] = useState(false);
   const [isRevertingCheckpoint, setIsRevertingCheckpoint] = useState(false);
+  const editAndRerunInFlightRef = useRef(false);
   const [planSidebarOpen, setPlanSidebarOpen] = useState(false);
   const [maximizedRightPanelThreadKey, setMaximizedRightPanelThreadKey] = useState<string | null>(
     null,
@@ -3636,6 +3636,7 @@ function ChatViewContent(props: ChatViewProps) {
 
   useEffect(() => {
     setIsRevertingCheckpoint(false);
+    editAndRerunInFlightRef.current = false;
   }, [activeThread?.id]);
 
   useEffect(() => {
@@ -3947,8 +3948,7 @@ function ChatViewContent(props: ChatViewProps) {
 
   const onEditAndRerun = useCallback(
     async (messageId: MessageId, turnCount: number) => {
-      const localApi = readLocalApi();
-      if (!localApi || !activeThread || isRevertingCheckpoint) return;
+      if (!activeThread || editAndRerunInFlightRef.current) return;
 
       const originalMessage = displayServerMessages.find(
         (entry) => entry.id === messageId && entry.role === "user",
@@ -3963,17 +3963,8 @@ function ChatViewContent(props: ChatViewProps) {
         return;
       }
       const hasActiveWork = phase === "running" || isSendBusy || isConnecting;
-      const confirmed = await localApi.dialogs.confirm(
-        [
-          "Edit and rerun this request?",
-          "V12 will preserve the current conversation in a recovery chat, then replace later history in this chat.",
-          ...(hasActiveWork ? ["The active run will be stopped first."] : []),
-        ].join("\n"),
-      );
-      if (!confirmed) {
-        return;
-      }
 
+      editAndRerunInFlightRef.current = true;
       setIsRevertingCheckpoint(true);
       setThreadError(activeThread.id, null);
       let restoredImages: ComposerImageAttachment[] = [];
@@ -4044,19 +4035,18 @@ function ChatViewContent(props: ChatViewProps) {
           historyThread.messages.length,
         );
         const recoveryThread = recoveryReady ? readThreadDetail(recoveryThreadRef) : null;
-        if (!recoveryThread) {
-          throw new Error("The recovery chat was created but did not finish loading.");
+        if (recoveryThread) {
+          useTaskHudStore.getState().copyContextTasksToFork({
+            sourceThreadKey: scopedThreadKey(routeThreadRef),
+            targetThreadKey: scopedThreadKey(recoveryThreadRef),
+            sourceThreadId: historyThread.id,
+            targetThreadId: recoveryThreadId,
+            messageIdBySourceId: buildForkMessageIdMap(
+              historyThread.messages,
+              recoveryThread.messages,
+            ),
+          });
         }
-        useTaskHudStore.getState().copyContextTasksToFork({
-          sourceThreadKey: scopedThreadKey(routeThreadRef),
-          targetThreadKey: scopedThreadKey(recoveryThreadRef),
-          sourceThreadId: historyThread.id,
-          targetThreadId: recoveryThreadId,
-          messageIdBySourceId: buildForkMessageIdMap(
-            historyThread.messages,
-            recoveryThread.messages,
-          ),
-        });
 
         const revertResult = await revertThreadCheckpoint({
           environmentId,
@@ -4087,6 +4077,7 @@ function ChatViewContent(props: ChatViewProps) {
           error instanceof Error ? error.message : "Failed to prepare this request for rerun.",
         );
       } finally {
+        editAndRerunInFlightRef.current = false;
         setIsRevertingCheckpoint(false);
       }
     },
@@ -4101,7 +4092,6 @@ function ChatViewContent(props: ChatViewProps) {
       forkThread,
       interruptThreadTurn,
       isConnecting,
-      isRevertingCheckpoint,
       isSendBusy,
       phase,
       revertThreadCheckpoint,
