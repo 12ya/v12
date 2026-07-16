@@ -102,6 +102,7 @@ export type MessagesTimelineRow =
       expanded: boolean;
       onlyToolEntries: boolean;
       summary: string;
+      groupedEntries: WorkLogEntry[];
     }
   | {
       kind: "turn-fold";
@@ -491,8 +492,6 @@ export function deriveMessagesTimelineRows(input: {
         } else {
           const groupId = `work-group:${timelineEntry.id}`;
           const expanded = input.expandedWorkGroupIds?.has(groupId) ?? false;
-          const renderedEntries = expanded ? visibleGroupedEntries : [];
-
           nextRows.push({
             kind: "work-toggle",
             id: `work-toggle:${timelineEntry.id}`,
@@ -502,16 +501,8 @@ export function deriveMessagesTimelineRows(input: {
             expanded,
             onlyToolEntries: visibleGroupedEntries.every((entry) => workLogEntryIsToolLike(entry)),
             summary: summarizeWorkLogGroup(visibleGroupedEntries),
+            groupedEntries: visibleGroupedEntries,
           });
-
-          for (const workEntry of renderedEntries) {
-            nextRows.push({
-              kind: "work",
-              id: workEntry.id,
-              createdAt: workEntry.createdAt,
-              groupedEntries: [workEntry],
-            });
-          }
         }
       }
       index = cursor - 1;
@@ -621,7 +612,8 @@ function isRowUnchanged(a: MessagesTimelineRow, b: MessagesTimelineRow): boolean
         a.groupId === bw.groupId &&
         a.hiddenCount === bw.hiddenCount &&
         a.expanded === bw.expanded &&
-        a.onlyToolEntries === bw.onlyToolEntries
+        a.onlyToolEntries === bw.onlyToolEntries &&
+        Equal.equals(a.groupedEntries, bw.groupedEntries)
       );
     }
 

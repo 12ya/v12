@@ -972,7 +972,7 @@ describe("deriveMessagesTimelineRows", () => {
     expect(assistantRow?.showAssistantCopyButton).toBe(false);
   });
 
-  it("models work log overflow expansion as inserted list rows", () => {
+  it("keeps work log overflow entries in one collapsible list row", () => {
     const timelineEntries = [
       {
         id: "work-entry-1",
@@ -1033,14 +1033,14 @@ describe("deriveMessagesTimelineRows", () => {
       onlyToolEntries: true,
       summary: "Used 3 tools",
     });
-    expect(expandedRows.map((row) => row.id)).toEqual([
-      "work-toggle:work-entry-1",
-      "work-1",
-      "work-2",
-      "work-3",
-    ]);
+    expect(expandedRows.map((row) => row.id)).toEqual(["work-toggle:work-entry-1"]);
     expect(expandedRows.find((row) => row.kind === "work-toggle")).toMatchObject({
       expanded: true,
+      groupedEntries: [
+        expect.objectContaining({ id: "work-1" }),
+        expect.objectContaining({ id: "work-2" }),
+        expect.objectContaining({ id: "work-3" }),
+      ],
     });
   });
 });

@@ -82,6 +82,7 @@ import {
 import { TerminalContextInlineChip } from "./TerminalContextInlineChip";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import { Popover, PopoverPopup } from "../ui/popover";
+import { Collapsible, CollapsiblePanel } from "../ui/collapsible";
 import {
   deriveDisplayedUserMessageState,
   type ParsedTerminalContextEntry,
@@ -1432,24 +1433,37 @@ function WorkGroupToggleTimelineRow({
   row: Extract<TimelineRow, { kind: "work-toggle" }>;
 }) {
   const ctx = use(TimelineRowCtx);
-  const DisclosureIcon = row.expanded ? ChevronDownIcon : ChevronRightIcon;
   return (
-    <button
-      type="button"
-      className="group flex w-full cursor-pointer items-center gap-1.5 rounded-md px-0.5 py-0.5 text-left text-[12px] leading-5 text-muted-foreground transition-colors duration-150 hover:text-foreground/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70"
-      aria-expanded={row.expanded}
-      onClick={(event) => {
-        const anchorElement =
-          event.currentTarget.closest<HTMLElement>("[data-timeline-row-id]") ?? event.currentTarget;
-        ctx.onToggleWorkGroup(row.groupId, anchorElement);
-      }}
-    >
-      <span className="flex size-5 shrink-0 items-center justify-center text-muted-foreground/75">
-        <WrenchIcon className="size-3.5 stroke-[1.8]" aria-hidden />
-      </span>
-      <span className="min-w-0 truncate">{row.summary}</span>
-      <DisclosureIcon className="size-3 shrink-0 opacity-60" aria-hidden />
-    </button>
+    <Collapsible open={row.expanded}>
+      <button
+        type="button"
+        className="group flex w-full cursor-pointer items-center gap-1.5 rounded-md px-0.5 py-0.5 text-left text-[12px] leading-5 text-muted-foreground transition-colors duration-150 hover:text-foreground/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70"
+        aria-expanded={row.expanded}
+        onClick={(event) => {
+          const anchorElement =
+            event.currentTarget.closest<HTMLElement>("[data-timeline-row-id]") ??
+            event.currentTarget;
+          ctx.onToggleWorkGroup(row.groupId, anchorElement);
+        }}
+      >
+        <span className="flex size-5 shrink-0 items-center justify-center text-muted-foreground/75">
+          <WrenchIcon className="size-3.5 stroke-[1.8]" aria-hidden />
+        </span>
+        <span className="min-w-0 truncate">{row.summary}</span>
+        <ChevronRightIcon
+          className={cn(
+            "size-3 shrink-0 opacity-60 transition-transform duration-200 ease-out motion-reduce:transition-none",
+            row.expanded && "rotate-90",
+          )}
+          aria-hidden
+        />
+      </button>
+      <CollapsiblePanel className="transition-[height,opacity] ease-out data-ending-style:opacity-0 data-starting-style:opacity-0 motion-reduce:transition-none">
+        <div className="pt-0.5">
+          <WorkGroupSection groupedEntries={row.groupedEntries} />
+        </div>
+      </CollapsiblePanel>
+    </Collapsible>
   );
 }
 
