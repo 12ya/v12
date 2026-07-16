@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { SidebarProjectSortOrder, SidebarThreadSortOrder } from "@v12/contracts/settings";
+import type { SidebarProjectSortOrder, SidebarThreadSortOrder } from "@v12code/contracts/settings";
 import {
   getThreadSortTimestamp,
   sortThreads,

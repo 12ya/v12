@@ -1,4 +1,4 @@
-import type { EnvironmentId as EnvironmentIdType } from "@v12/contracts";
+import type { EnvironmentId as EnvironmentIdType } from "@v12code/contracts";
 import * as Effect from "effect/Effect";
 import * as Option from "effect/Option";
 import * as Stream from "effect/Stream";

@@ -1,8 +1,8 @@
-import { EnvironmentId } from "@v12/contracts";
+import { EnvironmentId } from "@v12code/contracts";
 import type {
   RelayClientEnvironmentRecord,
   RelayEnvironmentStatusResponse,
-} from "@v12/contracts/relay";
+} from "@v12code/contracts/relay";
 import { describe, expect, it } from "@effect/vitest";
 import * as Deferred from "effect/Deferred";
 import * as Effect from "effect/Effect";

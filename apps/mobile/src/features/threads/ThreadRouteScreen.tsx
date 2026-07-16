@@ -7,8 +7,8 @@ import {
 } from "@react-navigation/native";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import * as Option from "effect/Option";
-import { EnvironmentId, ThreadId, type ProjectScript } from "@v12/contracts";
-import { projectScriptCwd, projectScriptRuntimeEnv } from "@v12/shared/projectScripts";
+import { EnvironmentId, ThreadId, type ProjectScript } from "@v12code/contracts";
+import { projectScriptCwd, projectScriptRuntimeEnv } from "@v12code/shared/projectScripts";
 import { Platform, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useWorkspaceState } from "../../state/workspace";

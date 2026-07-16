@@ -11,4 +11,4 @@ export {
   selectProjectGroupingSettings,
   type ProjectGroupingMode,
   type ProjectGroupingSettings,
-} from "@v12/client-runtime/state/project-grouping";
+} from "@v12code/client-runtime/state/project-grouping";

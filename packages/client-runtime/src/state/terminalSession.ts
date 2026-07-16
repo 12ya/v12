@@ -5,7 +5,7 @@ import type {
   TerminalSessionSnapshot,
   TerminalSummary,
   ThreadId,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 
 export interface TerminalSessionState {
   readonly summary: TerminalSummary | null;

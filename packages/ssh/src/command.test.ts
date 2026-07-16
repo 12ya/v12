@@ -14,7 +14,7 @@ import {
   baseSshArgs,
   getLastNonEmptyOutputLine,
   parseSshResolveOutput,
-  resolveRemoteV12CliPackageSpec,
+  resolveRemoteV12CodeCliPackageSpec,
   runSshCommand,
 } from "./command.ts";
 import { SshCommandError } from "./errors.ts";
@@ -99,37 +99,37 @@ describe("ssh command", () => {
     }),
   );
 
-  it.effect("resolves the remote v12 package spec from the desktop release channel", () =>
+  it.effect("resolves the remote v12code package spec from the desktop release channel", () =>
     Effect.sync(() => {
       assert.equal(
-        resolveRemoteV12CliPackageSpec({
+        resolveRemoteV12CodeCliPackageSpec({
           appVersion: "0.0.17",
           updateChannel: "latest",
         }),
-        "v12@0.0.17",
+        "v12code@0.0.17",
       );
       assert.equal(
-        resolveRemoteV12CliPackageSpec({
+        resolveRemoteV12CodeCliPackageSpec({
           appVersion: "0.0.17-nightly.20260415.44",
           updateChannel: "nightly",
         }),
-        "v12@0.0.17-nightly.20260415.44",
+        "v12code@0.0.17-nightly.20260415.44",
       );
       assert.equal(
-        resolveRemoteV12CliPackageSpec({
+        resolveRemoteV12CodeCliPackageSpec({
           appVersion: "0.0.0-dev",
           updateChannel: "nightly",
           isDevelopment: true,
         }),
-        "v12@nightly",
+        "v12code@nightly",
       );
       assert.equal(
-        resolveRemoteV12CliPackageSpec({
+        resolveRemoteV12CodeCliPackageSpec({
           appVersion: "0.0.0-dev",
           updateChannel: "latest",
           isDevelopment: true,
         }),
-        "v12@nightly",
+        "v12code@nightly",
       );
     }),
   );

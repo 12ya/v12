@@ -10,20 +10,20 @@ import type {
   ScopedThreadRef,
   ServerProvider,
   ThreadId,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import {
   ProviderDriverKind,
   ProviderInstanceId,
   PROVIDER_SEND_TURN_MAX_ATTACHMENTS,
   PROVIDER_SEND_TURN_MAX_IMAGE_BYTES,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import {
   connectionStatusText,
   type EnvironmentConnectionPresentation,
-} from "@v12/client-runtime/connection";
-import { scopedThreadKey } from "@v12/client-runtime/environment";
-import { serializeComposerFileLink } from "@v12/shared/composerTrigger";
-import { createModelSelection, normalizeModelSlug } from "@v12/shared/model";
+} from "@v12code/client-runtime/connection";
+import { scopedThreadKey } from "@v12code/client-runtime/environment";
+import { serializeComposerFileLink } from "@v12code/shared/composerTrigger";
+import { createModelSelection, normalizeModelSlug } from "@v12code/shared/model";
 import {
   memo,
   useCallback,
@@ -116,7 +116,7 @@ import {
   type ProviderInstanceEntry,
 } from "../../providerInstances";
 import { type AppModelOption, getAppModelOptionsForInstance } from "../../modelSelection";
-import type { UnifiedSettings } from "@v12/contracts/settings";
+import type { UnifiedSettings } from "@v12code/contracts/settings";
 import type { SessionPhase, Thread } from "../../types";
 import type { PendingUserInputDraftAnswer } from "../../pendingUserInput";
 import type { PendingApproval, PendingUserInput } from "../../session-logic";

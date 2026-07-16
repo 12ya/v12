@@ -25,7 +25,9 @@ const makeServerConfigLayer = (
       } satisfies ServerConfig.ServerConfig["Service"];
     }),
   ).pipe(
-    Layer.provide(ServerConfig.layerTest(process.cwd(), { prefix: "v12-auth-bootstrap-test-" })),
+    Layer.provide(
+      ServerConfig.layerTest(process.cwd(), { prefix: "v12code-auth-bootstrap-test-" }),
+    ),
   );
 
 const makePairingGrantStoreLayer = (

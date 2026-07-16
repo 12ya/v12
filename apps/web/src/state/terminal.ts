@@ -1,4 +1,4 @@
-import { createTerminalEnvironmentAtoms } from "@v12/client-runtime/state/terminal";
+import { createTerminalEnvironmentAtoms } from "@v12code/client-runtime/state/terminal";
 
 import { connectionAtomRuntime } from "../connection/runtime";
 

@@ -20,9 +20,9 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   isAtomCommandInterrupted,
   squashAtomCommandFailure,
-} from "@v12/client-runtime/state/runtime";
-import type { EnvironmentId, ScopedThreadRef } from "@v12/contracts";
-import { type TimestampFormat } from "@v12/contracts/settings";
+} from "@v12code/client-runtime/state/runtime";
+import type { EnvironmentId, ScopedThreadRef } from "@v12code/contracts";
+import { type TimestampFormat } from "@v12code/contracts/settings";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";

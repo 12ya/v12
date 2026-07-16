@@ -2,8 +2,8 @@ import { useAtomValue } from "@effect/atom-react";
 import {
   connectionCatalogDisplayUrl,
   type EnvironmentPresentation as BaseEnvironmentPresentation,
-} from "@v12/client-runtime/connection";
-import type { EnvironmentId } from "@v12/contracts";
+} from "@v12code/client-runtime/connection";
+import type { EnvironmentId } from "@v12code/contracts";
 import { useMemo } from "react";
 
 import { environmentCatalog } from "../connection/catalog";

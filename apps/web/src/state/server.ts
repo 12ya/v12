@@ -6,10 +6,10 @@ import {
   type ServerLifecycleWelcomePayload,
   type ServerProvider,
   type ServerSettings,
-} from "@v12/contracts";
-import { createServerEnvironmentAtoms } from "@v12/client-runtime/state/server";
-import { createEnvironmentServerConfigsAtom } from "@v12/client-runtime/state/shell";
-import { DEFAULT_RESOLVED_KEYBINDINGS } from "@v12/shared/keybindings";
+} from "@v12code/contracts";
+import { createServerEnvironmentAtoms } from "@v12code/client-runtime/state/server";
+import { createEnvironmentServerConfigsAtom } from "@v12code/client-runtime/state/shell";
+import { DEFAULT_RESOLVED_KEYBINDINGS } from "@v12code/shared/keybindings";
 import * as Option from "effect/Option";
 import { AsyncResult, Atom } from "effect/unstable/reactivity";
 

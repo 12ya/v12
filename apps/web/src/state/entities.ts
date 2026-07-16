@@ -3,8 +3,8 @@ import type {
   EnvironmentProject,
   EnvironmentThread,
   EnvironmentThreadShell,
-} from "@v12/client-runtime/state/shell";
-import { mergeEnvironmentThread } from "@v12/client-runtime/state/threads";
+} from "@v12code/client-runtime/state/shell";
+import { mergeEnvironmentThread } from "@v12code/client-runtime/state/threads";
 import type {
   OrchestrationMessage,
   OrchestrationProposedPlan,
@@ -13,8 +13,8 @@ import type {
   ScopedProjectRef,
   ScopedThreadRef,
   ServerConfig,
-} from "@v12/contracts";
-import type { EnvironmentId, ThreadId } from "@v12/contracts";
+} from "@v12code/contracts";
+import type { EnvironmentId, ThreadId } from "@v12code/contracts";
 import { Atom } from "effect/unstable/reactivity";
 import { useMemo } from "react";
 import { appAtomRegistry } from "../rpc/atomRegistry";

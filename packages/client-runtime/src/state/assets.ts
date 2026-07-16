@@ -1,4 +1,4 @@
-import { AssetResource, EnvironmentId, WS_METHODS } from "@v12/contracts";
+import { AssetResource, EnvironmentId, WS_METHODS } from "@v12code/contracts";
 import * as Schema from "effect/Schema";
 import { Atom } from "effect/unstable/reactivity";
 

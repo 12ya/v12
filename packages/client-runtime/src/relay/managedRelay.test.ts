@@ -1,5 +1,5 @@
-import { EnvironmentId } from "@v12/contracts";
-import { RelayEnvironmentStatusScope } from "@v12/contracts/relay";
+import { EnvironmentId } from "@v12code/contracts";
+import { RelayEnvironmentStatusScope } from "@v12code/contracts/relay";
 import { describe, expect, it } from "@effect/vitest";
 import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
@@ -27,7 +27,7 @@ function managedRelayTestLayer(
   );
   return ManagedRelay.layer({
     relayUrl,
-    clientId: "v12-mobile",
+    clientId: "v12code-mobile",
     ...(accessTokenStore ? { accessTokenStore } : {}),
   }).pipe(Layer.provide(signerLayer), Layer.provide(httpClientLayer));
 }
@@ -268,7 +268,7 @@ describe("ManagedRelayClient", () => {
     let persistedTokens: ReadonlyArray<ManagedRelay.ManagedRelayAccessTokenCacheEntry> = [
       {
         accountId: "user-1",
-        clientId: "v12-mobile",
+        clientId: "v12code-mobile",
         relayUrl: "https://relay.example.test",
         thumbprint: "client-thumbprint",
         scopes: [RelayEnvironmentStatusScope],

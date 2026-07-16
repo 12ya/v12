@@ -6,13 +6,13 @@ import {
   removeConnectionFromCatalog,
   removeCatalogValue,
   replaceCatalogValue,
-} from "@v12/client-runtime/platform";
-import { TokenStore } from "@v12/client-runtime/authorization";
+} from "@v12code/client-runtime/platform";
+import { TokenStore } from "@v12code/client-runtime/authorization";
 import {
   ConnectionTransientError,
   CredentialStore,
   ProfileStore,
-} from "@v12/client-runtime/connection";
+} from "@v12code/client-runtime/connection";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";

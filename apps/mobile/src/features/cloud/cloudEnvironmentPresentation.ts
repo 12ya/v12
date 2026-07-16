@@ -1,5 +1,5 @@
-import type { RelayEnvironmentStatusResponse } from "@v12/contracts/relay";
-import { type EnvironmentConnectionPhase } from "@v12/client-runtime/connection";
+import type { RelayEnvironmentStatusResponse } from "@v12code/contracts/relay";
+import { type EnvironmentConnectionPhase } from "@v12code/client-runtime/connection";
 
 export interface AvailableCloudEnvironmentPresentation {
   readonly connectionError: string | null;

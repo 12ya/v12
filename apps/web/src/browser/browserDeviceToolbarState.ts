@@ -1,4 +1,4 @@
-import type { PreviewViewportSetting } from "@v12/contracts";
+import type { PreviewViewportSetting } from "@v12code/contracts";
 
 export function reconcileLockedAspectRatio(
   current: number | null,

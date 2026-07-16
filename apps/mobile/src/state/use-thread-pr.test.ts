@@ -1,4 +1,4 @@
-import type { VcsStatusResult } from "@v12/contracts";
+import type { VcsStatusResult } from "@v12code/contracts";
 import { describe, expect, it } from "vite-plus/test";
 
 import { presentThreadPr } from "./thread-pr-presentation";
@@ -6,7 +6,7 @@ import { presentThreadPr } from "./thread-pr-presentation";
 const pullRequest: NonNullable<VcsStatusResult["pr"]> = {
   number: 3774,
   title: "Desktop-style pull request indicator",
-  url: "https://github.com/v12/v12/pull/3774",
+  url: "https://github.com/v12code/v12code/pull/3774",
   baseRef: "main",
   headRef: "codex/desktop-style-pr-indicator",
   state: "merged",

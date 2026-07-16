@@ -41,13 +41,13 @@ describe("resolveNativeReviewDiffView", () => {
     expect(resolvedView).not.toBeNull();
     expect(resolvedView).not.toBe(nativeView);
     expect(resolveNativeReviewDiffView()).toBe(resolvedView);
-    expect(expoMocks.requireNativeView).toHaveBeenCalledWith("V12ReviewDiffSurface");
+    expect(expoMocks.requireNativeView).toHaveBeenCalledWith("V12CodeReviewDiffSurface");
   });
 
   it("does not fall back to stale legacy native review diff view names", async () => {
     globalThis.expo = {
       getViewConfig: vi.fn().mockImplementation((moduleName: string) => {
-        if (moduleName === "V12ReviewDiffView") {
+        if (moduleName === "V12CodeReviewDiffView") {
           return { validAttributes: {}, directEventTypes: {} };
         }
         return null;
@@ -74,7 +74,7 @@ describe("resolveNativeReviewDiffView", () => {
     expect(consoleError).toHaveBeenCalledWith(
       expect.objectContaining({
         _tag: "NativeViewResolutionError",
-        nativeModuleName: "V12ReviewDiffSurface",
+        nativeModuleName: "V12CodeReviewDiffSurface",
         cause,
       }),
     );
@@ -88,12 +88,12 @@ describe("isPendingNativeViewRegistration", () => {
 
     expect(
       isPendingNativeViewRegistration(
-        new Error("Unable to find the 'V12ReviewDiffSurface' view for this native tag"),
+        new Error("Unable to find the 'V12CodeReviewDiffSurface' view for this native tag"),
       ),
     ).toBe(true);
     expect(
       isPendingNativeViewRegistration(
-        new Error("Unable to find the 'V12ReviewDiffView' view for this native tag"),
+        new Error("Unable to find the 'V12CodeReviewDiffView' view for this native tag"),
       ),
     ).toBe(false);
   });

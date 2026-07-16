@@ -1,7 +1,7 @@
 import { useAtomValue } from "@effect/atom-react";
-import type { EnvironmentPresentation } from "@v12/client-runtime/connection";
-import { createEnvironmentPresentationAtoms } from "@v12/client-runtime/state/presentation";
-import type { EnvironmentId } from "@v12/contracts";
+import type { EnvironmentPresentation } from "@v12code/client-runtime/connection";
+import { createEnvironmentPresentationAtoms } from "@v12code/client-runtime/state/presentation";
+import type { EnvironmentId } from "@v12code/contracts";
 import { Atom } from "effect/unstable/reactivity";
 
 import { environmentCatalog } from "../connection/catalog";

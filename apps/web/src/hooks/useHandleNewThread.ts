@@ -1,9 +1,9 @@
-import { scopedProjectKey, scopeProjectRef } from "@v12/client-runtime/environment";
+import { scopedProjectKey, scopeProjectRef } from "@v12code/client-runtime/environment";
 import {
   DEFAULT_RUNTIME_MODE,
   DEFAULT_SERVER_SETTINGS,
   type ScopedProjectRef,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import { useParams, useRouter } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
 import { type DraftThreadEnvMode, useComposerDraftStore } from "../composerDraftStore";

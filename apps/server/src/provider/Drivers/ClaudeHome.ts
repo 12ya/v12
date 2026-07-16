@@ -1,6 +1,6 @@
 import * as NodeOS from "node:os";
 
-import type { ClaudeSettings } from "@v12/contracts";
+import type { ClaudeSettings } from "@v12code/contracts";
 import * as Effect from "effect/Effect";
 import * as Path from "effect/Path";
 

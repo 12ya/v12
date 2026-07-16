@@ -4,9 +4,9 @@ import {
   type ScopedThreadRef,
   type ServerProviderSkill,
   type TurnId,
-} from "@v12/contracts";
-import { parseScopedThreadKey } from "@v12/client-runtime/environment";
-import { resolveChatListAnchoredEndSpace } from "@v12/shared/chatList";
+} from "@v12code/contracts";
+import { parseScopedThreadKey } from "@v12code/client-runtime/environment";
+import { resolveChatListAnchoredEndSpace } from "@v12code/shared/chatList";
 import {
   createContext,
   Fragment,
@@ -98,7 +98,7 @@ import {
 import { cn } from "~/lib/utils";
 import { useUiStateStore } from "~/uiStateStore";
 import { useMeasuredScrollHeight } from "~/hooks/useMeasuredScrollHeight";
-import { type TimestampFormat } from "@v12/contracts/settings";
+import { type TimestampFormat } from "@v12code/contracts/settings";
 import { formatChatTimestampTooltip, formatShortTimestamp } from "../../timestampFormat";
 import {
   extractTrailingTaskAnnotations,

@@ -46,8 +46,8 @@ import {
   DesktopBackendBootstrap,
   type DesktopBackendBootstrap as DesktopBackendBootstrapValue,
   PRIMARY_LOCAL_ENVIRONMENT_ID,
-} from "@v12/contracts";
-import { waitForHttpReady as waitForHttpReadyShared } from "@v12/shared/httpReadiness";
+} from "@v12code/contracts";
+import { waitForHttpReady as waitForHttpReadyShared } from "@v12code/shared/httpReadiness";
 
 import * as DesktopObservability from "../app/DesktopObservability.ts";
 
@@ -62,7 +62,7 @@ const DEFAULT_BACKEND_READINESS_TIMEOUT = Duration.minutes(1);
 const DEFAULT_BACKEND_READINESS_INTERVAL = Duration.millis(100);
 const DEFAULT_BACKEND_READINESS_REQUEST_TIMEOUT = Duration.seconds(1);
 const DEFAULT_BACKEND_TERMINATE_GRACE = Duration.seconds(2);
-const BACKEND_READINESS_PATH = "/.well-known/v12/environment";
+const BACKEND_READINESS_PATH = "/.well-known/v12code/environment";
 
 type BackendProcessLayerServices = ChildProcessSpawner.ChildProcessSpawner | HttpClient.HttpClient;
 
@@ -80,7 +80,7 @@ export interface DesktopBackendStartConfig {
   readonly env: Record<string, string | undefined>;
   // When true the spawner merges the desktop process.env on top of `env`;
   // when false `env` is passed verbatim. WSL mode opts out so a leaking
-  // V12_HOME can't pin the WSL backend to /mnt/c/...\.v12.
+  // V12CODE_HOME can't pin the WSL backend to /mnt/c/...\.v12code.
   readonly extendEnv: boolean;
   readonly bootstrap: DesktopBackendBootstrapValue;
   readonly bootstrapDelivery: DesktopBackendBootstrapDelivery;

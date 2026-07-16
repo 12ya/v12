@@ -13,9 +13,9 @@ const defaultInput = {
   platform: "darwin",
   processArch: "arm64",
   appVersion: "0.0.22",
-  appPath: "/Applications/V12.app/Contents/Resources/app.asar",
+  appPath: "/Applications/V12Code.app/Contents/Resources/app.asar",
   isPackaged: false,
-  resourcesPath: "/Applications/V12.app/Contents/Resources",
+  resourcesPath: "/Applications/V12Code.app/Contents/Resources",
   runningUnderArm64Translation: false,
 } satisfies DesktopEnvironment.MakeDesktopEnvironmentInput;
 
@@ -40,40 +40,43 @@ describe("DesktopEnvironment", () => {
       const environment = yield* makeEnvironment(
         {},
         {
-          V12_HOME: " /tmp/v12 ",
-          V12_COMMIT_HASH: " 0123456789abcdef ",
-          V12_PORT: "4949",
+          V12CODE_HOME: " /tmp/v12code ",
+          V12CODE_COMMIT_HASH: " 0123456789abcdef ",
+          V12CODE_PORT: "4949",
           VITE_DEV_SERVER_URL: "http://localhost:5173",
-          V12_DEV_REMOTE_V12_SERVER_ENTRY_PATH: " /remote/server.mjs ",
-          V12_OTLP_TRACES_URL: " http://127.0.0.1:4318/v1/traces ",
-          V12_OTLP_EXPORT_INTERVAL_MS: "2500",
+          V12CODE_DEV_REMOTE_V12CODE_SERVER_ENTRY_PATH: " /remote/server.mjs ",
+          V12CODE_OTLP_TRACES_URL: " http://127.0.0.1:4318/v1/traces ",
+          V12CODE_OTLP_EXPORT_INTERVAL_MS: "2500",
         },
       );
 
       assert.equal(environment.isDevelopment, true);
       assert.equal(environment.appDataDirectory, "/Users/alice/Library/Application Support");
-      assert.equal(environment.baseDir, "/tmp/v12");
-      assert.equal(environment.stateDir, "/tmp/v12/dev");
-      assert.equal(environment.desktopSettingsPath, "/tmp/v12/dev/desktop-settings.json");
-      assert.equal(environment.clientSettingsPath, "/tmp/v12/dev/client-settings.json");
+      assert.equal(environment.baseDir, "/tmp/v12code");
+      assert.equal(environment.stateDir, "/tmp/v12code/dev");
+      assert.equal(environment.desktopSettingsPath, "/tmp/v12code/dev/desktop-settings.json");
+      assert.equal(environment.clientSettingsPath, "/tmp/v12code/dev/client-settings.json");
       assert.equal(
         environment.savedEnvironmentRegistryPath,
-        "/tmp/v12/dev/saved-environments.json",
+        "/tmp/v12code/dev/saved-environments.json",
       );
-      assert.equal(environment.serverSettingsPath, "/tmp/v12/dev/settings.json");
-      assert.equal(environment.logDir, "/tmp/v12/dev/logs");
-      assert.equal(environment.browserArtifactsDir, "/tmp/v12/dev/browser-artifacts");
+      assert.equal(environment.serverSettingsPath, "/tmp/v12code/dev/settings.json");
+      assert.equal(environment.logDir, "/tmp/v12code/dev/logs");
+      assert.equal(environment.browserArtifactsDir, "/tmp/v12code/dev/browser-artifacts");
       assert.equal(environment.rootDir, "/repo");
       assert.equal(environment.appRoot, "/repo");
       assert.equal(environment.backendEntryPath, "/repo/apps/server/dist/bin.mjs");
       assert.equal(environment.backendCwd, "/repo");
-      assert.equal(environment.appUserModelId, "com.v12.v12.dev");
-      assert.equal(environment.linuxWmClass, "v12-dev");
+      assert.equal(environment.appUserModelId, "com.v12code.v12code.dev");
+      assert.equal(environment.linuxWmClass, "v12code-dev");
       assert.deepEqual(
         Option.map(environment.devServerUrl, (url) => url.href),
         Option.some("http://localhost:5173/"),
       );
-      assert.deepEqual(environment.devRemoteV12ServerEntryPath, Option.some("/remote/server.mjs"));
+      assert.deepEqual(
+        environment.devRemoteV12CodeServerEntryPath,
+        Option.some("/remote/server.mjs"),
+      );
       assert.deepEqual(environment.configuredBackendPort, Option.some(4949));
       assert.deepEqual(environment.commitHashOverride, Option.some("0123456789abcdef"));
       assert.deepEqual(environment.otlpTracesUrl, Option.some("http://127.0.0.1:4318/v1/traces"));
@@ -86,15 +89,15 @@ describe("DesktopEnvironment", () => {
       const environment = yield* makeEnvironment(
         {},
         {
-          V12_HOME: "/tmp/v12",
+          V12CODE_HOME: "/tmp/v12code",
         },
       );
 
       assert.equal(environment.isDevelopment, false);
-      assert.equal(environment.stateDir, "/tmp/v12/userdata");
-      assert.equal(environment.logDir, "/tmp/v12/userdata/logs");
-      assert.equal(environment.browserArtifactsDir, "/tmp/v12/userdata/browser-artifacts");
-      assert.equal(environment.serverSettingsPath, "/tmp/v12/userdata/settings.json");
+      assert.equal(environment.stateDir, "/tmp/v12code/userdata");
+      assert.equal(environment.logDir, "/tmp/v12code/userdata/logs");
+      assert.equal(environment.browserArtifactsDir, "/tmp/v12code/userdata/browser-artifacts");
+      assert.equal(environment.serverSettingsPath, "/tmp/v12code/userdata/settings.json");
     }),
   );
 
@@ -103,12 +106,12 @@ describe("DesktopEnvironment", () => {
       const environment = yield* makeEnvironment(
         {},
         {
-          V12_DESKTOP_APP_USER_MODEL_ID: " com.v12.v12.dev.local ",
+          V12CODE_DESKTOP_APP_USER_MODEL_ID: " com.v12code.v12code.dev.local ",
           VITE_DEV_SERVER_URL: "http://localhost:5173",
         },
       );
 
-      assert.equal(environment.appUserModelId, "com.v12.v12.dev.local");
+      assert.equal(environment.appUserModelId, "com.v12code.v12code.dev.local");
     }),
   );
 

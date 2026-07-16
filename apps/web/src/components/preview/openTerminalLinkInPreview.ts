@@ -1,6 +1,6 @@
-import type { LocalApi, ScopedThreadRef } from "@v12/contracts";
-import { isAtomCommandInterrupted } from "@v12/client-runtime/state/runtime";
-import { isPreviewableUrl } from "@v12/shared/preview";
+import type { LocalApi, ScopedThreadRef } from "@v12code/contracts";
+import { isAtomCommandInterrupted } from "@v12code/client-runtime/state/runtime";
+import { isPreviewableUrl } from "@v12code/shared/preview";
 import * as Schema from "effect/Schema";
 
 import type { OpenPreviewMutation } from "~/browser/openFileInPreview";

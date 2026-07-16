@@ -11,7 +11,7 @@ import {
   EnvironmentHttpConflictError,
   EnvironmentHttpInternalServerError,
   EnvironmentHttpUnauthorizedError,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import {
   RelayCloudEnvironmentHealthProofPayload,
   RelayCloudEnvironmentHealthRequest,
@@ -28,8 +28,8 @@ import {
   RelayEnvironmentLinkProofPayload,
   RelayLinkProofRequest,
   RelayManagedEndpointOrigin,
-} from "@v12/contracts/relay";
-import { withRelayClientTracing } from "@v12/shared/relayTracing";
+} from "@v12code/contracts/relay";
+import { withRelayClientTracing } from "@v12code/shared/relayTracing";
 import {
   normalizeRelayIssuer,
   RELAY_HEALTH_REQUEST_TYP,
@@ -39,8 +39,8 @@ import {
   RELAY_MINT_RESPONSE_TYP,
   signRelayJwt,
   verifyRelayJwt,
-} from "@v12/shared/relayJwt";
-import { isSecureRelayUrl } from "@v12/shared/relayUrl";
+} from "@v12code/shared/relayJwt";
+import { isSecureRelayUrl } from "@v12code/shared/relayUrl";
 import * as DateTime from "effect/DateTime";
 import * as Crypto from "effect/Crypto";
 import * as Duration from "effect/Duration";
@@ -104,7 +104,7 @@ const requireRelayUrl = relayUrlConfig.pipe(
   Effect.mapError(
     () =>
       new EnvironmentHttpInternalServerError({
-        message: "V12_RELAY_URL must be configured as a secure absolute HTTPS origin.",
+        message: "V12CODE_RELAY_URL must be configured as a secure absolute HTTPS origin.",
       }),
   ),
 );
@@ -382,7 +382,7 @@ const makeCloudLinkProof = Effect.fn("environment.cloud.makeLinkProof")(function
   const nowSeconds = Math.floor(now.epochMilliseconds / 1_000);
   const descriptor = yield* dependencies.environment.getDescriptor;
   const payload = {
-    iss: `v12-env:${descriptor.environmentId}`,
+    iss: `v12code-env:${descriptor.environmentId}`,
     aud: normalizeRelayIssuer(request.relayIssuer),
     sub: descriptor.environmentId,
     jti: yield* Crypto.Crypto.pipe(Effect.flatMap((crypto) => crypto.randomUUIDv4)),
@@ -518,7 +518,7 @@ const relayClientRequest = <A>(
     Effect.mapError(
       (cause) =>
         new EnvironmentHttpInternalServerError({
-          message: `V12 Connect relay request failed: ${String(cause)}`,
+          message: `V12Code Connect relay request failed: ${String(cause)}`,
         }),
     ),
     withRelayClientTracing,
@@ -545,7 +545,7 @@ const reconcileDesiredCloudLinkWith = Effect.fn("environment.cloud.reconcileDesi
           onNone: () =>
             Effect.fail(
               new EnvironmentHttpUnauthorizedError({
-                message: "Run `v12 connect link` to authorize this environment.",
+                message: "Run `v12code connect link` to authorize this environment.",
               }),
             ),
           onSome: Effect.succeed,
@@ -605,7 +605,7 @@ const reconcileDesiredCloudLinkWith = Effect.fn("environment.cloud.reconcileDesi
   },
   Effect.catchIf(
     ServerSecretStore.isSecretStoreError,
-    failEnvironmentCloudInternalError("Could not persist desired V12 Connect link state."),
+    failEnvironmentCloudInternalError("Could not persist desired V12Code Connect link state."),
   ),
   Effect.catchTags({
     CloudCliCredentialRemovalError: failCloudCliTokenManagerError,
@@ -741,7 +741,7 @@ const cloudEnvironmentHealthHandler = Effect.fn("environment.cloud.health")(
       token: request.proof,
       typ: RELAY_HEALTH_REQUEST_TYP,
       issuer: normalizeRelayIssuer(relayIssuer),
-      audience: `v12-env:${environmentId}`,
+      audience: `v12code-env:${environmentId}`,
       nowEpochSeconds: nowSeconds,
     }).pipe(Effect.flatMap(decodeCloudHealthProof), Effect.option);
     if (
@@ -774,7 +774,7 @@ const cloudEnvironmentHealthHandler = Effect.fn("environment.cloud.health")(
     const descriptor = yield* dependencies.environment.getDescriptor;
     const responseExpiresAt = DateTime.add(now, { minutes: 5 });
     const responsePayload = {
-      iss: `v12-env:${environmentId}`,
+      iss: `v12code-env:${environmentId}`,
       aud: normalizeRelayIssuer(relayIssuer),
       sub: environmentId,
       jti: yield* Crypto.Crypto.pipe(Effect.flatMap((crypto) => crypto.randomUUIDv4)),
@@ -859,7 +859,7 @@ const cloudMintCredentialHandler = Effect.fn("environment.cloud.mintCredential")
       token: request.proof,
       typ: RELAY_MINT_REQUEST_TYP,
       issuer: normalizeRelayIssuer(relayIssuer),
-      audience: `v12-env:${environmentId}`,
+      audience: `v12code-env:${environmentId}`,
       nowEpochSeconds: nowSeconds,
     }).pipe(Effect.flatMap(decodeCloudMintProof), Effect.option);
     if (
@@ -894,11 +894,11 @@ const cloudMintCredentialHandler = Effect.fn("environment.cloud.mintCredential")
       scopes: AuthStandardClientScopes,
       subject: "cloud-connect",
       ttl: Duration.minutes(2),
-      label: "V12 Connect connect",
+      label: "V12Code Connect connect",
       proofKeyThumbprint: proof.clientProofKeyThumbprint,
     });
     const responsePayload = {
-      iss: `v12-env:${environmentId}`,
+      iss: `v12code-env:${environmentId}`,
       aud: normalizeRelayIssuer(relayIssuer),
       sub: environmentId,
       jti: yield* Crypto.Crypto.pipe(Effect.flatMap((crypto) => crypto.randomUUIDv4)),
@@ -956,7 +956,7 @@ export const connectHttpApiLayer = HttpApiBuilder.group(
       .handle("preferences", ({ payload }) => cloudPreferencesHandler(dependencies, payload))
       .handle("health", ({ payload }) => cloudEnvironmentHealthHandler(dependencies, payload))
       .handle("mintCredential", ({ payload }) => cloudMintCredentialHandler(dependencies, payload))
-      .handle("v12MintCredential", ({ payload }) =>
+      .handle("v12codeMintCredential", ({ payload }) =>
         traceRelayRequest(cloudMintCredentialHandler(dependencies, payload)),
       );
   }),

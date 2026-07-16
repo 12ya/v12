@@ -1,5 +1,5 @@
 import { useAuth } from "@clerk/react";
-import { AuthAdministrativeScopes, AuthRelayWriteScope } from "@v12/contracts";
+import { AuthAdministrativeScopes, AuthRelayWriteScope } from "@v12code/contracts";
 import { CheckIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -30,12 +30,12 @@ import { Switch } from "../ui/switch";
 import { toastManager } from "../ui/toast";
 
 /**
- * Post-sign-in onboarding wizard for V12 Connect. Opens on every in-session
+ * Post-sign-in onboarding wizard for V12Code Connect. Opens on every in-session
  * sign-in — sign-out removes the connected relay environments, so each new
  * session starts with no devices to reach. It first prompts to publish this
  * environment (managed tunnel + agent activity, both defaulting on) when the
  * current session is authorized to manage the relay link, then lists the
- * account's V12 Connect environments so every device can be connected right
+ * account's V12Code Connect environments so every device can be connected right
  * away. A cold load with a restored session does not count as a sign-in.
  */
 export function ConnectOnboardingDialog() {
@@ -200,9 +200,9 @@ function ConfiguredConnectOnboardingDialog() {
     if (!ok) return;
     toastManager.add({
       type: "success",
-      title: "V12 Connect enabled",
+      title: "V12Code Connect enabled",
       description: exposeEnvironment
-        ? "This environment is available to your other devices through V12 Connect."
+        ? "This environment is available to your other devices through V12Code Connect."
         : "This environment publishes agent activity to your mobile clients.",
     });
     setStep("devices");
@@ -219,7 +219,7 @@ function ConfiguredConnectOnboardingDialog() {
     >
       <DialogPopup className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>Set up V12 Connect</DialogTitle>
+          <DialogTitle>Set up V12Code Connect</DialogTitle>
           <DialogDescription>
             Mesh your devices together — publish this environment and connect the rest, all in one
             place.
@@ -361,7 +361,7 @@ function PublishStep({
       <div className="rounded-lg border">
         <OnboardingToggleRow
           title="Publish this environment"
-          description="Make this environment available to your other devices through V12 Connect."
+          description="Make this environment available to your other devices through V12Code Connect."
           checked={exposeEnvironment}
           disabled={disabled}
           onCheckedChange={onExposeEnvironmentChange}

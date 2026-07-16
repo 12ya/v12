@@ -1,7 +1,7 @@
 import { useAtomValue } from "@effect/atom-react";
-import type { PreparedConnection } from "@v12/client-runtime/connection";
-import type { EnvironmentId } from "@v12/contracts";
-import type { ServerConfig } from "@v12/contracts";
+import type { PreparedConnection } from "@v12code/client-runtime/connection";
+import type { EnvironmentId } from "@v12code/contracts";
+import type { ServerConfig } from "@v12code/contracts";
 import * as Cause from "effect/Cause";
 import * as Option from "effect/Option";
 import { AsyncResult, Atom } from "effect/unstable/reactivity";

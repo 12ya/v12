@@ -1,4 +1,4 @@
-import type { PreviewRenderedViewportSize, PreviewViewportSetting } from "@v12/contracts";
+import type { PreviewRenderedViewportSize, PreviewViewportSetting } from "@v12code/contracts";
 
 import { browserViewportSettingKey } from "~/browser/browserViewportLayout";
 

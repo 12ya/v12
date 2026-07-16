@@ -20,7 +20,11 @@ const isDesktopShellEnvironmentCommandError = Schema.is(
 
 function envOutput(values: Readonly<Record<string, string>>): string {
   return Object.entries(values)
-    .flatMap(([name, value]) => [`__V12_ENV_${name}_START__`, value, `__V12_ENV_${name}_END__`])
+    .flatMap(([name, value]) => [
+      `__V12CODE_ENV_${name}_START__`,
+      value,
+      `__V12CODE_ENV_${name}_END__`,
+    ])
     .join("\n");
 }
 

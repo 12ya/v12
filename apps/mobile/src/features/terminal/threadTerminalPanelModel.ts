@@ -1,4 +1,4 @@
-import type { EnvironmentId, TerminalAttachInput } from "@v12/contracts";
+import type { EnvironmentId, TerminalAttachInput } from "@v12code/contracts";
 
 export interface ThreadTerminalSubscriptionIdentity {
   readonly environmentId: EnvironmentId;

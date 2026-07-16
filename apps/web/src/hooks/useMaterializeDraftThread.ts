@@ -1,8 +1,12 @@
-import { scopedThreadKey, scopeProjectRef, scopeThreadRef } from "@v12/client-runtime/environment";
-import { squashAtomCommandFailure } from "@v12/client-runtime/state/runtime";
-import { DEFAULT_MODEL, ProviderInstanceId, type ModelSelection } from "@v12/contracts";
-import { createModelSelection } from "@v12/shared/model";
-import { truncate } from "@v12/shared/String";
+import {
+  scopedThreadKey,
+  scopeProjectRef,
+  scopeThreadRef,
+} from "@v12code/client-runtime/environment";
+import { squashAtomCommandFailure } from "@v12code/client-runtime/state/runtime";
+import { DEFAULT_MODEL, ProviderInstanceId, type ModelSelection } from "@v12code/contracts";
+import { createModelSelection } from "@v12code/shared/model";
+import { truncate } from "@v12code/shared/String";
 import { useCallback } from "react";
 
 import {

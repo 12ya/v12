@@ -78,7 +78,7 @@ export class DesktopWindow extends Context.Service<
     readonly dispatchMenuAction: (action: string) => Effect.Effect<void, DesktopWindowError>;
     readonly syncAppearance: Effect.Effect<void>;
   }
->()("@v12/desktop/window/DesktopWindow") {}
+>()("@v12code/desktop/window/DesktopWindow") {}
 
 const { logInfo: logWindowInfo, logWarning: logWindowWarning } =
   makeComponentLogger("desktop-window");

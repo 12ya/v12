@@ -1,4 +1,4 @@
-import type { EnvironmentId } from "@v12/contracts";
+import type { EnvironmentId } from "@v12code/contracts";
 import * as Effect from "effect/Effect";
 import { Atom } from "effect/unstable/reactivity";
 

@@ -8,10 +8,10 @@ import * as Option from "effect/Option";
 
 import * as Electron from "electron";
 
-import * as NetService from "@v12/shared/Net";
-import { HostProcessArchitecture, HostProcessPlatform } from "@v12/shared/hostProcess";
-import { resolveRemoteV12CliPackageSpec } from "@v12/ssh/command";
-import type { RemoteV12RunnerOptions } from "@v12/ssh/tunnel";
+import * as NetService from "@v12code/shared/Net";
+import { HostProcessArchitecture, HostProcessPlatform } from "@v12code/shared/hostProcess";
+import { resolveRemoteV12CodeCliPackageSpec } from "@v12code/ssh/command";
+import type { RemoteV12CodeRunnerOptions } from "@v12code/ssh/tunnel";
 import serverPackageJson from "../../server/package.json" with { type: "json" };
 
 import * as DesktopIpc from "./ipc/DesktopIpc.ts";
@@ -73,8 +73,8 @@ const desktopEnvironmentLayer = Layer.unwrap(
 const resolveDesktopSshCliRunner = (
   environment: DesktopEnvironment.DesktopEnvironment["Service"],
   settings: DesktopAppSettings.DesktopSettings,
-): RemoteV12RunnerOptions => {
-  const devRemoteEntryPath = Option.getOrUndefined(environment.devRemoteV12ServerEntryPath);
+): RemoteV12CodeRunnerOptions => {
+  const devRemoteEntryPath = Option.getOrUndefined(environment.devRemoteV12CodeServerEntryPath);
   if (environment.isDevelopment && devRemoteEntryPath !== undefined) {
     return {
       nodeScriptPath: devRemoteEntryPath,
@@ -82,7 +82,7 @@ const resolveDesktopSshCliRunner = (
     };
   }
   return {
-    packageSpec: resolveRemoteV12CliPackageSpec({
+    packageSpec: resolveRemoteV12CodeCliPackageSpec({
       appVersion: environment.appVersion,
       updateChannel: settings.updateChannel,
       isDevelopment: environment.isDevelopment,

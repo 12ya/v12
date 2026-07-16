@@ -4,19 +4,19 @@ import * as Notifications from "expo-notifications";
 import * as Effect from "effect/Effect";
 import * as Schema from "effect/Schema";
 import { AppState, Platform } from "react-native";
-import type { EnvironmentId } from "@v12/contracts";
+import type { EnvironmentId } from "@v12code/contracts";
 import {
   type RelayDeviceRegistrationRequest,
   type RelayAgentActivitySnapshotResponse,
   type RelayLiveActivityRegistrationRequest,
-} from "@v12/contracts/relay";
-import { findErrorTraceId } from "@v12/client-runtime/errors";
-import { ManagedRelay } from "@v12/client-runtime/relay";
+} from "@v12code/contracts/relay";
+import { findErrorTraceId } from "@v12code/client-runtime/errors";
+import { ManagedRelay } from "@v12code/client-runtime/relay";
 import {
   isAtomCommandInterrupted,
   settleAsyncResult,
   squashAtomCommandFailure,
-} from "@v12/client-runtime/state/runtime";
+} from "@v12code/client-runtime/state/runtime";
 
 import type { SavedRemoteConnection } from "../../lib/connection";
 import { runtime } from "../../lib/runtime";
@@ -480,7 +480,7 @@ function armAgentAwarenessLiveActivityForLocalWorkNow(input: {
     }
     const nowIso = new Date(Date.now()).toISOString();
     const activity = AgentActivity.start({
-      title: "V12",
+      title: "V12Code",
       subtitle: "Agent work in progress",
       activeCount: 1,
       updatedAt: nowIso,

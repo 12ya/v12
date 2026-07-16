@@ -1,5 +1,5 @@
-import { executeAtomQuery } from "@v12/client-runtime/state/runtime";
-import type { EnvironmentId } from "@v12/contracts";
+import { executeAtomQuery } from "@v12code/client-runtime/state/runtime";
+import type { EnvironmentId } from "@v12code/contracts";
 
 import { appAtomRegistry } from "../../state/atom-registry";
 import { projectEnvironment } from "../../state/projects";

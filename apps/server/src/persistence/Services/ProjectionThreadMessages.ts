@@ -13,7 +13,7 @@ import {
   ThreadId,
   TurnId,
   IsoDateTime,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import * as Schema from "effect/Schema";
 import * as Context from "effect/Context";
 import type * as Option from "effect/Option";
@@ -92,4 +92,4 @@ export interface ProjectionThreadMessageRepositoryShape {
 export class ProjectionThreadMessageRepository extends Context.Service<
   ProjectionThreadMessageRepository,
   ProjectionThreadMessageRepositoryShape
->()("v12/persistence/Services/ProjectionThreadMessages/ProjectionThreadMessageRepository") {}
+>()("v12code/persistence/Services/ProjectionThreadMessages/ProjectionThreadMessageRepository") {}

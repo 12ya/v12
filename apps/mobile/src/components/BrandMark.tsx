@@ -2,7 +2,7 @@ import { Image, View } from "react-native";
 
 import { AppText as Text } from "./AppText";
 
-const BRAND_MARK_SOURCE = require("../../../../assets/v12-icon-transparent.png");
+const BRAND_MARK_SOURCE = require("../../../../assets/v12code-icon-transparent.png");
 
 export function BrandMark(props: { readonly compact?: boolean; readonly stageLabel?: string }) {
   const compact = props.compact ?? false;
@@ -22,9 +22,11 @@ export function BrandMark(props: { readonly compact?: boolean; readonly stageLab
       />
       <View className="gap-1">
         <View className="flex-row items-center gap-2">
-          <Text className="text-lg font-v12-bold tracking-[-0.4px] text-foreground">V12</Text>
+          <Text className="text-lg font-v12code-bold tracking-[-0.4px] text-foreground">
+            V12Code
+          </Text>
           <View className="rounded-full bg-subtle px-2 py-1">
-            <Text className="text-3xs font-v12-bold tracking-[1.1px] uppercase text-foreground-muted">
+            <Text className="text-3xs font-v12code-bold tracking-[1.1px] uppercase text-foreground-muted">
               {stageLabel}
             </Text>
           </View>

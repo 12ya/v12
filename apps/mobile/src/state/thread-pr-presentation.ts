@@ -1,5 +1,5 @@
-import type { VcsStatusResult } from "@v12/contracts";
-import { resolveChangeRequestPresentation } from "@v12/shared/sourceControl";
+import type { VcsStatusResult } from "@v12code/contracts";
+import { resolveChangeRequestPresentation } from "@v12code/shared/sourceControl";
 
 export type ThreadPr = NonNullable<VcsStatusResult["pr"]>;
 

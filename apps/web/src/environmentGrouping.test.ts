@@ -1,4 +1,4 @@
-import { EnvironmentId, ProjectId, ProviderInstanceId } from "@v12/contracts";
+import { EnvironmentId, ProjectId, ProviderInstanceId } from "@v12code/contracts";
 import { describe, expect, it } from "vite-plus/test";
 
 import {

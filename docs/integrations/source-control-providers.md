@@ -1,10 +1,10 @@
 # Source Control Integrations
 
-V12 connects directly to your Git hosting provider so you can create pull requests, review code, and manage repositories without leaving your editor. Work stays in flow—no more jumping between browser tabs and terminal windows.
+V12Code connects directly to your Git hosting provider so you can create pull requests, review code, and manage repositories without leaving your editor. Work stays in flow—no more jumping between browser tabs and terminal windows.
 
 ## Supported Providers
 
-V12 works with the platforms your team already uses:
+V12Code works with the platforms your team already uses:
 
 - **GitHub** – Pull requests, repository creation, and clone integration
 - **GitLab** – Merge requests, repository publishing, and hosted clones
@@ -32,7 +32,7 @@ V12 works with the platforms your team already uses:
 **Create pull requests while you work**
 
 - Push a branch and create a pull request from the Git panel
-- V12 can suggest titles and descriptions based on your commits
+- V12Code can suggest titles and descriptions based on your commits
 - Supports GitHub Pull Requests, GitLab Merge Requests, and Bitbucket Pull Requests
 
 **Stay on top of open reviews**
@@ -55,7 +55,7 @@ Run a quick **Rescan** after setting up a new machine or changing credentials.
 
 ### For GitHub (Recommended for most users)
 
-1. Install the GitHub CLI on the machine running V12:
+1. Install the GitHub CLI on the machine running V12Code:
    ```bash
    brew install gh
    ```
@@ -63,7 +63,7 @@ Run a quick **Rescan** after setting up a new machine or changing credentials.
    ```bash
    gh auth login
    ```
-3. Open **Settings → Source Control** in V12 and verify GitHub shows as authenticated
+3. Open **Settings → Source Control** in V12Code and verify GitHub shows as authenticated
 
 That's it—you can now clone, publish, and create pull requests.
 
@@ -84,12 +84,12 @@ That's it—you can now clone, publish, and create pull requests.
 Bitbucket uses API tokens instead of a CLI tool:
 
 1. Create an API token in your Atlassian account with read/write access to pull requests and repositories
-2. Add these environment variables to the environment running V12:
+2. Add these environment variables to the environment running V12Code:
    ```bash
-   export V12_BITBUCKET_EMAIL="you@example.com"
-   export V12_BITBUCKET_API_TOKEN="your-token"
+   export V12CODE_BITBUCKET_EMAIL="you@example.com"
+   export V12CODE_BITBUCKET_API_TOKEN="your-token"
    ```
-3. Restart V12 and verify the connection in **Source Control settings**
+3. Restart V12Code and verify the connection in **Source Control settings**
 
 ### For Azure DevOps
 
@@ -110,9 +110,9 @@ Bitbucket uses API tokens instead of a CLI tool:
 
 ## Requirements & Troubleshooting
 
-**Git is required** – V12 uses Git for all local operations. Ensure `git` is installed on your server.
+**Git is required** – V12Code uses Git for all local operations. Ensure `git` is installed on your server.
 
-**Server-side setup** – Authentication happens on the machine running V12 (the server), not your local browser. If you're using a hosted or team instance, your administrator may have already configured providers.
+**Server-side setup** – Authentication happens on the machine running V12Code (the server), not your local browser. If you're using a hosted or team instance, your administrator may have already configured providers.
 
 **Common issues:**
 

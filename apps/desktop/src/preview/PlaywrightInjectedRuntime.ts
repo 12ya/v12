@@ -205,10 +205,10 @@ export const playwrightInjectedRuntimeInstallExpression = Effect.fn(
     ),
   );
   return `(() => {
-    if (globalThis.__v12PlaywrightInjected) return true;
+    if (globalThis.__v12codePlaywrightInjected) return true;
     const module = { exports: {} };
     ${source}
-    globalThis.__v12PlaywrightInjected = new (module.exports.InjectedScript())(globalThis, ${options});
+    globalThis.__v12codePlaywrightInjected = new (module.exports.InjectedScript())(globalThis, ${options});
     return true;
   })()`;
 });

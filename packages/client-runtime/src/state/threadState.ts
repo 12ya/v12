@@ -1,4 +1,4 @@
-import type { OrchestrationThread } from "@v12/contracts";
+import type { OrchestrationThread } from "@v12code/contracts";
 import * as Option from "effect/Option";
 
 export type EnvironmentThreadStatus = "empty" | "cached" | "synchronizing" | "live" | "deleted";

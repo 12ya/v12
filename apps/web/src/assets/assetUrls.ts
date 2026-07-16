@@ -1,13 +1,13 @@
 import { useAtomValue } from "@effect/atom-react";
-import { resolveAssetUrl } from "@v12/client-runtime/state/assets";
-import type { AssetResource, EnvironmentId } from "@v12/contracts";
+import { resolveAssetUrl } from "@v12code/client-runtime/state/assets";
+import type { AssetResource, EnvironmentId } from "@v12code/contracts";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { useMemo } from "react";
 
 import { assetEnvironment } from "~/state/assets";
 import { usePreparedConnection } from "~/state/session";
 
-export { resolveAssetUrl } from "@v12/client-runtime/state/assets";
+export { resolveAssetUrl } from "@v12code/client-runtime/state/assets";
 
 export function useAssetUrl(environmentId: EnvironmentId, resource: AssetResource): string | null {
   const preparedConnection = usePreparedConnection(environmentId);

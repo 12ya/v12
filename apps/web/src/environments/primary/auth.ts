@@ -6,9 +6,9 @@ import type {
   ServerAuthSessionMethod,
   AuthSessionId,
   AuthSessionState,
-} from "@v12/contracts";
-import { EnvironmentHttpCommonError, PRIMARY_LOCAL_ENVIRONMENT_ID } from "@v12/contracts";
-import type { EnvironmentHttpCommonError as EnvironmentHttpCommonErrorType } from "@v12/contracts";
+} from "@v12code/contracts";
+import { EnvironmentHttpCommonError, PRIMARY_LOCAL_ENVIRONMENT_ID } from "@v12code/contracts";
+import type { EnvironmentHttpCommonError as EnvironmentHttpCommonErrorType } from "@v12code/contracts";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
 import * as Schema from "effect/Schema";

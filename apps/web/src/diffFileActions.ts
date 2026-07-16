@@ -1,4 +1,4 @@
-import type { ScopedThreadRef } from "@v12/contracts";
+import type { ScopedThreadRef } from "@v12code/contracts";
 
 import { useRightPanelStore } from "./rightPanelStore";
 import { resolvePathLinkTarget } from "./terminal-links";

@@ -1,4 +1,4 @@
-import type { PreviewSessionSnapshot, ProjectScript } from "@v12/contracts";
+import type { PreviewSessionSnapshot, ProjectScript } from "@v12code/contracts";
 
 export function shouldShowPreviewEmptyState(snapshot: PreviewSessionSnapshot | null): boolean {
   return snapshot === null || snapshot.navStatus._tag === "Idle";

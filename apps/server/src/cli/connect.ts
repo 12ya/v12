@@ -3,10 +3,10 @@ import {
   EnvironmentHttpApi,
   type RelayClientInstallProgressEvent,
   type RelayClientInstallProgressStage,
-} from "@v12/contracts";
-import { RelayOkResponse } from "@v12/contracts/relay";
-import * as RelayClient from "@v12/shared/relayClient";
-import { withRelayClientTracing } from "@v12/shared/relayTracing";
+} from "@v12code/contracts";
+import { RelayOkResponse } from "@v12code/contracts/relay";
+import * as RelayClient from "@v12code/shared/relayClient";
+import { withRelayClientTracing } from "@v12code/shared/relayTracing";
 import * as Cause from "effect/Cause";
 import * as Console from "effect/Console";
 import * as Duration from "effect/Duration";
@@ -104,15 +104,15 @@ function formatCloudStatus(status: CloudCliStatus, options?: { readonly json?: b
       ? "pending server startup"
       : "not provisioned";
   const nextStep = !status.authenticated
-    ? "Run `v12 connect link` to authorize and enable V12 Connect."
+    ? "Run `v12code connect link` to authorize and enable V12Code Connect."
     : !status.desired
-      ? "Run `v12 connect link` to enable V12 Connect."
+      ? "Run `v12code connect link` to enable V12Code Connect."
       : !status.linked
-        ? "Start V12 to provision the environment link and launch its managed tunnel."
+        ? "Start V12Code to provision the environment link and launch its managed tunnel."
         : undefined;
 
   return [
-    "V12 Connect",
+    "V12Code Connect",
     `  Exposure: ${status.desired ? "enabled" : "disabled"}`,
     `  Authorization: ${status.authenticated ? "stored credential" : "missing"}`,
     `  Environment link: ${provisioned}`,
@@ -128,7 +128,7 @@ const CLOUD_CLI_LIVE_SERVER_TIMEOUT = Duration.seconds(5);
 const confirmRelayClientInstall = (version: string) =>
   Prompt.run(
     Prompt.confirm({
-      message: `The V12 relay client is required for V12 Connect. Download and install version ${version}?`,
+      message: `The V12Code relay client is required for V12Code Connect. Download and install version ${version}?`,
       initial: false,
     }),
   );
@@ -185,7 +185,7 @@ const withCloudCliSessionToken = <A, E, R>(
     environmentAuth.issueSession({
       scopes: [AuthRelayWriteScope],
       subject: "cloud-cli",
-      label: "v12 connect cli",
+      label: "v12code connect cli",
     }),
     (issued) => run(issued.token),
     (issued) => environmentAuth.revokeSession(issued.sessionId).pipe(Effect.ignore({ log: true })),
@@ -233,7 +233,7 @@ const logCloudDisconnectFailure = (
   clearAuthorization: boolean,
   cause: Cause.Cause<unknown>,
 ) =>
-  Effect.logWarning("V12 Connect disconnect operation failed.").pipe(
+  Effect.logWarning("V12Code Connect disconnect operation failed.").pipe(
     Effect.annotateLogs({
       operation,
       clearAuthorization,
@@ -279,10 +279,10 @@ export const reportCloudDisconnectResults = Effect.fn("cloud.cli.report_disconne
         input.liveResult.cause,
       );
       yield* Console.warn(
-        "V12 Connect is disabled, but the running server could not stop its tunnel.\nRestart that server to stop the connector.",
+        "V12Code Connect is disabled, but the running server could not stop its tunnel.\nRestart that server to stop the connector.",
       );
     } else {
-      yield* Console.log("V12 Connect is disabled locally.");
+      yield* Console.log("V12Code Connect is disabled locally.");
     }
 
     if (Exit.isFailure(input.relayResult)) {
@@ -294,7 +294,7 @@ export const reportCloudDisconnectResults = Effect.fn("cloud.cli.report_disconne
       yield* Console.warn(
         input.clearAuthorization
           ? "Could not revoke the relay-side environment record before signing out.\nThe stored CLI authorization was still removed locally."
-          : "Could not revoke the relay-side environment record yet.\nRun `v12 connect unlink` again when the relay is reachable.",
+          : "Could not revoke the relay-side environment record yet.\nRun `v12code connect unlink` again when the relay is reachable.",
       );
     } else if (input.relayResult.value.status === "revoked") {
       yield* Console.log("Revoked the relay-side environment record.");
@@ -322,7 +322,7 @@ const disconnectCloud = Effect.fn("cloud.cli.disconnect")(function* (options: {
   });
 
   if (options.clearAuthorization) {
-    yield* Console.log("Signed out of V12 Connect locally.");
+    yield* Console.log("Signed out of V12Code Connect locally.");
   }
 });
 
@@ -367,14 +367,14 @@ const runCloudCommand = <A, E>(
 const connectLoginCommand = Command.make("login", {
   ...projectLocationFlags,
 }).pipe(
-  Command.withDescription("Authorize the V12 Connect CLI without enabling remote access."),
+  Command.withDescription("Authorize the V12Code Connect CLI without enabling remote access."),
   Command.withHandler((flags) =>
     runCloudCommand(
       flags,
       Effect.gen(function* () {
         const tokens = yield* CliTokenManager.CloudCliTokenManager;
         yield* tokens.get;
-        yield* Console.log("Signed in to V12 Connect.");
+        yield* Console.log("Signed in to V12Code Connect.");
       }),
     ),
   ),
@@ -389,7 +389,7 @@ const connectLinkCommand = Command.make("link", {
     Flag.withDefault(false),
   ),
 }).pipe(
-  Command.withDescription("Authorize this environment for V12 Connect on next start."),
+  Command.withDescription("Authorize this environment for V12Code Connect on next start."),
   Command.withHandler((flags) =>
     runCloudCommand(
       flags,
@@ -404,7 +404,9 @@ const connectLinkCommand = Command.make("link", {
             reportRelayClientInstallProgress,
           );
           if (Option.isNone(installed)) {
-            yield* Console.log("V12 Connect setup cancelled. The relay client was not installed.");
+            yield* Console.log(
+              "V12Code Connect setup cancelled. The relay client was not installed.",
+            );
             return;
           }
           yield* Console.log(
@@ -426,8 +428,8 @@ const connectLinkCommand = Command.make("link", {
         }
         yield* Console.log(
           flags.publishOnly
-            ? "This environment will publish agent activity to your mobile clients the next time V12 starts (no managed tunnel)."
-            : "This V12 environment will be available through V12 Connect the next time V12 starts.",
+            ? "This environment will publish agent activity to your mobile clients the next time V12Code starts (no managed tunnel)."
+            : "This V12Code environment will be available through V12Code Connect the next time V12Code starts.",
         );
       }),
     ),
@@ -438,7 +440,7 @@ const connectStatusCommand = Command.make("status", {
   ...projectLocationFlags,
   json: jsonFlag,
 }).pipe(
-  Command.withDescription("Show persisted V12 Connect and relay client state."),
+  Command.withDescription("Show persisted V12Code Connect and relay client state."),
   Command.withHandler((flags) =>
     runCloudCommand(
       flags,
@@ -507,7 +509,7 @@ const connectPublishCommand = Command.make("publish", {
           const linkedNow = Option.isSome(yield* secrets.get(CLOUD_LINKED_USER_ID));
           if (!linkedNow && (yield* CliState.readCliDesiredLinkMode) === "publish_only") {
             yield* CliState.setCliDesiredCloudLink(false);
-            yield* Console.log("Cancelled the pending publish-only V12 Connect link.");
+            yield* Console.log("Cancelled the pending publish-only V12Code Connect link.");
           }
           yield* Console.log("Publishing agent activity disabled.");
           return;
@@ -522,26 +524,26 @@ const connectPublishCommand = Command.make("publish", {
         // Publishing needs the relay to know this environment belongs to you.
         // Establish a tunnel-free publish-only link automatically so signing in
         // is all it takes — the mobile client can still reach the environment
-        // out of band without V12 Connect.
+        // out of band without V12Code Connect.
         if (!(yield* tokens.hasCredential)) {
           yield* Console.log(
-            "Run `v12 connect login` first so this environment can be authorized to publish.",
+            "Run `v12code connect login` first so this environment can be authorized to publish.",
           );
           return;
         }
-        // A link may already be desired (e.g. `v12 connect link` before the
+        // A link may already be desired (e.g. `v12code connect link` before the
         // server's first start). Never downgrade it: a desired managed link
         // also covers publishing, so only request a publish-only link when no
         // link is pending at all.
         if (yield* CliState.readCliDesiredCloudLink) {
           yield* Console.log(
-            "A V12 Connect link is already pending. Start V12 to finish provisioning it; publishing starts once it links.",
+            "A V12Code Connect link is already pending. Start V12Code to finish provisioning it; publishing starts once it links.",
           );
           return;
         }
         yield* CliState.setCliDesiredCloudLink(true, "publish_only");
         yield* Console.log(
-          "Restart V12 to finish authorizing this environment to publish (no managed tunnel is created).",
+          "Restart V12Code to finish authorizing this environment to publish (no managed tunnel is created).",
         );
       }),
     ),
@@ -551,7 +553,7 @@ const connectPublishCommand = Command.make("publish", {
 const connectUnlinkCommand = Command.make("unlink", {
   ...projectLocationFlags,
 }).pipe(
-  Command.withDescription("Disable V12 Connect while retaining the stored authorization."),
+  Command.withDescription("Disable V12Code Connect while retaining the stored authorization."),
   Command.withHandler((flags) =>
     runCloudCommand(flags, disconnectCloud({ clearAuthorization: false })),
   ),
@@ -560,14 +562,14 @@ const connectUnlinkCommand = Command.make("unlink", {
 const connectLogoutCommand = Command.make("logout", {
   ...projectLocationFlags,
 }).pipe(
-  Command.withDescription("Disable V12 Connect and clear the stored CLI authorization."),
+  Command.withDescription("Disable V12Code Connect and clear the stored CLI authorization."),
   Command.withHandler((flags) =>
     runCloudCommand(flags, disconnectCloud({ clearAuthorization: true })),
   ),
 );
 
 export const connectCommand = Command.make("connect").pipe(
-  Command.withDescription("Manage headless V12 Connect access."),
+  Command.withDescription("Manage headless V12Code Connect access."),
   Command.withSubcommands([
     connectLoginCommand,
     connectLinkCommand,

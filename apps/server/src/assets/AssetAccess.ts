@@ -1,4 +1,4 @@
-import type { AssetResource } from "@v12/contracts";
+import type { AssetResource } from "@v12code/contracts";
 import {
   AssetAttachmentNotFoundError,
   AssetPreviewTypeValidationError,
@@ -12,14 +12,14 @@ import {
   AssetWorkspacePathValidationError,
   AssetWorkspaceResolutionError,
   AssetWorkspaceRootNormalizationError,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import {
   isWorkspaceImagePreviewPath,
   isWorkspacePreviewEntryPath,
   WORKSPACE_BROWSER_PREVIEW_EXTENSIONS,
   WORKSPACE_IMAGE_PREVIEW_EXTENSIONS,
-} from "@v12/shared/filePreview";
-import { PROJECT_FAVICON_FALLBACK_MARKER } from "@v12/shared/projectFavicon";
+} from "@v12code/shared/filePreview";
+import { PROJECT_FAVICON_FALLBACK_MARKER } from "@v12code/shared/projectFavicon";
 import * as Clock from "effect/Clock";
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";

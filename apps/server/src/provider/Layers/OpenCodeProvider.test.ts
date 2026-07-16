@@ -7,7 +7,7 @@ import * as Layer from "effect/Layer";
 import * as Schema from "effect/Schema";
 import { beforeEach } from "vite-plus/test";
 
-import { OpenCodeSettings } from "@v12/contracts";
+import { OpenCodeSettings } from "@v12code/contracts";
 import { ServerConfig } from "../../config.ts";
 import {
   OpenCodeRuntime,

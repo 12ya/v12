@@ -18,7 +18,7 @@ import {
   settleAsyncResult,
   settlePromise,
   squashAtomCommandFailure,
-} from "@v12/client-runtime/state/runtime";
+} from "@v12code/client-runtime/state/runtime";
 import { AndroidScreenHeader } from "../../components/AndroidScreenHeader";
 import { AppText as Text } from "../../components/AppText";
 import { supportsAgentAwarenessPush } from "../agent-awareness/capabilities";
@@ -229,7 +229,7 @@ function ConfiguredSettingsRouteScreen() {
       } else {
         Alert.alert(
           "Couldn't finish enabling notifications",
-          "Notification access was granted, but this device could not be registered with V12 Connect. Notifications will start once registration succeeds.",
+          "Notification access was granted, but this device could not be registered with V12Code Connect. Notifications will start once registration succeeds.",
         );
       }
       return;
@@ -259,8 +259,8 @@ function ConfiguredSettingsRouteScreen() {
 
   const promptSignIn = useCallback(() => {
     Alert.alert(
-      "Request V12 Connect access",
-      "Live Activity updates require approved V12 Connect access so relay can deliver updates to this device.",
+      "Request V12Code Connect access",
+      "Live Activity updates require approved V12Code Connect access so relay can deliver updates to this device.",
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -332,7 +332,7 @@ function ConfiguredSettingsRouteScreen() {
     } else {
       Alert.alert(
         "Couldn't finish enabling Live Activities",
-        "This device could not be registered with V12 Connect, so Live Activities won't appear yet. They'll start once registration succeeds.",
+        "This device could not be registered with V12Code Connect, so Live Activities won't appear yet. They'll start once registration succeeds.",
       );
     }
   }, [
@@ -354,7 +354,7 @@ function ConfiguredSettingsRouteScreen() {
 
       Alert.alert(
         "Disable notifications",
-        "Notification permission is controlled by iOS. Open Settings to disable notifications for V12.",
+        "Notification permission is controlled by iOS. Open Settings to disable notifications for V12Code.",
         [
           { text: "Cancel", style: "cancel" },
           { text: "Open Settings", onPress: () => void Linking.openSettings() },
@@ -449,13 +449,13 @@ function ConfiguredSettingsRouteScreen() {
           <SettingsSection title="Account">
             <SettingsRow
               icon="person.crop.circle"
-              label="V12 Account"
+              label="V12Code Account"
               value={accountLabel}
               onPress={openAccount}
             />
           </SettingsSection>
           <Text className="px-2 text-sm text-foreground-muted">
-            V12 works locally without signing in. Cloud features are optional.
+            V12Code works locally without signing in. Cloud features are optional.
           </Text>
         </View>
 

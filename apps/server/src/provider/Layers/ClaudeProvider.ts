@@ -5,7 +5,7 @@ import {
   ProviderDriverKind,
   type ServerProviderModel,
   type ServerProviderSlashCommand,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
 import * as Option from "effect/Option";
@@ -17,9 +17,9 @@ import {
   getModelSelectionStringOptionValue,
   getProviderOptionCurrentValue,
   getProviderOptionDescriptors,
-} from "@v12/shared/model";
-import { resolveSpawnCommand } from "@v12/shared/shell";
-import { compareSemverVersions } from "@v12/shared/semver";
+} from "@v12code/shared/model";
+import { resolveSpawnCommand } from "@v12code/shared/shell";
+import { compareSemverVersions } from "@v12code/shared/semver";
 import {
   query as claudeQuery,
   type SlashCommand as ClaudeSlashCommand,
@@ -682,7 +682,7 @@ export const checkClaudeProviderStatus = Effect.fn("checkClaudeProviderStatus")(
         version: null,
         status: "warning",
         auth: { status: "unknown" },
-        message: "Claude is disabled in V12 settings.",
+        message: "Claude is disabled in V12Code settings.",
       },
     });
   }
@@ -841,7 +841,7 @@ export const makePendingClaudeProvider = (
           version: null,
           status: "warning",
           auth: { status: "unknown" },
-          message: "Claude is disabled in V12 settings.",
+          message: "Claude is disabled in V12Code settings.",
         },
       });
     }

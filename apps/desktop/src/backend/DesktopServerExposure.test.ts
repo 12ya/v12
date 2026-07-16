@@ -81,7 +81,10 @@ function makeEnvironmentLayer(baseDir: string, env: Record<string, string | unde
     runningUnderArm64Translation: false,
   }).pipe(
     Layer.provide(
-      Layer.mergeAll(NodeServices.layer, DesktopConfig.layerTest({ V12_HOME: baseDir, ...env })),
+      Layer.mergeAll(
+        NodeServices.layer,
+        DesktopConfig.layerTest({ V12CODE_HOME: baseDir, ...env }),
+      ),
     ),
   );
 }
@@ -93,7 +96,7 @@ function makeLayer(input: {
   readonly spawnerLayer?: Layer.Layer<ChildProcessSpawner.ChildProcessSpawner>;
   readonly desktopSettingsLayer?: Layer.Layer<DesktopAppSettings.DesktopAppSettings>;
 }) {
-  const env = { V12_HOME: input.baseDir, ...input.env };
+  const env = { V12CODE_HOME: input.baseDir, ...input.env };
   const environmentLayer = makeEnvironmentLayer(input.baseDir, env);
   const networkLayer = Layer.succeed(DesktopNetworkInterfaces.DesktopNetworkInterfaces, {
     read: Effect.succeed(input.networkInterfaces ?? emptyNetworkInterfaces),
@@ -128,7 +131,7 @@ const withHarness = <A, E, R>(
   Effect.gen(function* () {
     const fileSystem = yield* FileSystem.FileSystem;
     const baseDir = yield* fileSystem.makeTempDirectoryScoped({
-      prefix: "v12-desktop-server-exposure-test-",
+      prefix: "v12code-desktop-server-exposure-test-",
     });
     return yield* effect.pipe(
       Effect.provide(
@@ -362,8 +365,8 @@ describe("DesktopServerExposure", () => {
         );
       }),
       {
-        V12_DESKTOP_LAN_HOST: "10.0.0.7",
-        V12_DESKTOP_HTTPS_ENDPOINTS: "https://public.example.test",
+        V12CODE_DESKTOP_LAN_HOST: "10.0.0.7",
+        V12CODE_DESKTOP_HTTPS_ENDPOINTS: "https://public.example.test",
       },
     ),
   );
@@ -462,7 +465,7 @@ describe("DesktopServerExposure", () => {
         ]);
       }),
       {
-        V12_DESKTOP_HTTPS_ENDPOINTS:
+        V12CODE_DESKTOP_HTTPS_ENDPOINTS:
           "https://desktop.example.ts.net,http://desktop.example.test:3773,not-a-url",
       },
     ),

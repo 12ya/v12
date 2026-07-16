@@ -1,4 +1,4 @@
-import type { AtomCommandResult } from "@v12/client-runtime/state/runtime";
+import type { AtomCommandResult } from "@v12code/client-runtime/state/runtime";
 
 export interface FileSaveCoordinatorOptions<A, E> {
   readonly debounceMs: number;

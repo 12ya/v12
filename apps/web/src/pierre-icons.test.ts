@@ -4,7 +4,7 @@ import {
   hasSpecificPierreIconForFileName,
   resolvePierreIconForEntry,
   syntheticFileNameForLanguageId,
-  V12_PIERRE_ICONS,
+  V12CODE_PIERRE_ICONS,
 } from "./pierre-icons";
 
 describe("Pierre file icons", () => {
@@ -14,29 +14,32 @@ describe("Pierre file icons", () => {
     assert.equal(resolvePierreIconForEntry("vite.config.ts", "file")?.token, "vite");
   });
 
-  it("extends Pierre with V12-specific exact filename icons", () => {
+  it("extends Pierre with V12Code-specific exact filename icons", () => {
     assert.equal(
       resolvePierreIconForEntry("package.json", "file")?.name,
-      "v12-file-icon-package-json",
+      "v12code-file-icon-package-json",
     );
     assert.equal(
       resolvePierreIconForEntry("config/tsconfig.json", "file")?.name,
-      "v12-file-icon-tsconfig",
+      "v12code-file-icon-tsconfig",
     );
-    assert.equal(resolvePierreIconForEntry("AGENTS.md", "file")?.name, "v12-file-icon-agents");
-    assert.equal(resolvePierreIconForEntry("CLAUDE.md", "file")?.name, "v12-file-icon-claude");
-    assert.equal(resolvePierreIconForEntry("README.md", "file")?.name, "v12-file-icon-readme");
-    assert.equal(resolvePierreIconForEntry("pnpm-lock.yaml", "file")?.name, "v12-file-icon-pnpm");
+    assert.equal(resolvePierreIconForEntry("AGENTS.md", "file")?.name, "v12code-file-icon-agents");
+    assert.equal(resolvePierreIconForEntry("CLAUDE.md", "file")?.name, "v12code-file-icon-claude");
+    assert.equal(resolvePierreIconForEntry("README.md", "file")?.name, "v12code-file-icon-readme");
+    assert.equal(
+      resolvePierreIconForEntry("pnpm-lock.yaml", "file")?.name,
+      "v12code-file-icon-pnpm",
+    );
     assert.equal(
       resolvePierreIconForEntry("pnpm-workspace.yaml", "file")?.name,
-      "v12-file-icon-pnpm",
+      "v12code-file-icon-pnpm",
     );
   });
 
   it("ships every custom icon referenced by the extended resolver", () => {
-    const customIconNames = new Set(Object.values(V12_PIERRE_ICONS.byFileName));
+    const customIconNames = new Set(Object.values(V12CODE_PIERRE_ICONS.byFileName));
     for (const iconName of customIconNames) {
-      assert.include(V12_PIERRE_ICONS.spriteSheet, `id="${iconName}"`);
+      assert.include(V12CODE_PIERRE_ICONS.spriteSheet, `id="${iconName}"`);
     }
   });
 

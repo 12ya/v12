@@ -1,4 +1,8 @@
-import type { AdvertisedEndpoint, DesktopBridge, DesktopServerExposureState } from "@v12/contracts";
+import type {
+  AdvertisedEndpoint,
+  DesktopBridge,
+  DesktopServerExposureState,
+} from "@v12code/contracts";
 import * as Effect from "effect/Effect";
 import * as Schema from "effect/Schema";
 import { Atom } from "effect/unstable/reactivity";

@@ -1,5 +1,5 @@
-import type { RelayAgentActivityState } from "@v12/contracts/relay";
-import { RelayAgentActivityState as RelayAgentActivityStateSchema } from "@v12/contracts/relay";
+import type { RelayAgentActivityState } from "@v12code/contracts/relay";
+import { RelayAgentActivityState as RelayAgentActivityStateSchema } from "@v12code/contracts/relay";
 import * as Context from "effect/Context";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
@@ -89,7 +89,7 @@ export class AgentActivityRows extends Context.Service<
       readonly threadId: string;
     }) => Effect.Effect<RelayAgentActivityState | null, AgentActivityRowListPersistenceError>;
   }
->()("v12-relay/agentActivity/AgentActivityRows") {}
+>()("v12code-relay/agentActivity/AgentActivityRows") {}
 
 const decodeJsonString = Schema.decodeEffect(Schema.UnknownFromJsonString);
 const encodeJsonValue = Schema.encodeEffect(Schema.UnknownFromJsonString);

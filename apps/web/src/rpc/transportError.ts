@@ -1,4 +1,4 @@
 export {
   isTransportConnectionErrorMessage,
   sanitizeThreadErrorMessage,
-} from "@v12/client-runtime/errors";
+} from "@v12code/client-runtime/errors";

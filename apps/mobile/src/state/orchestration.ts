@@ -1,4 +1,4 @@
-import { createOrchestrationEnvironmentAtoms } from "@v12/client-runtime/state/orchestration";
+import { createOrchestrationEnvironmentAtoms } from "@v12code/client-runtime/state/orchestration";
 
 import { connectionAtomRuntime } from "../connection/runtime";
 

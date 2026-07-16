@@ -7,8 +7,8 @@
  * terminal surfaces point at terminal session ids, file surfaces point at
  * workspace paths, and diff/plan/files remain singleton surfaces.
  */
-import { scopedThreadKey } from "@v12/client-runtime/environment";
-import type { ScopedThreadRef } from "@v12/contracts";
+import { scopedThreadKey } from "@v12code/client-runtime/environment";
+import type { ScopedThreadRef } from "@v12code/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -39,7 +39,7 @@ export type RightPanelSurface =
     }
   | { id: "plan"; kind: "plan" };
 
-const RIGHT_PANEL_STORAGE_KEY = "v12:right-panel-state:v2";
+const RIGHT_PANEL_STORAGE_KEY = "v12code:right-panel-state:v2";
 const RIGHT_PANEL_STORAGE_VERSION = 7;
 
 export interface ThreadRightPanelState {

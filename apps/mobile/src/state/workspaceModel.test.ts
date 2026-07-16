@@ -1,6 +1,9 @@
-import type { EnvironmentShellSummary } from "@v12/client-runtime/state/shell";
-import { BearerConnectionProfile, BearerConnectionTarget } from "@v12/client-runtime/connection";
-import { EnvironmentId } from "@v12/contracts";
+import type { EnvironmentShellSummary } from "@v12code/client-runtime/state/shell";
+import {
+  BearerConnectionProfile,
+  BearerConnectionTarget,
+} from "@v12code/client-runtime/connection";
+import { EnvironmentId } from "@v12code/contracts";
 import { describe, expect, it } from "@effect/vitest";
 import * as Option from "effect/Option";
 

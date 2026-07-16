@@ -1,4 +1,4 @@
-import type { ProviderDriverKind, ProviderInstanceId, ServerProvider } from "@v12/contracts";
+import type { ProviderDriverKind, ProviderInstanceId, ServerProvider } from "@v12code/contracts";
 import type * as Stream from "effect/Stream";
 import type { ServerProviderShape } from "./Services/ServerProvider.ts";
 

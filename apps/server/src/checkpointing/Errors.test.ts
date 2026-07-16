@@ -1,5 +1,5 @@
 import { expect, it } from "@effect/vitest";
-import { ThreadId } from "@v12/contracts";
+import { ThreadId } from "@v12code/contracts";
 
 import {
   CheckpointRefUnavailableError,

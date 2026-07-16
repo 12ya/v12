@@ -1,4 +1,4 @@
-import { type ComposerPathSearchTarget } from "@v12/client-runtime/state/threads";
+import { type ComposerPathSearchTarget } from "@v12code/client-runtime/state/threads";
 
 import { useComposerPathSearch as useComposerPathSearchQuery } from "../state/queries";
 

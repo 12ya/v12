@@ -1,4 +1,4 @@
-import { managedRelaySessionAtom } from "@v12/client-runtime/relay";
+import { managedRelaySessionAtom } from "@v12code/client-runtime/relay";
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
 import { appAtomRegistry } from "../../state/atom-registry";

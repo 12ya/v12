@@ -6,12 +6,12 @@
  * is the one place that must enumerate every live preview tab.
  */
 import { useAtomValue } from "@effect/atom-react";
-import { scopedThreadKey } from "@v12/client-runtime/environment";
+import { scopedThreadKey } from "@v12code/client-runtime/environment";
 import {
   type PreviewEvent,
   type PreviewSessionSnapshot,
   type ScopedThreadRef,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import { Atom } from "effect/unstable/reactivity";
 
 import { PREVIEW_RECENT_URL_LIMIT } from "./components/preview/previewConstants";

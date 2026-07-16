@@ -6,15 +6,15 @@ import type {
   OrchestrationThreadShell,
   ThreadId,
   TurnId,
-} from "@v12/contracts";
-import { ProviderInstanceId } from "@v12/contracts";
+} from "@v12code/contracts";
+import { ProviderInstanceId } from "@v12code/contracts";
 
 import { projectThreadAwareness } from "./agentAwareness.ts";
 
 const NOW = "2026-05-22T12:00:00.000Z";
 
 const project = {
-  title: "v12",
+  title: "v12code",
 } satisfies Pick<OrchestrationProjectShell, "title">;
 
 function thread(

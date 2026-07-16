@@ -39,11 +39,11 @@ it.layer(NodeServices.layer)("RepositoryIdentityResolverLive", (it) => {
     Effect.gen(function* () {
       const fileSystem = yield* FileSystem.FileSystem;
       const cwd = yield* fileSystem.makeTempDirectoryScoped({
-        prefix: "v12-repository-identity-test-",
+        prefix: "v12code-repository-identity-test-",
       });
 
       yield* git(cwd, ["init"]);
-      yield* git(cwd, ["remote", "add", "origin", "git@github.com:V12/v12.git"]);
+      yield* git(cwd, ["remote", "add", "origin", "git@github.com:V12Code/v12code.git"]);
 
       const resolver = yield* RepositoryIdentityResolver.RepositoryIdentityResolver;
       const identity = yield* resolver.resolve(cwd);
@@ -52,12 +52,12 @@ it.layer(NodeServices.layer)("RepositoryIdentityResolverLive", (it) => {
       const resolvedCwd = yield* fileSystem.realPath(cwd);
 
       expect(identity).not.toBeNull();
-      expect(identity?.canonicalKey).toBe("github.com/v12/v12");
+      expect(identity?.canonicalKey).toBe("github.com/v12code/v12code");
       expect(normalizeResolvedPath(resolvedIdentityRoot)).toBe(normalizeResolvedPath(resolvedCwd));
-      expect(identity?.displayName).toBe("v12/v12");
+      expect(identity?.displayName).toBe("v12code/v12code");
       expect(identity?.provider).toBe("github");
-      expect(identity?.owner).toBe("v12");
-      expect(identity?.name).toBe("v12");
+      expect(identity?.owner).toBe("v12code");
+      expect(identity?.name).toBe("v12code");
     }).pipe(Effect.provide(RepositoryIdentityResolver.layer)),
   );
 
@@ -66,13 +66,13 @@ it.layer(NodeServices.layer)("RepositoryIdentityResolverLive", (it) => {
       const fileSystem = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
       const repoRoot = yield* fileSystem.makeTempDirectoryScoped({
-        prefix: "v12-repository-identity-nested-root-test-",
+        prefix: "v12code-repository-identity-nested-root-test-",
       });
       const nestedWorkspace = path.join(repoRoot, "packages", "web");
 
       yield* fileSystem.makeDirectory(nestedWorkspace, { recursive: true });
       yield* git(repoRoot, ["init"]);
-      yield* git(repoRoot, ["remote", "add", "origin", "git@github.com:V12/v12.git"]);
+      yield* git(repoRoot, ["remote", "add", "origin", "git@github.com:V12Code/v12code.git"]);
 
       const resolver = yield* RepositoryIdentityResolver.RepositoryIdentityResolver;
       const identity = yield* resolver.resolve(nestedWorkspace);
@@ -81,7 +81,7 @@ it.layer(NodeServices.layer)("RepositoryIdentityResolverLive", (it) => {
       const resolvedRepoRoot = yield* fileSystem.realPath(repoRoot);
 
       expect(identity).not.toBeNull();
-      expect(identity?.canonicalKey).toBe("github.com/v12/v12");
+      expect(identity?.canonicalKey).toBe("github.com/v12code/v12code");
       expect(normalizeResolvedPath(resolvedIdentityRoot)).toBe(
         normalizeResolvedPath(resolvedRepoRoot),
       );
@@ -92,10 +92,10 @@ it.layer(NodeServices.layer)("RepositoryIdentityResolverLive", (it) => {
     Effect.gen(function* () {
       const fileSystem = yield* FileSystem.FileSystem;
       const nonGitDir = yield* fileSystem.makeTempDirectoryScoped({
-        prefix: "v12-repository-identity-non-git-",
+        prefix: "v12code-repository-identity-non-git-",
       });
       const gitDir = yield* fileSystem.makeTempDirectoryScoped({
-        prefix: "v12-repository-identity-no-remote-",
+        prefix: "v12code-repository-identity-no-remote-",
       });
 
       yield* git(gitDir, ["init"]);
@@ -113,20 +113,20 @@ it.layer(NodeServices.layer)("RepositoryIdentityResolverLive", (it) => {
     Effect.gen(function* () {
       const fileSystem = yield* FileSystem.FileSystem;
       const cwd = yield* fileSystem.makeTempDirectoryScoped({
-        prefix: "v12-repository-identity-upstream-test-",
+        prefix: "v12code-repository-identity-upstream-test-",
       });
 
       yield* git(cwd, ["init"]);
-      yield* git(cwd, ["remote", "add", "origin", "git@github.com:julius/v12.git"]);
-      yield* git(cwd, ["remote", "add", "upstream", "git@github.com:V12/v12.git"]);
+      yield* git(cwd, ["remote", "add", "origin", "git@github.com:julius/v12code.git"]);
+      yield* git(cwd, ["remote", "add", "upstream", "git@github.com:V12Code/v12code.git"]);
 
       const resolver = yield* RepositoryIdentityResolver.RepositoryIdentityResolver;
       const identity = yield* resolver.resolve(cwd);
 
       expect(identity).not.toBeNull();
       expect(identity?.locator.remoteName).toBe("upstream");
-      expect(identity?.canonicalKey).toBe("github.com/v12/v12");
-      expect(identity?.displayName).toBe("v12/v12");
+      expect(identity?.canonicalKey).toBe("github.com/v12code/v12code");
+      expect(identity?.displayName).toBe("v12code/v12code");
     }).pipe(Effect.provide(RepositoryIdentityResolver.layer)),
   );
 
@@ -134,20 +134,20 @@ it.layer(NodeServices.layer)("RepositoryIdentityResolverLive", (it) => {
     Effect.gen(function* () {
       const fileSystem = yield* FileSystem.FileSystem;
       const cwd = yield* fileSystem.makeTempDirectoryScoped({
-        prefix: "v12-repository-identity-nested-group-test-",
+        prefix: "v12code-repository-identity-nested-group-test-",
       });
 
       yield* git(cwd, ["init"]);
-      yield* git(cwd, ["remote", "add", "origin", "git@gitlab.com:V12/platform/v12.git"]);
+      yield* git(cwd, ["remote", "add", "origin", "git@gitlab.com:V12Code/platform/v12code.git"]);
 
       const resolver = yield* RepositoryIdentityResolver.RepositoryIdentityResolver;
       const identity = yield* resolver.resolve(cwd);
 
       expect(identity).not.toBeNull();
-      expect(identity?.canonicalKey).toBe("gitlab.com/v12/platform/v12");
-      expect(identity?.displayName).toBe("v12/platform/v12");
-      expect(identity?.owner).toBe("v12");
-      expect(identity?.name).toBe("v12");
+      expect(identity?.canonicalKey).toBe("gitlab.com/v12code/platform/v12code");
+      expect(identity?.displayName).toBe("v12code/platform/v12code");
+      expect(identity?.owner).toBe("v12code");
+      expect(identity?.name).toBe("v12code");
     }).pipe(Effect.provide(RepositoryIdentityResolver.layer)),
   );
 
@@ -157,7 +157,7 @@ it.layer(NodeServices.layer)("RepositoryIdentityResolverLive", (it) => {
       Effect.gen(function* () {
         const fileSystem = yield* FileSystem.FileSystem;
         const cwd = yield* fileSystem.makeTempDirectoryScoped({
-          prefix: "v12-repository-identity-late-remote-test-",
+          prefix: "v12code-repository-identity-late-remote-test-",
         });
 
         yield* git(cwd, ["init"]);
@@ -166,7 +166,7 @@ it.layer(NodeServices.layer)("RepositoryIdentityResolverLive", (it) => {
         const initialIdentity = yield* resolver.resolve(cwd);
         expect(initialIdentity).toBeNull();
 
-        yield* git(cwd, ["remote", "add", "origin", "git@github.com:V12/v12.git"]);
+        yield* git(cwd, ["remote", "add", "origin", "git@github.com:V12Code/v12code.git"]);
 
         for (const _attempt of [1, 2, 3]) {
           const cachedIdentity = yield* resolver.resolve(cwd);
@@ -177,8 +177,8 @@ it.layer(NodeServices.layer)("RepositoryIdentityResolverLive", (it) => {
 
         const refreshedIdentity = yield* resolver.resolve(cwd);
         expect(refreshedIdentity).not.toBeNull();
-        expect(refreshedIdentity?.canonicalKey).toBe("github.com/v12/v12");
-        expect(refreshedIdentity?.name).toBe("v12");
+        expect(refreshedIdentity?.canonicalKey).toBe("github.com/v12code/v12code");
+        expect(refreshedIdentity?.name).toBe("v12code");
       }).pipe(
         Effect.provide(
           Layer.merge(
@@ -196,30 +196,30 @@ it.layer(NodeServices.layer)("RepositoryIdentityResolverLive", (it) => {
     Effect.gen(function* () {
       const fileSystem = yield* FileSystem.FileSystem;
       const cwd = yield* fileSystem.makeTempDirectoryScoped({
-        prefix: "v12-repository-identity-remote-change-test-",
+        prefix: "v12code-repository-identity-remote-change-test-",
       });
 
       yield* git(cwd, ["init"]);
-      yield* git(cwd, ["remote", "add", "origin", "git@github.com:V12/v12.git"]);
+      yield* git(cwd, ["remote", "add", "origin", "git@github.com:V12Code/v12code.git"]);
 
       const resolver = yield* RepositoryIdentityResolver.RepositoryIdentityResolver;
       const initialIdentity = yield* resolver.resolve(cwd);
       expect(initialIdentity).not.toBeNull();
-      expect(initialIdentity?.canonicalKey).toBe("github.com/v12/v12");
+      expect(initialIdentity?.canonicalKey).toBe("github.com/v12code/v12code");
 
-      yield* git(cwd, ["remote", "set-url", "origin", "git@github.com:V12/v12-next.git"]);
+      yield* git(cwd, ["remote", "set-url", "origin", "git@github.com:V12Code/v12code-next.git"]);
 
       const cachedIdentity = yield* resolver.resolve(cwd);
       expect(cachedIdentity).not.toBeNull();
-      expect(cachedIdentity?.canonicalKey).toBe("github.com/v12/v12");
+      expect(cachedIdentity?.canonicalKey).toBe("github.com/v12code/v12code");
 
       yield* TestClock.adjust(Duration.millis(180));
 
       const refreshedIdentity = yield* resolver.resolve(cwd);
       expect(refreshedIdentity).not.toBeNull();
-      expect(refreshedIdentity?.canonicalKey).toBe("github.com/v12/v12-next");
-      expect(refreshedIdentity?.displayName).toBe("v12/v12-next");
-      expect(refreshedIdentity?.name).toBe("v12-next");
+      expect(refreshedIdentity?.canonicalKey).toBe("github.com/v12code/v12code-next");
+      expect(refreshedIdentity?.displayName).toBe("v12code/v12code-next");
+      expect(refreshedIdentity?.name).toBe("v12code-next");
     }).pipe(
       Effect.provide(
         Layer.merge(

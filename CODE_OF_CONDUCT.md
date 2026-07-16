@@ -2,7 +2,7 @@
 
 ## Our Standards
 
-We want V12 to be a welcoming, practical, and technically focused community.
+We want V12Code to be a welcoming, practical, and technically focused community.
 
 Participants are expected to:
 

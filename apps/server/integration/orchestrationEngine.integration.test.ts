@@ -16,7 +16,7 @@ import {
   ThreadId,
   ModelSelection,
   ProviderInstanceId,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import { assert, it } from "@effect/vitest";
 import * as Clock from "effect/Clock";
 import * as Effect from "effect/Effect";

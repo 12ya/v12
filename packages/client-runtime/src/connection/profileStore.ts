@@ -15,7 +15,7 @@ export class ConnectionProfileStore extends Context.Service<
     readonly put: (profile: ConnectionProfile) => Effect.Effect<void, ConnectionAttemptError>;
     readonly remove: (connectionId: string) => Effect.Effect<void, ConnectionAttemptError>;
   }
->()("@v12/client-runtime/connection/profileStore/ConnectionProfileStore") {}
+>()("@v12code/client-runtime/connection/profileStore/ConnectionProfileStore") {}
 
 export const make = (service: ConnectionProfileStore["Service"]) =>
   ConnectionProfileStore.of(service);

@@ -1,4 +1,4 @@
-import type { LocalApi } from "@v12/contracts";
+import type { LocalApi } from "@v12code/contracts";
 import * as Schema from "effect/Schema";
 import { type MouseEvent, useCallback } from "react";
 

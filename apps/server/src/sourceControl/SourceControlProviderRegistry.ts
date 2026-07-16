@@ -7,9 +7,9 @@ import * as Layer from "effect/Layer";
 import {
   SourceControlProviderError,
   type SourceControlProviderDiscoveryItem,
-} from "@v12/contracts";
-import type { SourceControlProviderKind } from "@v12/contracts";
-import { detectSourceControlProviderFromRemoteUrl } from "@v12/shared/sourceControl";
+} from "@v12code/contracts";
+import type { SourceControlProviderKind } from "@v12code/contracts";
+import { detectSourceControlProviderFromRemoteUrl } from "@v12code/shared/sourceControl";
 
 import * as AzureDevOpsSourceControlProvider from "./AzureDevOpsSourceControlProvider.ts";
 import * as BitbucketSourceControlProvider from "./BitbucketSourceControlProvider.ts";
@@ -59,7 +59,7 @@ export class SourceControlProviderRegistry extends Context.Service<
     >;
     readonly discover: Effect.Effect<ReadonlyArray<SourceControlProviderDiscoveryItem>>;
   }
->()("v12/sourceControl/SourceControlProviderRegistry") {}
+>()("v12code/sourceControl/SourceControlProviderRegistry") {}
 
 function unsupportedProvider(
   kind: SourceControlProviderKind,

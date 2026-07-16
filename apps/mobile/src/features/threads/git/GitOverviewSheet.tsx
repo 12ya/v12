@@ -3,8 +3,8 @@ import {
   buildMenuItems,
   getGitActionDisabledReason,
   requiresDefaultBranchConfirmation,
-} from "@v12/client-runtime/state/vcs";
-import { EnvironmentId, ThreadId } from "@v12/contracts";
+} from "@v12code/client-runtime/state/vcs";
+import { EnvironmentId, ThreadId } from "@v12code/contracts";
 import {
   CommonActions,
   StackActions,
@@ -390,10 +390,10 @@ export function GitOverviewSheet(props: GitOverviewSheetProps) {
               weight="medium"
             />
           </Pressable>
-          <Text className="text-xs font-v12-bold tracking-[1px] uppercase text-foreground-muted">
+          <Text className="text-xs font-v12code-bold tracking-[1px] uppercase text-foreground-muted">
             Repository
           </Text>
-          <Text className="pr-10 text-xl font-v12-bold">{currentBranchLabel}</Text>
+          <Text className="pr-10 text-xl font-v12code-bold">{currentBranchLabel}</Text>
           <Text className="text-foreground-secondary text-sm font-medium leading-normal">
             {currentStatusSummary}
           </Text>

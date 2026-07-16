@@ -3,7 +3,7 @@ import { FitAddon } from "@xterm/addon-fit";
 import {
   isAtomCommandInterrupted,
   squashAtomCommandFailure,
-} from "@v12/client-runtime/state/runtime";
+} from "@v12code/client-runtime/state/runtime";
 import {
   Plus,
   SquareSplitHorizontal,
@@ -16,8 +16,8 @@ import {
   type ResolvedKeybindingsConfig,
   type ScopedThreadRef,
   type ThreadId,
-} from "@v12/contracts";
-import { getTerminalLabel } from "@v12/shared/terminalLabels";
+} from "@v12code/contracts";
+import { getTerminalLabel } from "@v12code/shared/terminalLabels";
 import { Terminal, type ITheme } from "@xterm/xterm";
 import {
   type PointerEvent as ReactPointerEvent,

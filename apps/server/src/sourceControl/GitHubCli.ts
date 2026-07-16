@@ -9,7 +9,7 @@ import {
   TrimmedNonEmptyString,
   type SourceControlRepositoryVisibility,
   type VcsError,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 
 import * as VcsProcess from "../vcs/VcsProcess.ts";
 import {
@@ -245,7 +245,7 @@ export class GitHubCli extends Context.Service<
       readonly force?: boolean;
     }) => Effect.Effect<void, GitHubCliError>;
   }
->()("v12/sourceControl/GitHubCli") {}
+>()("v12code/sourceControl/GitHubCli") {}
 
 const RawGitHubRepositoryCloneUrlsSchema = Schema.Struct({
   nameWithOwner: TrimmedNonEmptyString,

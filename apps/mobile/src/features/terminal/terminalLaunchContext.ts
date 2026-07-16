@@ -1,4 +1,4 @@
-import type { EnvironmentId, ThreadId } from "@v12/contracts";
+import type { EnvironmentId, ThreadId } from "@v12code/contracts";
 
 interface TerminalLocationLike {
   readonly cwd: string;

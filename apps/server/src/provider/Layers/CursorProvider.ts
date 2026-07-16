@@ -7,10 +7,10 @@ import type {
   ServerProviderAuth,
   ServerProviderModel,
   ServerProviderState,
-} from "@v12/contracts";
-import { ProviderDriverKind } from "@v12/contracts";
+} from "@v12code/contracts";
+import { ProviderDriverKind } from "@v12code/contracts";
 import type * as EffectAcpSchema from "effect-acp/schema";
-import { causeErrorTag } from "@v12/shared/observability";
+import { causeErrorTag } from "@v12code/shared/observability";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
 import * as Exit from "effect/Exit";
@@ -27,8 +27,8 @@ import {
   createModelCapabilities,
   getProviderOptionBooleanSelectionValue,
   getProviderOptionStringSelectionValue,
-} from "@v12/shared/model";
-import { resolveSpawnCommand } from "@v12/shared/shell";
+} from "@v12code/shared/model";
+import { resolveSpawnCommand } from "@v12code/shared/shell";
 
 import {
   buildBooleanOptionDescriptor,
@@ -65,7 +65,7 @@ const CURSOR_PARAMETERIZED_MODEL_PICKER_MIN_VERSION_DATE = 2026_04_08;
 const CURSOR_CLI_INSTALLATION_DOCS_URL = "https://cursor.com/docs/cli/installation";
 const CURSOR_ACP_MODEL_DISCOVERY_FAILED_MESSAGE = [
   "Cursor ACP model discovery failed.",
-  "Cursor CLI setup may be incomplete; install or enable the Cursor CLI, restart V12, and try again.",
+  "Cursor CLI setup may be incomplete; install or enable the Cursor CLI, restart V12Code, and try again.",
   `See ${CURSOR_CLI_INSTALLATION_DOCS_URL}.`,
   "Check server logs for ACP details.",
 ].join(" ");
@@ -93,7 +93,7 @@ export function buildInitialCursorProviderSnapshot(
           version: null,
           status: "warning",
           auth: { status: "unknown" },
-          message: "Cursor is disabled in V12 settings.",
+          message: "Cursor is disabled in V12Code settings.",
         },
       });
     }
@@ -419,7 +419,7 @@ const makeCursorAcpProbeRuntime = (
           ...(environment ? { env: environment } : {}),
         },
         cwd: process.cwd(),
-        clientInfo: { name: "v12-provider-probe", version: "0.0.0" },
+        clientInfo: { name: "v12code-provider-probe", version: "0.0.0" },
         authMethodId: "cursor_login",
         clientCapabilities: CURSOR_PARAMETERIZED_MODEL_PICKER_CAPABILITIES,
       }).pipe(Layer.provide(Layer.succeed(ChildProcessSpawner.ChildProcessSpawner, spawner))),
@@ -618,7 +618,7 @@ function joinProviderMessages(...messages: ReadonlyArray<string | undefined>): s
 function buildCursorCliCommandMissingMessage(binaryPath: string): string {
   return [
     `Cursor CLI command \`${binaryPath}\` was not found.`,
-    `Install or enable the Cursor CLI, make sure \`${binaryPath}\` is on PATH, then restart V12.`,
+    `Install or enable the Cursor CLI, make sure \`${binaryPath}\` is on PATH, then restart V12Code.`,
     `See ${CURSOR_CLI_INSTALLATION_DOCS_URL}.`,
   ].join(" ");
 }
@@ -1008,7 +1008,7 @@ export const checkCursorProviderStatus = Effect.fn("checkCursorProviderStatus")(
         version: null,
         status: "warning",
         auth: { status: "unknown" },
-        message: "Cursor is disabled in V12 settings.",
+        message: "Cursor is disabled in V12Code settings.",
       },
     });
   }

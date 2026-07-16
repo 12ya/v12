@@ -1,4 +1,4 @@
-import type { EnvironmentId, ServerConfig } from "@v12/contracts";
+import type { EnvironmentId, ServerConfig } from "@v12code/contracts";
 import * as Option from "effect/Option";
 import { AsyncResult, Atom } from "effect/unstable/reactivity";
 

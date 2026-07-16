@@ -6,7 +6,7 @@ interface ReviewPerformanceLike {
   readonly clearMeasures?: (name?: string) => void;
 }
 
-const REVIEW_PERF_PREFIX = "v12.review";
+const REVIEW_PERF_PREFIX = "v12code.review";
 let reviewPerfSequence = 0;
 
 function getPerformance(): ReviewPerformanceLike | null {

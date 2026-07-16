@@ -1,12 +1,12 @@
 Built on the goated [T3 Code](https://github.com/pingdotgg/t3code) by T3 Tools.
 
-# V12
+# V12Code
 
-V12 is a minimal web GUI for coding agents (currently Codex, Claude, Cursor, and OpenCode, more coming soon).
+V12Code is a minimal web GUI for coding agents (currently Codex, Claude, Cursor, and OpenCode, more coming soon).
 
-## What is V12?
+## What is V12Code?
 
-V12 brings the best coding-agent workflows into one fast, open-source app:
+V12Code brings the best coding-agent workflows into one fast, open-source app:
 
 - **Cursor-like chat drafts:** Start a chat, switch away, and come back without losing what you wrote.
 - **Message queuing:** Send follow-up messages while an agent is working and keep the next instructions ready to go.
@@ -18,7 +18,7 @@ V12 brings the best coding-agent workflows into one fast, open-source app:
 ## Installation
 
 > [!WARNING]
-> V12 currently supports Codex, Claude, Cursor, and OpenCode.
+> V12Code currently supports Codex, Claude, Cursor, and OpenCode.
 > Install and authenticate at least one provider before use:
 >
 > - Codex: install [Codex CLI](https://developers.openai.com/codex/cli) and run `codex login`
@@ -29,31 +29,31 @@ V12 brings the best coding-agent workflows into one fast, open-source app:
 ### Run without installing
 
 ```bash
-npx v12@latest
+npx v12code@latest
 ```
 
-Tip: Use `npx v12@latest --help` for the full CLI reference.
+Tip: Use `npx v12code@latest --help` for the full CLI reference.
 
 ### Desktop app
 
-Install the latest version of the desktop app from [GitHub Releases](https://github.com/12ya/v12/releases), or from your favorite package registry:
+Install the latest version of the desktop app from [GitHub Releases](https://github.com/12ya/v12code/releases), or from your favorite package registry:
 
 #### Windows (`winget`)
 
 ```bash
-winget install V12.V12
+winget install V12Code.V12Code
 ```
 
 #### macOS (Homebrew)
 
 ```bash
-brew install --cask 12ya/tap/v12-code
+brew install --cask 12ya/tap/v12code-code
 ```
 
 #### Arch Linux (AUR)
 
 ```bash
-yay -S v12-bin
+yay -S v12code-bin
 ```
 
 ## Some notes
@@ -64,7 +64,7 @@ There's no public docs site yet, checkout the miscellaneous markdown files in [d
 
 ## Documentation
 
-- [V12 roadmap](./docs/project/roadmap.md)
+- [V12Code roadmap](./docs/project/roadmap.md)
 - [Getting started](./docs/getting-started/quick-start.md)
 - [Architecture overview](./docs/architecture/overview.md)
 - [Provider guides](./docs/providers/codex.md)
@@ -77,7 +77,7 @@ Contributions are welcome. Read [CONTRIBUTING.md](./CONTRIBUTING.md) before open
 
 ### Install `vp`
 
-V12 uses Vite+ so you'll need to install the global `vp` command-line tool.
+V12Code uses Vite+ so you'll need to install the global `vp` command-line tool.
 
 #### macOS / Linux
 
@@ -99,4 +99,4 @@ Checkout their getting started guide for more information: https://viteplus.dev/
 vp i
 ```
 
-Need support? [Open an issue](https://github.com/12ya/v12/issues).
+Need support? [Open an issue](https://github.com/12ya/v12code/issues).

@@ -1,15 +1,15 @@
-import { findErrorTraceId } from "@v12/client-runtime/errors";
+import { findErrorTraceId } from "@v12code/client-runtime/errors";
 import {
   type EnvironmentConnectionPresentation,
   RelayConnectionRegistration,
   RelayConnectionTarget,
-} from "@v12/client-runtime/connection";
+} from "@v12code/client-runtime/connection";
 import {
   isAtomCommandInterrupted,
   squashAtomCommandFailure,
-} from "@v12/client-runtime/state/runtime";
-import type { EnvironmentId } from "@v12/contracts";
-import type { RelayClientEnvironmentRecord } from "@v12/contracts/relay";
+} from "@v12code/client-runtime/state/runtime";
+import type { EnvironmentId } from "@v12code/contracts";
+import type { RelayClientEnvironmentRecord } from "@v12code/contracts/relay";
 import * as Option from "effect/Option";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
 
@@ -45,7 +45,7 @@ export function RemoteEnvironmentRowsSkeleton() {
 }
 
 /**
- * The user's V12 Connect environments from relay discovery, each with a
+ * The user's V12Code Connect environments from relay discovery, each with a
  * Connect button. The primary environment is always excluded; already-saved
  * environments are hidden unless `showSavedEnvironments` renders them with
  * their live connection state (used by onboarding, where the full device mesh
@@ -100,7 +100,7 @@ export function CloudEnvironmentConnectRows({
       toastManager.add({
         type: "success",
         title: "Environment added",
-        description: `Connecting to ${environment.label} through V12 Connect.`,
+        description: `Connecting to ${environment.label} through V12Code Connect.`,
       });
       return;
     }
@@ -109,9 +109,9 @@ export function CloudEnvironmentConnectRows({
     }
     const cause = squashAtomCommandFailure(result);
     const message =
-      cause instanceof Error ? cause.message : "Could not connect the V12 Connect environment.";
+      cause instanceof Error ? cause.message : "Could not connect the V12Code Connect environment.";
     const traceId = findErrorTraceId(cause);
-    console.error("[v12-connect] Could not connect environment", { message, traceId, cause });
+    console.error("[v12code-connect] Could not connect environment", { message, traceId, cause });
     toastManager.add({
       type: "error",
       title: "Could not connect environment",
@@ -154,7 +154,7 @@ export function CloudEnvironmentConnectRows({
       return (
         <div className={ITEM_ROW_CLASSNAME}>
           <p className="text-sm font-medium text-destructive">
-            Could not load V12 Connect environments
+            Could not load V12Code Connect environments
           </p>
           <p className="mt-1 text-xs text-muted-foreground">{discoveryProblem}</p>
           <Button

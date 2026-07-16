@@ -7,7 +7,7 @@ import {
   ProviderInstanceId,
   ThreadId,
   type ClientOrchestrationCommand,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import { describe, expect, it } from "@effect/vitest";
 import * as Crypto from "effect/Crypto";
 import * as Deferred from "effect/Deferred";
@@ -196,7 +196,7 @@ describe("environment commands", () => {
           prepareWorktree: {
             projectCwd: "/workspace/project",
             baseBranch: "main",
-            branch: `v12/child-${index}`,
+            branch: `v12code/child-${index}`,
           },
         },
         createdAt: "2026-06-06T00:00:00.000Z",

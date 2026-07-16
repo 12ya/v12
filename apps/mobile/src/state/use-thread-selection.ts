@@ -6,8 +6,8 @@ import {
   ThreadId,
   type ScopedProjectRef,
   type ScopedThreadRef,
-} from "@v12/contracts";
-import type { EnvironmentThreadShell } from "@v12/client-runtime/state/shell";
+} from "@v12code/contracts";
+import type { EnvironmentThreadShell } from "@v12code/client-runtime/state/shell";
 import * as Option from "effect/Option";
 
 import { useProject, useThreadShell } from "../state/entities";

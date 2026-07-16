@@ -19,8 +19,8 @@ import * as HttpServerResponse from "effect/unstable/http/HttpServerResponse";
 import * as HttpTraceContext from "effect/unstable/http/HttpTraceContext";
 import * as HttpApiBuilder from "effect/unstable/httpapi/HttpApiBuilder";
 import * as HttpApiError from "effect/unstable/httpapi/HttpApiError";
-import { encodeOAuthScope } from "@v12/shared/oauthScope";
-import { httpHeaderRedactionLayer } from "@v12/shared/httpObservability";
+import { encodeOAuthScope } from "@v12code/shared/oauthScope";
+import { httpHeaderRedactionLayer } from "@v12code/shared/httpObservability";
 
 import {
   RelayApi,
@@ -47,8 +47,8 @@ import {
   type RelayEnvironmentConnectRequest,
   type RelayDpopAccessTokenScope,
   RelayInternalError,
-} from "@v12/contracts/relay";
-import { normalizeRelayIssuer } from "@v12/shared/relayJwt";
+} from "@v12code/contracts/relay";
+import { normalizeRelayIssuer } from "@v12code/shared/relayJwt";
 
 import * as DeliveryAttempts from "../agentActivity/DeliveryAttempts.ts";
 import * as AgentActivityRows from "../agentActivity/AgentActivityRows.ts";

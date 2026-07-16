@@ -7,7 +7,7 @@ import {
   type GitRunStackedActionResult,
   GitStackedAction,
   WS_METHODS,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import * as Cause from "effect/Cause";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";

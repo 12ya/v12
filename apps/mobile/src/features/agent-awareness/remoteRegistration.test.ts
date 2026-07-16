@@ -9,10 +9,10 @@ import * as Effect from "effect/Effect";
 import * as Exit from "effect/Exit";
 import * as Layer from "effect/Layer";
 import { FetchHttpClient } from "effect/unstable/http";
-import { ManagedRelay } from "@v12/client-runtime/relay";
+import { ManagedRelay } from "@v12code/client-runtime/relay";
 
-import type { EnvironmentId } from "@v12/contracts";
-import { verifyDpopProof } from "@v12/shared/dpop";
+import type { EnvironmentId } from "@v12code/contracts";
+import { verifyDpopProof } from "@v12code/shared/dpop";
 import type { SavedRemoteConnection } from "../../lib/connection";
 import { cryptoLayer } from "../cloud/dpop";
 import { managedRelayClientLayer } from "../cloud/managedRelayLayer";
@@ -269,13 +269,13 @@ describe("makeRelayDeviceRegistrationRequest", () => {
         label: "Julius's iPhone",
         iosMajorVersion: 18,
         appVersion: "1.0.0",
-        bundleId: "com.v12.v12.preview",
+        bundleId: "com.v12code.v12code.preview",
         apsEnvironment: resolveApsEnvironment("preview"),
         notificationsEnabled: true,
         preferences: {},
       }),
     ).toMatchObject({
-      bundleId: "com.v12.v12.preview",
+      bundleId: "com.v12code.v12code.preview",
       apsEnvironment: "production",
     });
   });

@@ -1,4 +1,4 @@
-import type { EnvironmentId } from "@v12/contracts";
+import type { EnvironmentId } from "@v12code/contracts";
 import { Globe, RadioTower } from "lucide-react";
 
 import { Empty, EmptyDescription, EmptyMedia, EmptyTitle } from "~/components/ui/empty";

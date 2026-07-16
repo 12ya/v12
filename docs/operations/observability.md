@@ -1,6 +1,6 @@
 # Observability
 
-V12 has one server-side observability model:
+V12Code has one server-side observability model:
 
 - pretty logs go to stdout for humans
 - completed spans go to a local NDJSON trace file
@@ -22,7 +22,7 @@ If you want a log message to show up in the trace file, emit it inside an active
 
 ### Traces
 
-Completed spans are written as NDJSON records to `serverTracePath` (by default, `~/.v12/userdata/logs/server.trace.ndjson`).
+Completed spans are written as NDJSON records to `serverTracePath` (by default, `~/.v12code/userdata/logs/server.trace.ndjson`).
 
 Important fields in each record:
 
@@ -65,7 +65,7 @@ You do not need any extra env vars. Just run the app normally and inspect `serve
 Examples:
 
 ```bash
-npx v12
+npx v12code
 ```
 
 ```bash
@@ -99,16 +99,16 @@ Default Grafana login:
 #### 2. Export OTLP env vars
 
 ```bash
-export V12_OTLP_TRACES_URL=http://localhost:4318/v1/traces
-export V12_OTLP_METRICS_URL=http://localhost:4318/v1/metrics
-export V12_OTLP_SERVICE_NAME=v12-local
+export V12CODE_OTLP_TRACES_URL=http://localhost:4318/v1/traces
+export V12CODE_OTLP_METRICS_URL=http://localhost:4318/v1/metrics
+export V12CODE_OTLP_SERVICE_NAME=v12code-local
 ```
 
 Optional:
 
 ```bash
-export V12_TRACE_MIN_LEVEL=Info
-export V12_TRACE_TIMING_ENABLED=true
+export V12CODE_TRACE_MIN_LEVEL=Info
+export V12CODE_TRACE_TIMING_ENABLED=true
 ```
 
 #### 3. Launch the app from that same shell
@@ -116,7 +116,7 @@ export V12_TRACE_TIMING_ENABLED=true
 CLI:
 
 ```bash
-npx v12
+npx v12code
 ```
 
 Monorepo web/server dev:
@@ -133,23 +133,23 @@ node --run dev:desktop
 
 Packaged desktop app:
 
-Launch the actual app executable from the same shell so the desktop app and embedded backend inherit `V12_OTLP_*`.
+Launch the actual app executable from the same shell so the desktop app and embedded backend inherit `V12CODE_OTLP_*`.
 
 macOS app bundle example:
 
 ```bash
-V12_OTLP_TRACES_URL=http://localhost:4318/v1/traces \
-V12_OTLP_METRICS_URL=http://localhost:4318/v1/metrics \
-V12_OTLP_SERVICE_NAME=v12-desktop \
-"/Applications/V12.app/Contents/MacOS/V12"
+V12CODE_OTLP_TRACES_URL=http://localhost:4318/v1/traces \
+V12CODE_OTLP_METRICS_URL=http://localhost:4318/v1/metrics \
+V12CODE_OTLP_SERVICE_NAME=v12code-desktop \
+"/Applications/V12Code.app/Contents/MacOS/V12Code"
 ```
 
 Direct binary example:
 
 ```bash
-V12_OTLP_TRACES_URL=http://localhost:4318/v1/traces \
-V12_OTLP_METRICS_URL=http://localhost:4318/v1/metrics \
-V12_OTLP_SERVICE_NAME=v12-desktop \
+V12CODE_OTLP_TRACES_URL=http://localhost:4318/v1/traces \
+V12CODE_OTLP_METRICS_URL=http://localhost:4318/v1/metrics \
+V12CODE_OTLP_SERVICE_NAME=v12code-desktop \
 ./path/to/your/desktop-app-binary
 ```
 
@@ -168,7 +168,7 @@ The trace file is the fastest way to inspect raw span data.
 Tail it:
 
 ```bash
-tail -f "$V12_HOME/userdata/logs/server.trace.ndjson"
+tail -f "$V12CODE_HOME/userdata/logs/server.trace.ndjson"
 ```
 
 In monorepo dev, use:
@@ -185,7 +185,7 @@ jq -c 'select(.exit._tag != "Success") | {
   durationMs,
   exit,
   attributes
-}' "$V12_HOME/userdata/logs/server.trace.ndjson"
+}' "$V12CODE_HOME/userdata/logs/server.trace.ndjson"
 ```
 
 Show slow spans:
@@ -196,7 +196,7 @@ jq -c 'select(.durationMs > 1000) | {
   durationMs,
   traceId,
   spanId
-}' "$V12_HOME/userdata/logs/server.trace.ndjson"
+}' "$V12CODE_HOME/userdata/logs/server.trace.ndjson"
 ```
 
 Inspect embedded log events:
@@ -213,7 +213,7 @@ jq -c 'select(any(.events[]?; .attributes["effect.logLevel"] != null)) | {
         level: .attributes["effect.logLevel"]
       }
   ]
-}' "$V12_HOME/userdata/logs/server.trace.ndjson"
+}' "$V12CODE_HOME/userdata/logs/server.trace.ndjson"
 ```
 
 Follow one trace:
@@ -224,7 +224,7 @@ jq -r 'select(.traceId == "TRACE_ID_HERE") | [
   .spanId,
   (.parentSpanId // "-"),
   .durationMs
-] | @tsv' "$V12_HOME/userdata/logs/server.trace.ndjson"
+] | @tsv' "$V12CODE_HOME/userdata/logs/server.trace.ndjson"
 ```
 
 Filter orchestration commands:
@@ -235,7 +235,7 @@ jq -c 'select(.attributes["orchestration.command_type"] != null) | {
   durationMs,
   commandType: .attributes["orchestration.command_type"],
   aggregateKind: .attributes["orchestration.aggregate_kind"]
-}' "$V12_HOME/userdata/logs/server.trace.ndjson"
+}' "$V12CODE_HOME/userdata/logs/server.trace.ndjson"
 ```
 
 Filter git activity:
@@ -250,7 +250,7 @@ jq -c 'select(.attributes["git.operation"] != null) | {
     .events[]
     | select(.name == "git.hook.started" or .name == "git.hook.finished")
   ]
-}' "$V12_HOME/userdata/logs/server.trace.ndjson"
+}' "$V12CODE_HOME/userdata/logs/server.trace.ndjson"
 ```
 
 ### Use Tempo When You Need A Real Trace Viewer
@@ -272,7 +272,7 @@ Recommended flow in Grafana:
 
 Good first searches:
 
-- service name such as `v12-local`, `v12-dev`, or `v12-desktop`
+- service name such as `v12code-local`, `v12code-dev`, or `v12code-desktop`
 - span names like `sql.execute`, `git.runCommand`, `provider.sendTurn`
 - orchestration spans with attributes like `orchestration.command_type`
 
@@ -284,20 +284,20 @@ Traces are best for one request. Metrics are best for trends.
 
 Good metric families to watch:
 
-- `v12_rpc_request_duration`
-- `v12_orchestration_command_duration`
-- `v12_orchestration_command_ack_duration`
-- `v12_provider_turn_duration`
-- `v12_git_command_duration`
-- `v12_db_query_duration`
+- `v12code_rpc_request_duration`
+- `v12code_orchestration_command_duration`
+- `v12code_orchestration_command_ack_duration`
+- `v12code_provider_turn_duration`
+- `v12code_git_command_duration`
+- `v12code_db_query_duration`
 
 Counters tell you volume and failure rate:
 
-- `v12_rpc_requests_total`
-- `v12_orchestration_commands_total`
-- `v12_provider_turns_total`
-- `v12_git_commands_total`
-- `v12_db_queries_total`
+- `v12code_rpc_requests_total`
+- `v12code_orchestration_commands_total`
+- `v12code_provider_turns_total`
+- `v12code_git_commands_total`
+- `v12code_db_queries_total`
 
 Use metrics when the question is:
 
@@ -313,7 +313,7 @@ Use traces when the question is:
 
 ### What The New Ack Metric Means
 
-`v12_orchestration_command_ack_duration` measures:
+`v12code_orchestration_command_ack_duration` measures:
 
 - start: command dispatch enters the orchestration engine
 - end: the first committed domain event for that command is published by the server
@@ -344,7 +344,7 @@ If you need those later, add client-side instrumentation or a dedicated server f
 
 ### "Did this command take too long to acknowledge?"
 
-1. Check `v12_orchestration_command_ack_duration` by `commandType`.
+1. Check `v12code_orchestration_command_ack_duration` by `commandType`.
 2. If it is high, inspect the corresponding orchestration trace.
 3. Look at child spans for projection, sqlite, provider, or git work.
 
@@ -358,7 +358,7 @@ If you need those later, add client-side instrumentation or a dedicated server f
 
 Usually one of these is true:
 
-- `V12_OTLP_TRACES_URL` was not set
+- `V12CODE_OTLP_TRACES_URL` was not set
 - the app was launched from a different environment than the one where you exported the vars
 - the app was not fully restarted after changing env
 - Grafana is looking at the wrong time range or service name
@@ -482,19 +482,19 @@ It provides:
 
 Local trace file:
 
-- `V12_TRACE_FILE`: override trace file path
-- `V12_TRACE_MAX_BYTES`: per-file rotation size, default `10485760`
-- `V12_TRACE_MAX_FILES`: rotated file count, default `10`
-- `V12_TRACE_BATCH_WINDOW_MS`: flush window, default `200`
-- `V12_TRACE_MIN_LEVEL`: minimum trace level, default `Info`
-- `V12_TRACE_TIMING_ENABLED`: enable timing metadata, default `true`
+- `V12CODE_TRACE_FILE`: override trace file path
+- `V12CODE_TRACE_MAX_BYTES`: per-file rotation size, default `10485760`
+- `V12CODE_TRACE_MAX_FILES`: rotated file count, default `10`
+- `V12CODE_TRACE_BATCH_WINDOW_MS`: flush window, default `200`
+- `V12CODE_TRACE_MIN_LEVEL`: minimum trace level, default `Info`
+- `V12CODE_TRACE_TIMING_ENABLED`: enable timing metadata, default `true`
 
 OTLP export:
 
-- `V12_OTLP_TRACES_URL`: OTLP trace endpoint
-- `V12_OTLP_METRICS_URL`: OTLP metric endpoint
-- `V12_OTLP_EXPORT_INTERVAL_MS`: export interval, default `10000`
-- `V12_OTLP_SERVICE_NAME`: service name, default `v12-server`
+- `V12CODE_OTLP_TRACES_URL`: OTLP trace endpoint
+- `V12CODE_OTLP_METRICS_URL`: OTLP metric endpoint
+- `V12CODE_OTLP_EXPORT_INTERVAL_MS`: export interval, default `10000`
+- `V12CODE_OTLP_SERVICE_NAME`: service name, default `v12code-server`
 
 If the OTLP URLs are unset, local tracing still works and metrics stay in-process only.
 

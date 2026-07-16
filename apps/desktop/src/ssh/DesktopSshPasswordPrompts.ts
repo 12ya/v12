@@ -1,6 +1,6 @@
-import type { DesktopSshPasswordPromptRequest } from "@v12/contracts";
-import { DesktopSshPasswordPromptResolutionInputSchema } from "@v12/contracts";
-import type { SshPasswordRequest } from "@v12/ssh/auth";
+import type { DesktopSshPasswordPromptRequest } from "@v12code/contracts";
+import { DesktopSshPasswordPromptResolutionInputSchema } from "@v12code/contracts";
+import type { SshPasswordRequest } from "@v12code/ssh/auth";
 import * as Context from "effect/Context";
 import * as Crypto from "effect/Crypto";
 import * as DateTime from "effect/DateTime";
@@ -63,7 +63,7 @@ export class DesktopSshPromptWindowUnavailableError extends Schema.TaggedErrorCl
 ) {
   override get message(): string {
     const request = this.requestId === null ? "before a request id was assigned" : this.requestId;
-    return `V12 window is unavailable during ${this.stage} for SSH authentication to ${this.destination} (request: ${request}).`;
+    return `V12Code window is unavailable during ${this.stage} for SSH authentication to ${this.destination} (request: ${request}).`;
   }
 }
 
@@ -190,7 +190,7 @@ export class DesktopSshPasswordPrompts extends Context.Service<
       input: DesktopSshPasswordPromptResolutionInput,
     ) => Effect.Effect<void, DesktopSshPasswordPromptResolveError>;
   }
->()("@v12/desktop/ssh/DesktopSshPasswordPrompts") {}
+>()("@v12code/desktop/ssh/DesktopSshPasswordPrompts") {}
 
 interface PendingSshPasswordPrompt {
   readonly requestId: string;

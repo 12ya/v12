@@ -6,7 +6,7 @@
  *
  * @module ProjectionStateRepository
  */
-import { IsoDateTime, NonNegativeInt } from "@v12/contracts";
+import { IsoDateTime, NonNegativeInt } from "@v12code/contracts";
 import * as Option from "effect/Option";
 import * as Schema from "effect/Schema";
 import * as Context from "effect/Context";
@@ -63,4 +63,4 @@ export interface ProjectionStateRepositoryShape {
 export class ProjectionStateRepository extends Context.Service<
   ProjectionStateRepository,
   ProjectionStateRepositoryShape
->()("v12/persistence/Services/ProjectionState/ProjectionStateRepository") {}
+>()("v12code/persistence/Services/ProjectionState/ProjectionStateRepository") {}

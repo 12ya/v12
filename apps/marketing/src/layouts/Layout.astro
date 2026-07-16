@@ -8,8 +8,8 @@ interface Props {
 }
 
 const {
-  title = "V12",
-  description = "V12 — The open-source control plane for coding agents.",
+  title = "V12Code",
+  description = "V12Code — The open-source control plane for coding agents.",
   pageClass,
 } = Astro.props;
 ---
@@ -35,8 +35,8 @@ const {
     <div class:list={["page", pageClass]}>
       <nav class="nav">
         <div class="nav-inner">
-          <a href="/" class="nav-brand" aria-label="V12 home">
-            <span class="nav-brand-name">V12</span>
+          <a href="/" class="nav-brand" aria-label="V12Code home">
+            <span class="nav-brand-name">V12Code</span>
           </a>
           <div class="nav-right">
             <a
@@ -44,7 +44,7 @@ const {
               href={GITHUB_REPOSITORY_URL}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={`Star V12 on GitHub — ${MARKETING_STATS.githubStars} stars`}
+              aria-label={`Star V12Code on GitHub — ${MARKETING_STATS.githubStars} stars`}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M12 2.3l2.9 5.88 6.49.94-4.7 4.58 1.11 6.47L12 17.12l-5.8 3.05 1.11-6.47-4.7-4.58 6.49-.94L12 2.3z"/>
@@ -63,7 +63,7 @@ const {
         <div class="footer-inner">
           <div class="footer-brand">
             <img src="/icon.webp" alt="" />
-            <span>V12 · MIT licensed</span>
+            <span>V12Code · MIT licensed</span>
           </div>
           <div class="footer-links">
             <a href={GITHUB_REPOSITORY_URL} target="_blank" rel="noopener noreferrer">GitHub</a>

@@ -1,9 +1,9 @@
-import { scopeProjectRef, scopeThreadRef } from "@v12/client-runtime/environment";
+import { scopeProjectRef, scopeThreadRef } from "@v12code/client-runtime/environment";
 import {
   isAtomCommandInterrupted,
   squashAtomCommandFailure,
-} from "@v12/client-runtime/state/runtime";
-import type { EnvironmentId, VcsRef, ThreadId } from "@v12/contracts";
+} from "@v12code/client-runtime/state/runtime";
+import type { EnvironmentId, VcsRef, ThreadId } from "@v12code/contracts";
 import { LegendList, type LegendListRef } from "@legendapp/list/react";
 import { ChevronDownIcon, GitBranchIcon, RefreshCwIcon, SearchIcon } from "lucide-react";
 import {

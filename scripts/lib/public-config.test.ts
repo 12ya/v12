@@ -18,24 +18,24 @@ describe("loadRepoEnv", () => {
   it("does not project cloud configuration for an unconfigured clone", () => {
     const env = loadRepoEnv({ baseEnv: {}, repoRoot: makeTemporaryDirectory() });
 
-    expect(env.V12_CLERK_PUBLISHABLE_KEY).toBeUndefined();
-    expect(env.V12_CLERK_CLI_OAUTH_CLIENT_ID).toBeUndefined();
+    expect(env.V12CODE_CLERK_PUBLISHABLE_KEY).toBeUndefined();
+    expect(env.V12CODE_CLERK_CLI_OAUTH_CLIENT_ID).toBeUndefined();
     expect(env.VITE_CLERK_PUBLISHABLE_KEY).toBeUndefined();
     expect(env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY).toBeUndefined();
-    expect(env.V12_CLERK_JWT_TEMPLATE).toBeUndefined();
+    expect(env.V12CODE_CLERK_JWT_TEMPLATE).toBeUndefined();
     expect(env.VITE_CLERK_JWT_TEMPLATE).toBeUndefined();
     expect(env.EXPO_PUBLIC_CLERK_JWT_TEMPLATE).toBeUndefined();
-    expect(env.V12_RELAY_URL).toBeUndefined();
-    expect(env.VITE_V12_RELAY_URL).toBeUndefined();
-    expect(env.V12_MOBILE_OTLP_TRACES_URL).toBeUndefined();
-    expect(env.V12_MOBILE_OTLP_TRACES_DATASET).toBeUndefined();
-    expect(env.V12_MOBILE_OTLP_TRACES_TOKEN).toBeUndefined();
+    expect(env.V12CODE_RELAY_URL).toBeUndefined();
+    expect(env.VITE_V12CODE_RELAY_URL).toBeUndefined();
+    expect(env.V12CODE_MOBILE_OTLP_TRACES_URL).toBeUndefined();
+    expect(env.V12CODE_MOBILE_OTLP_TRACES_DATASET).toBeUndefined();
+    expect(env.V12CODE_MOBILE_OTLP_TRACES_TOKEN).toBeUndefined();
     expect(env.EXPO_PUBLIC_OTLP_TRACES_URL).toBeUndefined();
     expect(env.EXPO_PUBLIC_OTLP_TRACES_DATASET).toBeUndefined();
     expect(env.EXPO_PUBLIC_OTLP_TRACES_TOKEN).toBeUndefined();
-    expect(env.V12_RELAY_CLIENT_OTLP_TRACES_URL).toBeUndefined();
-    expect(env.V12_RELAY_CLIENT_OTLP_TRACES_DATASET).toBeUndefined();
-    expect(env.V12_RELAY_CLIENT_OTLP_TRACES_TOKEN).toBeUndefined();
+    expect(env.V12CODE_RELAY_CLIENT_OTLP_TRACES_URL).toBeUndefined();
+    expect(env.V12CODE_RELAY_CLIENT_OTLP_TRACES_DATASET).toBeUndefined();
+    expect(env.V12CODE_RELAY_CLIENT_OTLP_TRACES_TOKEN).toBeUndefined();
     expect(env.VITE_RELAY_OTLP_TRACES_URL).toBeUndefined();
     expect(env.VITE_RELAY_OTLP_TRACES_DATASET).toBeUndefined();
     expect(env.VITE_RELAY_OTLP_TRACES_TOKEN).toBeUndefined();
@@ -45,34 +45,36 @@ describe("loadRepoEnv", () => {
     const repoRoot = makeTemporaryDirectory();
     NodeFS.writeFileSync(
       NodePath.join(repoRoot, ".env"),
-      "V12_CLERK_PUBLISHABLE_KEY=pk_root\nV12_CLERK_JWT_TEMPLATE=template_root\nV12_CLERK_CLI_OAUTH_CLIENT_ID=oauth_root\nV12_RELAY_URL=https://root.example.test\n",
+      "V12CODE_CLERK_PUBLISHABLE_KEY=pk_root\nV12CODE_CLERK_JWT_TEMPLATE=template_root\nV12CODE_CLERK_CLI_OAUTH_CLIENT_ID=oauth_root\nV12CODE_RELAY_URL=https://root.example.test\n",
     );
     NodeFS.writeFileSync(
       NodePath.join(repoRoot, ".env.local"),
-      "V12_CLERK_PUBLISHABLE_KEY=pk_local\nV12_CLERK_JWT_TEMPLATE=template_local\nV12_CLERK_CLI_OAUTH_CLIENT_ID=oauth_local\nV12_RELAY_URL=https://local.example.test\n",
+      "V12CODE_CLERK_PUBLISHABLE_KEY=pk_local\nV12CODE_CLERK_JWT_TEMPLATE=template_local\nV12CODE_CLERK_CLI_OAUTH_CLIENT_ID=oauth_local\nV12CODE_RELAY_URL=https://local.example.test\n",
     );
 
-    expect(loadRepoEnv({ baseEnv: {}, repoRoot }).V12_RELAY_URL).toBe("https://local.example.test");
+    expect(loadRepoEnv({ baseEnv: {}, repoRoot }).V12CODE_RELAY_URL).toBe(
+      "https://local.example.test",
+    );
     expect(
       loadRepoEnv({
         baseEnv: {
-          V12_CLERK_PUBLISHABLE_KEY: "pk_ci",
-          V12_CLERK_JWT_TEMPLATE: "template_ci",
-          V12_CLERK_CLI_OAUTH_CLIENT_ID: "oauth_ci",
-          V12_RELAY_URL: "https://ci.example.test",
+          V12CODE_CLERK_PUBLISHABLE_KEY: "pk_ci",
+          V12CODE_CLERK_JWT_TEMPLATE: "template_ci",
+          V12CODE_CLERK_CLI_OAUTH_CLIENT_ID: "oauth_ci",
+          V12CODE_RELAY_URL: "https://ci.example.test",
         },
         repoRoot,
       }),
     ).toMatchObject({
-      V12_CLERK_PUBLISHABLE_KEY: "pk_ci",
-      V12_CLERK_CLI_OAUTH_CLIENT_ID: "oauth_ci",
+      V12CODE_CLERK_PUBLISHABLE_KEY: "pk_ci",
+      V12CODE_CLERK_CLI_OAUTH_CLIENT_ID: "oauth_ci",
       VITE_CLERK_PUBLISHABLE_KEY: "pk_ci",
       EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_ci",
-      V12_CLERK_JWT_TEMPLATE: "template_ci",
+      V12CODE_CLERK_JWT_TEMPLATE: "template_ci",
       VITE_CLERK_JWT_TEMPLATE: "template_ci",
       EXPO_PUBLIC_CLERK_JWT_TEMPLATE: "template_ci",
-      V12_RELAY_URL: "https://ci.example.test",
-      VITE_V12_RELAY_URL: "https://ci.example.test",
+      V12CODE_RELAY_URL: "https://ci.example.test",
+      VITE_V12CODE_RELAY_URL: "https://ci.example.test",
     });
   });
 
@@ -81,8 +83,8 @@ describe("loadRepoEnv", () => {
       resolvePublicConfig({
         VITE_CLERK_PUBLISHABLE_KEY: "pk_legacy",
         VITE_CLERK_JWT_TEMPLATE: "template_legacy",
-        V12_CLERK_CLI_OAUTH_CLIENT_ID: "oauth_canonical",
-        VITE_V12_RELAY_URL: "https://legacy.example.test",
+        V12CODE_CLERK_CLI_OAUTH_CLIENT_ID: "oauth_canonical",
+        VITE_V12CODE_RELAY_URL: "https://legacy.example.test",
         EXPO_PUBLIC_OTLP_TRACES_URL: "https://api.axiom.co/v1/traces",
         EXPO_PUBLIC_OTLP_TRACES_DATASET: "mobile-traces",
         EXPO_PUBLIC_OTLP_TRACES_TOKEN: "mobile-token",
@@ -105,16 +107,16 @@ describe("loadRepoEnv", () => {
     expect(
       loadRepoEnv({
         baseEnv: {
-          V12_RELAY_CLIENT_OTLP_TRACES_URL: "https://api.axiom.co/v1/traces",
-          V12_RELAY_CLIENT_OTLP_TRACES_DATASET: "relay-client-traces",
-          V12_RELAY_CLIENT_OTLP_TRACES_TOKEN: "relay-client-token",
+          V12CODE_RELAY_CLIENT_OTLP_TRACES_URL: "https://api.axiom.co/v1/traces",
+          V12CODE_RELAY_CLIENT_OTLP_TRACES_DATASET: "relay-client-traces",
+          V12CODE_RELAY_CLIENT_OTLP_TRACES_TOKEN: "relay-client-token",
         },
         repoRoot: makeTemporaryDirectory(),
       }),
     ).toEqual({
-      V12_RELAY_CLIENT_OTLP_TRACES_URL: "https://api.axiom.co/v1/traces",
-      V12_RELAY_CLIENT_OTLP_TRACES_DATASET: "relay-client-traces",
-      V12_RELAY_CLIENT_OTLP_TRACES_TOKEN: "relay-client-token",
+      V12CODE_RELAY_CLIENT_OTLP_TRACES_URL: "https://api.axiom.co/v1/traces",
+      V12CODE_RELAY_CLIENT_OTLP_TRACES_DATASET: "relay-client-traces",
+      V12CODE_RELAY_CLIENT_OTLP_TRACES_TOKEN: "relay-client-token",
       VITE_RELAY_OTLP_TRACES_URL: "https://api.axiom.co/v1/traces",
       VITE_RELAY_OTLP_TRACES_DATASET: "relay-client-traces",
       VITE_RELAY_OTLP_TRACES_TOKEN: "relay-client-token",
@@ -125,19 +127,19 @@ describe("loadRepoEnv", () => {
     expect(
       loadRepoEnv({
         baseEnv: {
-          V12_RELAY_URL: "https://relay.example.test",
-          V12_MOBILE_OTLP_TRACES_URL: "https://api.axiom.co/v1/traces",
-          V12_MOBILE_OTLP_TRACES_DATASET: "mobile-traces",
-          V12_MOBILE_OTLP_TRACES_TOKEN: "mobile-token",
+          V12CODE_RELAY_URL: "https://relay.example.test",
+          V12CODE_MOBILE_OTLP_TRACES_URL: "https://api.axiom.co/v1/traces",
+          V12CODE_MOBILE_OTLP_TRACES_DATASET: "mobile-traces",
+          V12CODE_MOBILE_OTLP_TRACES_TOKEN: "mobile-token",
         },
         repoRoot: makeTemporaryDirectory(),
       }),
     ).toEqual({
-      V12_RELAY_URL: "https://relay.example.test",
-      VITE_V12_RELAY_URL: "https://relay.example.test",
-      V12_MOBILE_OTLP_TRACES_URL: "https://api.axiom.co/v1/traces",
-      V12_MOBILE_OTLP_TRACES_DATASET: "mobile-traces",
-      V12_MOBILE_OTLP_TRACES_TOKEN: "mobile-token",
+      V12CODE_RELAY_URL: "https://relay.example.test",
+      VITE_V12CODE_RELAY_URL: "https://relay.example.test",
+      V12CODE_MOBILE_OTLP_TRACES_URL: "https://api.axiom.co/v1/traces",
+      V12CODE_MOBILE_OTLP_TRACES_DATASET: "mobile-traces",
+      V12CODE_MOBILE_OTLP_TRACES_TOKEN: "mobile-token",
       EXPO_PUBLIC_OTLP_TRACES_URL: "https://api.axiom.co/v1/traces",
       EXPO_PUBLIC_OTLP_TRACES_DATASET: "mobile-traces",
       EXPO_PUBLIC_OTLP_TRACES_TOKEN: "mobile-token",
@@ -146,7 +148,7 @@ describe("loadRepoEnv", () => {
 });
 
 function makeTemporaryDirectory() {
-  const directory = NodeFS.mkdtempSync(NodePath.join(NodeOS.tmpdir(), "v12-public-config-"));
+  const directory = NodeFS.mkdtempSync(NodePath.join(NodeOS.tmpdir(), "v12code-public-config-"));
   temporaryDirectories.push(directory);
   return directory;
 }

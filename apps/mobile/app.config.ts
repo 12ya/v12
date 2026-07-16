@@ -8,9 +8,9 @@ const repoEnv = loadRepoEnv();
 Object.assign(process.env, repoEnv);
 
 const APP_VARIANT = resolveAppVariant(repoEnv.APP_VARIANT);
-const isIosPersonalTeamBuild = repoEnv.V12_IOS_PERSONAL_TEAM === "1";
+const isIosPersonalTeamBuild = repoEnv.V12CODE_IOS_PERSONAL_TEAM === "1";
 
-const personalTeamBundleIdentifier = repoEnv.V12_IOS_PERSONAL_TEAM_BUNDLE_ID?.trim();
+const personalTeamBundleIdentifier = repoEnv.V12CODE_IOS_PERSONAL_TEAM_BUNDLE_ID?.trim();
 const IOS_BUNDLE_IDENTIFIER_PATTERN = /^[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/;
 
 if (
@@ -19,7 +19,7 @@ if (
     !IOS_BUNDLE_IDENTIFIER_PATTERN.test(personalTeamBundleIdentifier))
 ) {
   throw new Error(
-    "V12_IOS_PERSONAL_TEAM_BUNDLE_ID must be a reverse-DNS identifier such as com.example.v12 when V12_IOS_PERSONAL_TEAM=1.",
+    "V12CODE_IOS_PERSONAL_TEAM_BUNDLE_ID must be a reverse-DNS identifier such as com.example.v12code when V12CODE_IOS_PERSONAL_TEAM=1.",
   );
 }
 
@@ -47,27 +47,27 @@ const RELEASE_ASSETS = {
 
 const VARIANT_CONFIG = {
   development: {
-    appName: "V12 Dev",
-    scheme: "v12-dev",
-    iosBundleIdentifier: "com.v12.v12.dev",
-    androidPackage: "com.v12.v12.dev",
-    relyingParty: "clerk.v12.codes",
+    appName: "V12Code Dev",
+    scheme: "v12code-dev",
+    iosBundleIdentifier: "com.v12code.v12code.dev",
+    androidPackage: "com.v12code.v12code.dev",
+    relyingParty: "clerk.v12code.codes",
     assets: DEVELOPMENT_ASSETS,
   },
   preview: {
-    appName: "V12 Preview",
-    scheme: "v12-preview",
-    iosBundleIdentifier: "com.v12.v12.preview",
-    androidPackage: "com.v12.v12.preview",
-    relyingParty: "clerk.v12.codes",
+    appName: "V12Code Preview",
+    scheme: "v12code-preview",
+    iosBundleIdentifier: "com.v12code.v12code.preview",
+    androidPackage: "com.v12code.v12code.preview",
+    relyingParty: "clerk.v12code.codes",
     assets: RELEASE_ASSETS,
   },
   production: {
-    appName: "V12",
-    scheme: "v12",
-    iosBundleIdentifier: "com.v12.v12",
-    androidPackage: "com.v12.v12",
-    relyingParty: "clerk.v12.codes",
+    appName: "V12Code",
+    scheme: "v12code",
+    iosBundleIdentifier: "com.v12code.v12code",
+    androidPackage: "com.v12code.v12code",
+    relyingParty: "clerk.v12code.codes",
     assets: RELEASE_ASSETS,
   },
 } as const;
@@ -107,7 +107,7 @@ const widgetsPlugin: NonNullable<ExpoConfig["plugins"]>[number] = [
       {
         name: "AgentActivity",
         displayName: "Agent Activity",
-        description: "Shows the current state of active V12 agents.",
+        description: "Shows the current state of active V12Code agents.",
         supportedFamilies: ["systemSmall", "systemMedium", "accessoryRectangular"],
       },
     ],
@@ -144,7 +144,7 @@ const sharingPlugin: NonNullable<ExpoConfig["plugins"]>[number] = [
 
 const config: ExpoConfig = {
   name: variant.appName,
-  slug: "v12",
+  slug: "v12code",
   platforms: ["ios", "android"],
   scheme: variant.scheme,
   version: "0.1.0",
@@ -168,7 +168,7 @@ const config: ExpoConfig = {
     icon: variant.assets.iosIcon,
     supportsTablet: true,
     bundleIdentifier: iosBundleIdentifier,
-    // Pin code signing to the V12 team so non-interactive `expo run:ios`
+    // Pin code signing to the V12Code team so non-interactive `expo run:ios`
     // does not fall back to a personal team (which cannot sign app groups,
     // Sign in with Apple, or push notification entitlements).
     appleTeamId: "ARK85ZXQ4Z",
@@ -181,7 +181,7 @@ const config: ExpoConfig = {
         NSAllowsArbitraryLoads: true,
       },
       NSLocalNetworkUsageDescription:
-        "Allow V12 to connect to V12 servers on your local network or tailnet.",
+        "Allow V12Code to connect to V12Code servers on your local network or tailnet.",
       ITSAppUsesNonExemptEncryption: false,
     },
   },
@@ -260,7 +260,7 @@ const config: ExpoConfig = {
     [
       "expo-camera",
       {
-        cameraPermission: "Allow V12 to access your camera so you can scan pairing QR codes.",
+        cameraPermission: "Allow V12Code to access your camera so you can scan pairing QR codes.",
         barcodeScannerEnabled: true,
         recordAudioAndroid: false,
       },
@@ -310,7 +310,7 @@ const config: ExpoConfig = {
     appVariant: APP_VARIANT,
     iosPersonalTeamBuild: isIosPersonalTeamBuild,
     relay: {
-      url: repoEnv.V12_RELAY_URL ?? null,
+      url: repoEnv.V12CODE_RELAY_URL ?? null,
     },
     clerk: {
       publishableKey: repoEnv.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? null,

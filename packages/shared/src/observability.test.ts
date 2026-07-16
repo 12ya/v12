@@ -153,7 +153,9 @@ describe("observability", () => {
         Effect.gen(function* () {
           const fileSystem = yield* FileSystem.FileSystem;
           const path = yield* Path.Path;
-          const tempDir = yield* fileSystem.makeTempDirectoryScoped({ prefix: "v12-trace-sink-" });
+          const tempDir = yield* fileSystem.makeTempDirectoryScoped({
+            prefix: "v12code-trace-sink-",
+          });
           const tracePath = path.join(tempDir, "shared.trace.ndjson");
 
           const sink = yield* makeTraceSink({
@@ -181,7 +183,9 @@ describe("observability", () => {
         Effect.gen(function* () {
           const fileSystem = yield* FileSystem.FileSystem;
           const path = yield* Path.Path;
-          const tempDir = yield* fileSystem.makeTempDirectoryScoped({ prefix: "v12-trace-sink-" });
+          const tempDir = yield* fileSystem.makeTempDirectoryScoped({
+            prefix: "v12code-trace-sink-",
+          });
           const tracePath = path.join(tempDir, "shared.trace.ndjson");
 
           const sink = yield* makeTraceSink({
@@ -222,7 +226,9 @@ describe("observability", () => {
         Effect.gen(function* () {
           const fileSystem = yield* FileSystem.FileSystem;
           const path = yield* Path.Path;
-          const tempDir = yield* fileSystem.makeTempDirectoryScoped({ prefix: "v12-trace-sink-" });
+          const tempDir = yield* fileSystem.makeTempDirectoryScoped({
+            prefix: "v12code-trace-sink-",
+          });
           const tracePath = path.join(tempDir, "shared.trace.ndjson");
 
           const sink = yield* makeTraceSink({
@@ -261,7 +267,7 @@ describe("observability", () => {
           const fileSystem = yield* FileSystem.FileSystem;
           const path = yield* Path.Path;
           const tempDir = yield* fileSystem.makeTempDirectoryScoped({
-            prefix: "v12-local-tracer-",
+            prefix: "v12code-local-tracer-",
           });
           const tracePath = path.join(tempDir, "shared.trace.ndjson");
 
@@ -321,7 +327,7 @@ describe("observability", () => {
           const fileSystem = yield* FileSystem.FileSystem;
           const path = yield* Path.Path;
           const tempDir = yield* fileSystem.makeTempDirectoryScoped({
-            prefix: "v12-local-tracer-",
+            prefix: "v12code-local-tracer-",
           });
           const tracePath = path.join(tempDir, "shared.trace.ndjson");
 

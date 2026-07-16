@@ -14,18 +14,18 @@ import {
   EnvironmentHttpUnauthorizedError,
   EnvironmentId,
   WS_METHODS,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import {
   type RelayClientDeviceRecord,
   type RelayClientEnvironmentRecord,
   type RelayEnvironmentLinkResponse,
   type RelayProtectedError as RelayProtectedErrorType,
   type RelayManagedEndpointProviderKind,
-} from "@v12/contracts/relay";
-import { EnvironmentRegistry } from "@v12/client-runtime/connection";
-import { request, runStream } from "@v12/client-runtime/rpc";
-import { makeEnvironmentHttpApiClient } from "@v12/client-runtime/rpc";
-import { ManagedRelay } from "@v12/client-runtime/relay";
+} from "@v12code/contracts/relay";
+import { EnvironmentRegistry } from "@v12code/client-runtime/connection";
+import { request, runStream } from "@v12code/client-runtime/rpc";
+import { makeEnvironmentHttpApiClient } from "@v12code/client-runtime/rpc";
+import { ManagedRelay } from "@v12code/client-runtime/relay";
 
 import {
   readPrimaryEnvironmentDescriptor,
@@ -74,7 +74,7 @@ function ensureRelayClientAvailable(
     if (status.status === "available") return;
     if (status.status === "unsupported") {
       return yield* new CloudEnvironmentLinkError({
-        message: `V12 cannot install the relay client automatically on ${status.platform}-${status.arch}.`,
+        message: `V12Code cannot install the relay client automatically on ${status.platform}-${status.arch}.`,
       });
     }
 
@@ -110,7 +110,7 @@ function ensureRelayClientAvailable(
       return yield* new CloudEnvironmentLinkError({
         message:
           installedStatus.status === "unsupported"
-            ? `V12 cannot install the relay client automatically on ${installedStatus.platform}-${installedStatus.arch}.`
+            ? `V12Code cannot install the relay client automatically on ${installedStatus.platform}-${installedStatus.arch}.`
             : "The relay client is still unavailable after installation.",
       });
     }
@@ -276,7 +276,7 @@ export function listManagedCloudEnvironments(input: {
     const configuredRelayUrl = relayUrl();
     if (!configuredRelayUrl) {
       return yield* new CloudEnvironmentLinkError({
-        message: "V12_RELAY_URL is not configured.",
+        message: "V12CODE_RELAY_URL is not configured.",
       });
     }
     const relayClient = yield* ManagedRelay.ManagedRelayClient;
@@ -306,7 +306,7 @@ export function listCloudDevices(input: {
   return Effect.gen(function* () {
     if (!relayUrl()) {
       return yield* new CloudEnvironmentLinkError({
-        message: "V12_RELAY_URL is not configured.",
+        message: "V12CODE_RELAY_URL is not configured.",
       });
     }
     const relayClient = yield* ManagedRelay.ManagedRelayClient;
@@ -385,7 +385,7 @@ export function unlinkPrimaryEnvironmentFromCloud(input: {
 
 // "publish_only" links the environment to the relay for agent-activity
 // publishing alone: no managed tunnel is provisioned, so it can be toggled
-// independently of V12 Connect while clients reach the environment out of band.
+// independently of V12Code Connect while clients reach the environment out of band.
 export type CloudLinkMode = "managed" | "publish_only";
 
 const PUBLISH_ONLY_PROVIDER_KIND = "manual" satisfies RelayManagedEndpointProviderKind;
@@ -403,7 +403,7 @@ export function linkPrimaryEnvironmentToCloud(input: {
     const configuredRelayUrl = relayUrl();
     if (!configuredRelayUrl) {
       return yield* new CloudEnvironmentLinkError({
-        message: "V12_RELAY_URL is not configured.",
+        message: "V12CODE_RELAY_URL is not configured.",
       });
     }
     const managedTunnelsEnabled = (input.mode ?? "managed") === "managed";

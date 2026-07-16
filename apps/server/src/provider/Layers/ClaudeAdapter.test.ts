@@ -20,8 +20,8 @@ import {
   type RuntimeMode,
   ThreadId,
   ProviderInstanceId,
-} from "@v12/contracts";
-import { createModelSelection } from "@v12/shared/model";
+} from "@v12code/contracts";
+import { createModelSelection } from "@v12code/shared/model";
 import { assert, describe, it } from "@effect/vitest";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
@@ -42,7 +42,7 @@ const decodeClaudeSettings = Schema.decodeSync(ClaudeSettings);
 
 // Test-local service tag so the rest of the file can keep using `yield* ClaudeAdapter`.
 class ClaudeAdapter extends Context.Service<ClaudeAdapter, ClaudeAdapterShape>()(
-  "v12/provider/Layers/ClaudeAdapter.test/ClaudeAdapter",
+  "v12code/provider/Layers/ClaudeAdapter.test/ClaudeAdapter",
 ) {}
 
 class FakeClaudeQuery implements AsyncIterable<SDKMessage> {
@@ -3534,15 +3534,15 @@ describe("ClaudeAdapterLive", () => {
 
       // Claude CLI 2.1.121 — lookup by full question text. This is the path
       // that regressed in #2388 when the answers were keyed by `header`.
-      const v121Rendered = sdkQuestions
+      const v12code1Rendered = sdkQuestions
         .map(({ question }) => {
           const answer = sdkAnswers[question];
           return answer === undefined ? null : `"${question}"="${String(answer)}"`;
         })
         .filter((entry): entry is string => entry !== null)
         .join(", ");
-      assert.notEqual(v121Rendered, "", "Expected non-empty SDK 2.1.121 tool_result (#2388)");
-      assert.equal(v121Rendered, '"Which framework?"="React"');
+      assert.notEqual(v12code1Rendered, "", "Expected non-empty SDK 2.1.121 tool_result (#2388)");
+      assert.equal(v12code1Rendered, '"Which framework?"="React"');
     }).pipe(
       Effect.provideService(Random.Random, makeDeterministicRandomService()),
       Effect.provide(harness.layer),

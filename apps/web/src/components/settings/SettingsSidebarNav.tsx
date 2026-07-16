@@ -20,7 +20,10 @@ import {
   SidebarSeparator,
   useSidebar,
 } from "../ui/sidebar";
-import { V12ConnectSidebarAvatar, V12ConnectSidebarSignIn } from "../clerk/V12ConnectSidebarSignIn";
+import {
+  V12CodeConnectSidebarAvatar,
+  V12CodeConnectSidebarSignIn,
+} from "../clerk/V12CodeConnectSidebarSignIn";
 
 export type SettingsSectionPath =
   | "/settings/general"
@@ -105,7 +108,7 @@ export function SettingsSidebarNav({ pathname }: { pathname: string }) {
 
       <SidebarSeparator />
       <SidebarFooter className="p-2">
-        <V12ConnectSidebarSignIn />
+        <V12CodeConnectSidebarSignIn />
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-1">
           <SidebarMenu className="min-w-0">
             <SidebarMenuItem>
@@ -119,7 +122,7 @@ export function SettingsSidebarNav({ pathname }: { pathname: string }) {
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
-          <V12ConnectSidebarAvatar />
+          <V12CodeConnectSidebarAvatar />
         </div>
       </SidebarFooter>
     </>

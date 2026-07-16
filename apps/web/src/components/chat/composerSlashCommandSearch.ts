@@ -2,7 +2,7 @@ import {
   insertRankedSearchResult,
   normalizeSearchQuery,
   scoreQueryMatch,
-} from "@v12/shared/searchRanking";
+} from "@v12code/shared/searchRanking";
 
 import type { ComposerCommandItem } from "./ComposerCommandMenu";
 

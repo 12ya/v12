@@ -24,7 +24,7 @@ const makeServerConfigLayer = (
   ).pipe(
     Layer.provide(
       ServerConfig.layerTest(process.cwd(), {
-        prefix: "v12-auth-control-plane-test-",
+        prefix: "v12code-auth-control-plane-test-",
       }),
     ),
   );

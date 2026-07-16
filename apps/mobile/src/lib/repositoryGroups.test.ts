@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vite-plus/test";
 
-import { EnvironmentId, ProjectId, ProviderInstanceId, ThreadId } from "@v12/contracts";
+import { EnvironmentId, ProjectId, ProviderInstanceId, ThreadId } from "@v12code/contracts";
 
 import { groupProjectsByRepository } from "./repositoryGroups";
-import { EnvironmentProject, EnvironmentThreadShell } from "@v12/client-runtime/state/shell";
+import { EnvironmentProject, EnvironmentThreadShell } from "@v12code/client-runtime/state/shell";
 
 function makeProject(
   input: Partial<EnvironmentProject> & Pick<EnvironmentProject, "environmentId" | "id" | "title">,
@@ -44,29 +44,29 @@ function makeThread(
 describe("groupProjectsByRepository", () => {
   it("groups projects across environments by repository identity", () => {
     const repoIdentity = {
-      canonicalKey: "github.com/v12/v12",
+      canonicalKey: "github.com/v12code/v12code",
       locator: {
         source: "git-remote" as const,
         remoteName: "origin",
-        remoteUrl: "git@github.com:v12/v12.git",
+        remoteUrl: "git@github.com:v12code/v12code.git",
       },
       provider: "github",
-      owner: "v12",
-      name: "v12",
-      displayName: "V12",
+      owner: "v12code",
+      name: "v12code",
+      displayName: "V12Code",
     };
 
     const projects = [
       makeProject({
         environmentId: EnvironmentId.make("env-local"),
         id: ProjectId.make("project-local"),
-        title: "V12",
+        title: "V12Code",
         repositoryIdentity: repoIdentity,
       }),
       makeProject({
         environmentId: EnvironmentId.make("env-staging"),
         id: ProjectId.make("project-staging"),
-        title: "V12",
+        title: "V12Code",
         repositoryIdentity: repoIdentity,
       }),
     ];
@@ -94,9 +94,9 @@ describe("groupProjectsByRepository", () => {
 
     expect(groups).toHaveLength(1);
     expect(groups[0]).toMatchObject({
-      key: "github.com/v12/v12",
-      title: "V12",
-      subtitle: "v12/v12",
+      key: "github.com/v12code/v12code",
+      title: "V12Code",
+      subtitle: "v12code/v12code",
       projectCount: 2,
       threadCount: 2,
     });

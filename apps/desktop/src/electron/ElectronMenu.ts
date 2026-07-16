@@ -1,5 +1,5 @@
-import type { ContextMenuItem } from "@v12/contracts";
-import { HostProcessPlatform } from "@v12/shared/hostProcess";
+import type { ContextMenuItem } from "@v12code/contracts";
+import { HostProcessPlatform } from "@v12code/shared/hostProcess";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
@@ -57,7 +57,7 @@ export class ElectronMenu extends Context.Service<
     ) => Effect.Effect<Option.Option<string>>;
     readonly popupTemplate: (input: ElectronMenuTemplateInput) => Effect.Effect<void>;
   }
->()("@v12/desktop/electron/ElectronMenu") {}
+>()("@v12code/desktop/electron/ElectronMenu") {}
 
 function normalizeContextMenuItems(source: readonly ContextMenuItem[]): ContextMenuItem[] {
   const normalizedItems: ContextMenuItem[] = [];

@@ -5,8 +5,11 @@ import type {
   PreviewOpenInput,
   PreviewSessionSnapshot,
   ScopedThreadRef,
-} from "@v12/contracts";
-import { type AtomCommandResult, mapAtomCommandResult } from "@v12/client-runtime/state/runtime";
+} from "@v12code/contracts";
+import {
+  type AtomCommandResult,
+  mapAtomCommandResult,
+} from "@v12code/client-runtime/state/runtime";
 import * as Cause from "effect/Cause";
 import * as Data from "effect/Data";
 import { AsyncResult } from "effect/unstable/reactivity";

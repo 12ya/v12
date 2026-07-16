@@ -1,5 +1,5 @@
-import { EnvironmentId, type ExecutionEnvironmentDescriptor } from "@v12/contracts";
-import { HostProcessArchitecture, HostProcessPlatform } from "@v12/shared/hostProcess";
+import { EnvironmentId, type ExecutionEnvironmentDescriptor } from "@v12code/contracts";
+import { HostProcessArchitecture, HostProcessPlatform } from "@v12code/shared/hostProcess";
 import * as Context from "effect/Context";
 import * as Crypto from "effect/Crypto";
 import * as Effect from "effect/Effect";
@@ -32,7 +32,7 @@ export class ServerEnvironment extends Context.Service<
     readonly getEnvironmentId: Effect.Effect<EnvironmentId>;
     readonly getDescriptor: Effect.Effect<ExecutionEnvironmentDescriptor>;
   }
->()("v12/environment/ServerEnvironment") {}
+>()("v12code/environment/ServerEnvironment") {}
 
 function platformOs(platform: NodeJS.Platform): ExecutionEnvironmentDescriptor["platform"]["os"] {
   switch (platform) {

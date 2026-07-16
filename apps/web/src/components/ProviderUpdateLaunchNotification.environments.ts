@@ -1,5 +1,5 @@
-import type { ConnectionCatalogEntry } from "@v12/client-runtime/connection";
-import type { ServerConfig } from "@v12/contracts";
+import type { ConnectionCatalogEntry } from "@v12code/client-runtime/connection";
+import type { ServerConfig } from "@v12code/contracts";
 import { useMemo } from "react";
 
 import { useEnvironments, usePrimaryEnvironmentId } from "~/state/environments";

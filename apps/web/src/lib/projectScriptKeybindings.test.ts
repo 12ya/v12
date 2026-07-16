@@ -1,4 +1,4 @@
-import { MAX_KEYBINDING_VALUE_LENGTH, type KeybindingCommand } from "@v12/contracts";
+import { MAX_KEYBINDING_VALUE_LENGTH, type KeybindingCommand } from "@v12code/contracts";
 import { describe, expect, it } from "vite-plus/test";
 
 import { commandForProjectScript } from "../projectScripts";

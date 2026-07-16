@@ -6,7 +6,7 @@ import {
   PrimaryEnvironmentAuth,
   RelayDeviceIdentity,
   SshEnvironmentGateway,
-} from "@v12/client-runtime/platform";
+} from "@v12code/client-runtime/platform";
 import {
   BearerConnectionCredential,
   BearerConnectionProfile,
@@ -20,18 +20,18 @@ import {
   PrimaryConnectionRegistration,
   PrimaryConnectionTarget,
   Wakeups,
-} from "@v12/client-runtime/connection";
-import { bootstrapRemoteBearerSession } from "@v12/client-runtime/authorization";
-import { fetchRemoteEnvironmentDescriptor } from "@v12/client-runtime/environment";
-import { managedRelayAccountChanges, managedRelaySessionAtom } from "@v12/client-runtime/relay";
-import { EnvironmentRpcRequestObserver } from "@v12/client-runtime/rpc";
+} from "@v12code/client-runtime/connection";
+import { bootstrapRemoteBearerSession } from "@v12code/client-runtime/authorization";
+import { fetchRemoteEnvironmentDescriptor } from "@v12code/client-runtime/environment";
+import { managedRelayAccountChanges, managedRelaySessionAtom } from "@v12code/client-runtime/relay";
+import { EnvironmentRpcRequestObserver } from "@v12code/client-runtime/rpc";
 import {
   AuthStandardClientScopes,
   type DesktopBridge,
   type DesktopEnvironmentBootstrap,
   type DesktopSshEnvironmentTarget,
   PRIMARY_LOCAL_ENVIRONMENT_ID,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import * as Clock from "effect/Clock";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
@@ -117,7 +117,7 @@ function clientMetadata() {
   const desktop = window.desktopBridge !== undefined;
   const platform = navigator.platform.trim();
   return {
-    label: desktop ? "V12 Desktop" : "V12 Web",
+    label: desktop ? "V12Code Desktop" : "V12Code Web",
     deviceType: "desktop" as const,
     ...(platform === "" ? {} : { os: platform }),
   };
@@ -182,7 +182,7 @@ const capabilitiesLayer = Layer.effectContext(
         if (session === null) {
           return yield* new ConnectionBlockedError({
             reason: "authentication",
-            detail: "Sign in to V12 Connect to connect this environment.",
+            detail: "Sign in to V12Code Connect to connect this environment.",
           });
         }
         const token = yield* session.readClerkToken().pipe(
@@ -197,7 +197,7 @@ const capabilitiesLayer = Layer.effectContext(
         if (token === null) {
           return yield* new ConnectionBlockedError({
             reason: "authentication",
-            detail: "The V12 Connect session is unavailable.",
+            detail: "The V12Code Connect session is unavailable.",
           });
         }
         return token;

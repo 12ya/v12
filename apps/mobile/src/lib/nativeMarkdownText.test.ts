@@ -8,7 +8,7 @@ import {
   nativeMarkdownListItemBlocks,
   nativeMarkdownTextRuns,
   nativeMarkdownWithPreservedSoftBreaks,
-} from "@v12/mobile-markdown-text/markdown";
+} from "@v12code/mobile-markdown-text/markdown";
 
 describe("nativeMarkdownTextRuns", () => {
   it("preserves inline emphasis and code styles", () => {

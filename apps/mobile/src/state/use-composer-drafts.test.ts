@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "@effect/vitest";
-import { EnvironmentId, ProviderInstanceId } from "@v12/contracts";
+import { EnvironmentId, ProviderInstanceId } from "@v12code/contracts";
 
 import { appAtomRegistry } from "./atom-registry";
 import {

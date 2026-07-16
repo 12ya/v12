@@ -12,4 +12,4 @@ export class PlatformConnectionSource extends Context.Service<
     // both additions and removals by re-emitting.
     readonly registrations: Stream.Stream<ReadonlyArray<PlatformConnectionRegistration>>;
   }
->()("@v12/client-runtime/platform/source/PlatformConnectionSource") {}
+>()("@v12code/client-runtime/platform/source/PlatformConnectionSource") {}

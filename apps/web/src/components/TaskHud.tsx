@@ -1,6 +1,6 @@
-import type { EnvironmentId, ScopedThreadRef } from "@v12/contracts";
-import { scopedThreadKey } from "@v12/client-runtime/environment";
-import type { TimestampFormat } from "@v12/contracts/settings";
+import type { EnvironmentId, ScopedThreadRef } from "@v12code/contracts";
+import { scopedThreadKey } from "@v12code/client-runtime/environment";
+import type { TimestampFormat } from "@v12code/contracts/settings";
 import { CheckIcon, ListTodoIcon, Trash2Icon, XIcon } from "lucide-react";
 import { memo, useCallback, useMemo } from "react";
 

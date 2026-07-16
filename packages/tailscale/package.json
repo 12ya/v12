@@ -1,5 +1,5 @@
 {
-  "name": "@v12/tailscale",
+  "name": "@v12code/tailscale",
   "private": true,
   "type": "module",
   "exports": {
@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@effect/platform-node": "catalog:",
-    "@v12/shared": "workspace:*",
+    "@v12code/shared": "workspace:*",
     "effect": "catalog:"
   },
   "devDependencies": {

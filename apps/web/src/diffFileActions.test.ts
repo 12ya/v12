@@ -1,5 +1,5 @@
-import { scopeThreadRef } from "@v12/client-runtime/environment";
-import { EnvironmentId, ThreadId } from "@v12/contracts";
+import { scopeThreadRef } from "@v12code/client-runtime/environment";
+import { EnvironmentId, ThreadId } from "@v12code/contracts";
 import { beforeEach, describe, expect, it, vi } from "vite-plus/test";
 
 import { openDiffFilePrimaryAction } from "./diffFileActions";

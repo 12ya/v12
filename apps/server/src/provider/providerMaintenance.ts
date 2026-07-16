@@ -2,9 +2,9 @@ import {
   ProviderDriverKind,
   type ServerProvider,
   type ServerProviderVersionAdvisory,
-} from "@v12/contracts";
-import { compareSemverVersions } from "@v12/shared/semver";
-import { resolveCommandPath } from "@v12/shared/shell";
+} from "@v12code/contracts";
+import { compareSemverVersions } from "@v12code/shared/semver";
+import { resolveCommandPath } from "@v12code/shared/shell";
 import * as Config from "effect/Config";
 import * as Context from "effect/Context";
 import * as DateTime from "effect/DateTime";
@@ -81,7 +81,7 @@ export interface ProviderVersionCacheEntry {
 }
 
 export const ProviderVersionCache = Context.Reference<Map<string, ProviderVersionCacheEntry>>(
-  "@v12/server/providerMaintenance/ProviderVersionCache",
+  "@v12code/server/providerMaintenance/ProviderVersionCache",
   {
     defaultValue: () => new Map(),
   },

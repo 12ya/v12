@@ -4,12 +4,12 @@ import {
   type ProjectScript,
   ThreadId,
   type VcsStatusResult,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import {
   type GitActionRequestInput,
   requiresDefaultBranchConfirmation,
   resolveQuickAction,
-} from "@v12/client-runtime/state/vcs";
+} from "@v12code/client-runtime/state/vcs";
 import { useNavigation } from "@react-navigation/native";
 import { NativeHeaderToolbar } from "../../native/StackHeader";
 import { useCallback, useMemo } from "react";

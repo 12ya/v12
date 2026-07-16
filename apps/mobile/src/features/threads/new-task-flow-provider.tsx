@@ -7,14 +7,14 @@ import type {
   ProviderOptionSelection,
   RuntimeMode,
   ServerProviderSkill,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import {
   CommandId,
   DEFAULT_PROVIDER_INTERACTION_MODE,
   DEFAULT_RUNTIME_MODE,
   MessageId,
   ThreadId,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import * as Arr from "effect/Array";
 import { pipe } from "effect/Function";
 
@@ -53,8 +53,8 @@ import {
   setPendingConnectionError,
   useSavedRemoteConnections,
 } from "../../state/use-remote-environment-registry";
-import { EnvironmentProject } from "@v12/client-runtime/state/shell";
-import { type VcsRef } from "@v12/client-runtime/state/vcs";
+import { EnvironmentProject } from "@v12code/client-runtime/state/shell";
+import { type VcsRef } from "@v12code/client-runtime/state/vcs";
 
 type WorkspaceMode = "local" | "worktree";
 

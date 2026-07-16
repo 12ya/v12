@@ -7,7 +7,7 @@ import * as Layer from "effect/Layer";
 import * as PlatformError from "effect/PlatformError";
 import { ChildProcessSpawner } from "effect/unstable/process";
 
-import { GitCommandError, SourceControlProviderError } from "@v12/contracts";
+import { GitCommandError, SourceControlProviderError } from "@v12code/contracts";
 
 import * as ServerConfig from "../config.ts";
 import * as GitVcsDriver from "../vcs/GitVcsDriver.ts";
@@ -16,9 +16,9 @@ import * as SourceControlProviderRegistry from "./SourceControlProviderRegistry.
 import * as SourceControlRepositoryService from "./SourceControlRepositoryService.ts";
 
 const CLONE_URLS = {
-  nameWithOwner: "octocat/v12",
-  url: "https://github.com/octocat/v12",
-  sshUrl: "git@github.com:octocat/v12.git",
+  nameWithOwner: "octocat/v12code",
+  url: "https://github.com/octocat/v12code",
+  sshUrl: "git@github.com:octocat/v12code.git",
 };
 
 function makeProvider(
@@ -82,8 +82,8 @@ function makeLayer(input: {
       ServerConfig.layerTest(
         process.cwd(),
         input.fileSystem
-          ? "/tmp/v12-source-control-repos"
-          : { prefix: "v12-source-control-repos-" },
+          ? "/tmp/v12code-source-control-repos"
+          : { prefix: "v12code-source-control-repos-" },
       ),
     ),
   );
@@ -110,12 +110,12 @@ it.effect("looks up repositories through the requested provider without search",
     const service = yield* SourceControlRepositoryService.SourceControlRepositoryService;
     const result = yield* service.lookupRepository({
       provider: "github",
-      repository: "octocat/v12",
+      repository: "octocat/v12code",
       cwd: "/workspace",
     });
 
     assert.deepStrictEqual(result, { provider: "github", ...CLONE_URLS });
-    assert.deepStrictEqual(calls, [{ cwd: "/workspace", repository: "octocat/v12" }]);
+    assert.deepStrictEqual(calls, [{ cwd: "/workspace", repository: "octocat/v12code" }]);
   }).pipe(Effect.provide(makeLayer({ provider })));
 });
 
@@ -124,7 +124,7 @@ it.effect("preserves provider failures without deriving the repository message f
     provider: "github",
     operation: "getRepositoryCloneUrls",
     cwd: "/workspace",
-    repository: "octocat/v12",
+    repository: "octocat/v12code",
     detail: "credential token abc123 was rejected",
   });
   const provider = makeProvider({
@@ -136,7 +136,7 @@ it.effect("preserves provider failures without deriving the repository message f
     const error = yield* Effect.flip(
       service.lookupRepository({
         provider: "github",
-        repository: "octocat/v12",
+        repository: "octocat/v12code",
         cwd: "/workspace",
       }),
     );
@@ -156,16 +156,16 @@ it.effect("clones a looked-up repository into the requested destination", () =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
     const parent = yield* fs.makeTempDirectoryScoped({
-      prefix: "v12-source-control-clone-parent-",
+      prefix: "v12code-source-control-clone-parent-",
     });
-    const destinationPath = `${parent}/v12`;
+    const destinationPath = `${parent}/v12code`;
     const cloneCalls: Array<{ cwd: string; args: ReadonlyArray<string> }> = [];
 
     yield* Effect.gen(function* () {
       const service = yield* SourceControlRepositoryService.SourceControlRepositoryService;
       const result = yield* service.cloneRepository({
         provider: "github",
-        repository: "octocat/v12",
+        repository: "octocat/v12code",
         destinationPath,
         protocol: "https",
       });
@@ -178,7 +178,7 @@ it.effect("clones a looked-up repository into the requested destination", () =>
       assert.deepStrictEqual(cloneCalls, [
         {
           cwd: parent,
-          args: ["clone", CLONE_URLS.url, "v12"],
+          args: ["clone", CLONE_URLS.url, "v12code"],
         },
       ]);
     }).pipe(
@@ -202,7 +202,7 @@ it.effect("preserves destination probe failures instead of treating them as miss
     _tag: "PermissionDenied",
     module: "FileSystem",
     method: "exists",
-    pathOrDescriptor: "/restricted/v12",
+    pathOrDescriptor: "/restricted/v12code",
   });
 
   return Effect.gen(function* () {
@@ -210,7 +210,7 @@ it.effect("preserves destination probe failures instead of treating them as miss
     const error = yield* Effect.flip(
       service.cloneRepository({
         remoteUrl: CLONE_URLS.sshUrl,
-        destinationPath: "/restricted/v12",
+        destinationPath: "/restricted/v12code",
       }),
     );
 
@@ -250,7 +250,7 @@ it.effect("publishes by creating the repository, adding a remote, and pushing up
     const result = yield* service.publishRepository({
       cwd: "/workspace",
       provider: "github",
-      repository: "octocat/v12",
+      repository: "octocat/v12code",
       visibility: "private",
       remoteName: "origin",
       protocol: "ssh",
@@ -265,7 +265,7 @@ it.effect("publishes by creating the repository, adding a remote, and pushing up
       status: "pushed",
     });
     assert.deepStrictEqual(createCalls, [
-      { cwd: "/workspace", repository: "octocat/v12", visibility: "private" },
+      { cwd: "/workspace", repository: "octocat/v12code", visibility: "private" },
     ]);
     assert.deepStrictEqual(remoteCalls, [
       { cwd: "/workspace", preferredName: "origin", url: CLONE_URLS.sshUrl },
@@ -305,7 +305,7 @@ it.effect("publishes to the remote name returned by ensureRemote", () => {
     const result = yield* service.publishRepository({
       cwd: "/workspace",
       provider: "github",
-      repository: "octocat/v12",
+      repository: "octocat/v12code",
       visibility: "private",
       remoteName: "origin",
       protocol: "ssh",
@@ -341,7 +341,7 @@ it.effect("publish succeeds with status remote_added when the local repo has no 
     const result = yield* service.publishRepository({
       cwd: "/workspace",
       provider: "github",
-      repository: "octocat/v12",
+      repository: "octocat/v12code",
       visibility: "private",
       remoteName: "origin",
       protocol: "ssh",

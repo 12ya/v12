@@ -1,6 +1,6 @@
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import { it as effectIt } from "@effect/vitest";
-import { HostProcessEnvironment, HostProcessPlatform } from "@v12/shared/hostProcess";
+import { HostProcessEnvironment, HostProcessPlatform } from "@v12code/shared/hostProcess";
 import * as Effect from "effect/Effect";
 import { describe, expect, it, vi } from "vite-plus/test";
 
@@ -39,7 +39,7 @@ describe("extractPathFromShellOutput", () => {
   it("extracts the path between capture markers", () => {
     expect(
       extractPathFromShellOutput(
-        "__V12_PATH_START__\n/opt/homebrew/bin:/usr/bin\n__V12_PATH_END__\n",
+        "__V12CODE_PATH_START__\n/opt/homebrew/bin:/usr/bin\n__V12CODE_PATH_END__\n",
       ),
     ).toBe("/opt/homebrew/bin:/usr/bin");
   });
@@ -47,7 +47,7 @@ describe("extractPathFromShellOutput", () => {
   it("ignores shell startup noise around the capture markers", () => {
     expect(
       extractPathFromShellOutput(
-        "Welcome to fish\n__V12_PATH_START__\n/opt/homebrew/bin:/usr/bin\n__V12_PATH_END__\nBye\n",
+        "Welcome to fish\n__V12CODE_PATH_START__\n/opt/homebrew/bin:/usr/bin\n__V12CODE_PATH_END__\nBye\n",
       ),
     ).toBe("/opt/homebrew/bin:/usr/bin");
   });
@@ -65,7 +65,7 @@ describe("readPathFromLoginShell", () => {
         args: ReadonlyArray<string>,
         options: { encoding: "utf8"; timeout: number },
       ) => string
-    >(() => "__V12_ENV_PATH_START__\n/a:/b\n__V12_ENV_PATH_END__\n");
+    >(() => "__V12CODE_ENV_PATH_START__\n/a:/b\n__V12CODE_ENV_PATH_END__\n");
 
     expect(readPathFromLoginShell("/opt/homebrew/bin/fish", execFile)).toBe("/a:/b");
     expect(execFile).toHaveBeenCalledTimes(1);
@@ -83,8 +83,8 @@ describe("readPathFromLoginShell", () => {
     expect(args).toHaveLength(2);
     expect(args?.[0]).toBe("-ilc");
     expect(args?.[1]).toContain("printenv PATH || true");
-    expect(args?.[1]).toContain("__V12_ENV_PATH_START__");
-    expect(args?.[1]).toContain("__V12_ENV_PATH_END__");
+    expect(args?.[1]).toContain("__V12CODE_ENV_PATH_START__");
+    expect(args?.[1]).toContain("__V12CODE_ENV_PATH_END__");
     expect(options).toEqual({ encoding: "utf8", timeout: 5000 });
   });
 });
@@ -131,12 +131,12 @@ describe("readEnvironmentFromLoginShell", () => {
       ) => string
     >(() =>
       [
-        "__V12_ENV_PATH_START__",
+        "__V12CODE_ENV_PATH_START__",
         "/a:/b",
-        "__V12_ENV_PATH_END__",
-        "__V12_ENV_SSH_AUTH_SOCK_START__",
+        "__V12CODE_ENV_PATH_END__",
+        "__V12CODE_ENV_SSH_AUTH_SOCK_START__",
         "/tmp/secretive.sock",
-        "__V12_ENV_SSH_AUTH_SOCK_END__",
+        "__V12CODE_ENV_SSH_AUTH_SOCK_END__",
       ].join("\n"),
     );
 
@@ -156,11 +156,11 @@ describe("readEnvironmentFromLoginShell", () => {
       ) => string
     >(() =>
       [
-        "__V12_ENV_PATH_START__",
+        "__V12CODE_ENV_PATH_START__",
         "/a:/b",
-        "__V12_ENV_PATH_END__",
-        "__V12_ENV_SSH_AUTH_SOCK_START__",
-        "__V12_ENV_SSH_AUTH_SOCK_END__",
+        "__V12CODE_ENV_PATH_END__",
+        "__V12CODE_ENV_SSH_AUTH_SOCK_START__",
+        "__V12CODE_ENV_SSH_AUTH_SOCK_END__",
       ].join("\n"),
     );
 
@@ -177,7 +177,11 @@ describe("readEnvironmentFromLoginShell", () => {
         options: { encoding: "utf8"; timeout: number },
       ) => string
     >(() =>
-      ["__V12_ENV_CUSTOM_VAR_START__", "  padded value  ", "__V12_ENV_CUSTOM_VAR_END__"].join("\n"),
+      [
+        "__V12CODE_ENV_CUSTOM_VAR_START__",
+        "  padded value  ",
+        "__V12CODE_ENV_CUSTOM_VAR_END__",
+      ].join("\n"),
     );
 
     expect(readEnvironmentFromLoginShell("/bin/zsh", ["CUSTOM_VAR"], execFile)).toEqual({
@@ -223,7 +227,7 @@ describe("readEnvironmentFromWindowsShell", () => {
       ) => string
     >(
       () =>
-        "__V12_ENV_PATH_START__\nC:\\Users\\testuser\\AppData\\Roaming\\npm\n__V12_ENV_PATH_END__\n",
+        "__V12CODE_ENV_PATH_START__\nC:\\Users\\testuser\\AppData\\Roaming\\npm\n__V12CODE_ENV_PATH_END__\n",
     );
 
     expect(readEnvironmentFromWindowsShell(["PATH"], execFile)).toEqual({
@@ -245,7 +249,7 @@ describe("readEnvironmentFromWindowsShell", () => {
       ) => string
     >(
       () =>
-        "__V12_ENV_FNM_DIR_START__\r\nC:\\Users\\testuser\\AppData\\Roaming\\fnm\r\n__V12_ENV_FNM_DIR_END__\r\n",
+        "__V12CODE_ENV_FNM_DIR_START__\r\nC:\\Users\\testuser\\AppData\\Roaming\\fnm\r\n__V12CODE_ENV_FNM_DIR_END__\r\n",
     );
 
     expect(readEnvironmentFromWindowsShell(["FNM_DIR"], execFile)).toEqual({
@@ -260,7 +264,7 @@ describe("readEnvironmentFromWindowsShell", () => {
         args: ReadonlyArray<string>,
         options: { encoding: "utf8"; timeout: number },
       ) => string
-    >(() => "__V12_ENV_PATH_START__\nC:\\Tools\n__V12_ENV_PATH_END__\n");
+    >(() => "__V12CODE_ENV_PATH_START__\nC:\\Tools\n__V12CODE_ENV_PATH_END__\n");
 
     expect(readEnvironmentFromWindowsShell(["PATH"], { loadProfile: true }, execFile)).toEqual({
       PATH: "C:\\Tools",
@@ -284,7 +288,7 @@ describe("readEnvironmentFromWindowsShell", () => {
       if (file === "pwsh.exe") {
         throw new Error("spawn pwsh.exe ENOENT");
       }
-      return "__V12_ENV_PATH_START__\nC:\\Tools\n__V12_ENV_PATH_END__\n";
+      return "__V12CODE_ENV_PATH_START__\nC:\\Tools\n__V12CODE_ENV_PATH_END__\n";
     });
 
     expect(readEnvironmentFromWindowsShell(["PATH"], execFile)).toEqual({

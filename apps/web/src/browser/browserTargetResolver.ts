@@ -1,5 +1,9 @@
-import type { BrowserNavigationTarget, EnvironmentId, PreviewUrlResolution } from "@v12/contracts";
-import { isLoopbackHost, normalizePreviewUrl } from "@v12/shared/preview";
+import type {
+  BrowserNavigationTarget,
+  EnvironmentId,
+  PreviewUrlResolution,
+} from "@v12code/contracts";
+import { isLoopbackHost, normalizePreviewUrl } from "@v12code/shared/preview";
 
 import { readPreparedConnection } from "~/state/session";
 

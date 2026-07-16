@@ -5,8 +5,8 @@ import {
   ProviderInstanceId,
   ServerSettings,
   ServerSettingsPatch,
-} from "@v12/contracts";
-import { createModelSelection } from "@v12/shared/model";
+} from "@v12code/contracts";
+import { createModelSelection } from "@v12code/shared/model";
 import { assert, it } from "@effect/vitest";
 import * as Effect from "effect/Effect";
 import * as Duration from "effect/Duration";
@@ -27,7 +27,7 @@ const makeServerSettingsLayer = () =>
     Layer.provideMerge(
       Layer.fresh(
         ServerConfig.layerTest(process.cwd(), {
-          prefix: "v12-server-settings-test-",
+          prefix: "v12code-server-settings-test-",
         }),
       ),
     ),
@@ -60,7 +60,7 @@ it.layer(NodeServices.layer)("server settings", (it) => {
     });
     const configLayer = Layer.fresh(
       ServerConfig.layerTest(process.cwd(), {
-        prefix: "v12-server-settings-secret-failure-test-",
+        prefix: "v12code-server-settings-secret-failure-test-",
       }),
     );
     const settingsLayer = ServerSettingsModule.layer.pipe(

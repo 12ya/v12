@@ -1,4 +1,4 @@
-import { createEnvironmentCatalogAtoms } from "@v12/client-runtime/state/connections";
+import { createEnvironmentCatalogAtoms } from "@v12code/client-runtime/state/connections";
 
 import { connectionAtomRuntime } from "./runtime";
 

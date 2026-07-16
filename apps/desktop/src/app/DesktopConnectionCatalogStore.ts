@@ -5,13 +5,13 @@ import {
   RelayConnectionTarget,
   SshConnectionProfile,
   SshConnectionTarget,
-} from "@v12/client-runtime/connection";
+} from "@v12code/client-runtime/connection";
 import {
   ConnectionCatalogDocument as RuntimeConnectionCatalogDocument,
   type ConnectionCatalogDocument as RuntimeConnectionCatalogDocumentType,
-} from "@v12/client-runtime/platform";
-import type { PersistedSavedEnvironmentRecord } from "@v12/contracts";
-import { fromLenientJson } from "@v12/shared/schemaJson";
+} from "@v12code/client-runtime/platform";
+import type { PersistedSavedEnvironmentRecord } from "@v12code/contracts";
+import { fromLenientJson } from "@v12code/shared/schemaJson";
 import * as Context from "effect/Context";
 import * as Crypto from "effect/Crypto";
 import * as Effect from "effect/Effect";
@@ -165,7 +165,7 @@ export class DesktopConnectionCatalogStore extends Context.Service<
     >;
     readonly clear: Effect.Effect<void>;
   }
->()("@v12/desktop/app/DesktopConnectionCatalogStore") {}
+>()("@v12code/desktop/app/DesktopConnectionCatalogStore") {}
 
 function decodeSecretBytes(
   catalogPath: string,

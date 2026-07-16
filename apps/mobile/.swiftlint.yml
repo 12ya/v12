@@ -1,14 +1,14 @@
 included:
-  - ios/V12
-  - modules/v12-composer-editor/ios
-  - modules/v12-native-controls/ios
-  - modules/v12-terminal/ios
-  - modules/v12-review-diff/ios
+  - ios/V12Code
+  - modules/v12code-composer-editor/ios
+  - modules/v12code-native-controls/ios
+  - modules/v12code-terminal/ios
+  - modules/v12code-review-diff/ios
 
 excluded:
   - ios/Pods
   - ios/build
-  - modules/v12-terminal/Vendor
+  - modules/v12code-terminal/Vendor
 
 reporter: xcode
 

@@ -1,4 +1,4 @@
-import { OrchestrationCheckpointFile } from "@v12/contracts";
+import { OrchestrationCheckpointFile } from "@v12code/contracts";
 import * as SqlClient from "effect/unstable/sql/SqlClient";
 import * as SqlSchema from "effect/unstable/sql/SqlSchema";
 import * as Effect from "effect/Effect";

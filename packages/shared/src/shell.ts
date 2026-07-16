@@ -11,8 +11,8 @@ import * as Path from "effect/Path";
 import { HostProcessEnvironment, HostProcessPlatform } from "./hostProcess.ts";
 import * as Context from "effect/Context";
 
-const PATH_CAPTURE_START = "__V12_PATH_START__";
-const PATH_CAPTURE_END = "__V12_PATH_END__";
+const PATH_CAPTURE_START = "__V12CODE_PATH_START__";
+const PATH_CAPTURE_END = "__V12CODE_PATH_END__";
 const SHELL_ENV_NAME_PATTERN = /^[A-Z0-9_]+$/;
 const WINDOWS_PATH_DELIMITER = ";";
 const POSIX_PATH_DELIMITER = ":";
@@ -134,7 +134,7 @@ function resolveSpawnExecutableWithNode(
 }
 
 export const SpawnExecutableResolution = Context.Reference<SpawnExecutableResolver>(
-  "@v12/shared/shell/SpawnExecutableResolution",
+  "@v12code/shared/shell/SpawnExecutableResolution",
   {
     defaultValue: () => resolveSpawnExecutableWithNode,
   },
@@ -237,11 +237,11 @@ export function mergePathEntries(
 }
 
 function envCaptureStart(name: string): string {
-  return `__V12_ENV_${name}_START__`;
+  return `__V12CODE_ENV_${name}_START__`;
 }
 
 function envCaptureEnd(name: string): string {
-  return `__V12_ENV_${name}_END__`;
+  return `__V12CODE_ENV_${name}_END__`;
 }
 
 function buildEnvironmentCaptureCommand(names: ReadonlyArray<string>): string {
@@ -333,14 +333,14 @@ export type WindowsShellEnvironmentReader = (
 ) => Partial<Record<string, string>>;
 
 export const WindowsShellEnvironment = Context.Reference<WindowsShellEnvironmentReader>(
-  "@v12/shared/shell/WindowsShellEnvironment",
+  "@v12code/shared/shell/WindowsShellEnvironment",
   {
     defaultValue: () => readEnvironmentFromWindowsShell,
   },
 );
 
 export const CommandAvailability = Context.Reference<CommandAvailabilityChecker>(
-  "@v12/shared/shell/CommandAvailability",
+  "@v12code/shared/shell/CommandAvailability",
   {
     defaultValue: () => isCommandAvailable,
   },

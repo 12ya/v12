@@ -1,4 +1,4 @@
-import { EnvironmentId } from "@v12/contracts";
+import { EnvironmentId } from "@v12code/contracts";
 import { describe, expect, it } from "@effect/vitest";
 import * as Option from "effect/Option";
 

@@ -1,4 +1,7 @@
-import type { RelayAgentActivityState, RelayDeviceRegistrationRequest } from "@v12/contracts/relay";
+import type {
+  RelayAgentActivityState,
+  RelayDeviceRegistrationRequest,
+} from "@v12code/contracts/relay";
 import type { SignedApnsDeliveryJob } from "./apnsDeliveryJobs.ts";
 import * as NodeCryptoLayer from "@effect/platform-node/NodeCrypto";
 import { describe, expect, it } from "@effect/vitest";
@@ -127,12 +130,12 @@ const config = RelayConfiguration.RelayConfiguration.of({
     environment: "sandbox",
     teamId: "team-id",
     keyId: "key-id",
-    bundleId: "codes.v12.mobile",
+    bundleId: "codes.v12code.mobile",
     privateKey: Redacted.make("apns-private-key"),
   },
   clerkSecretKey: Redacted.make("clerk-secret"),
   clerkPublishableKey: "pk_test_test",
-  clerkJwtAudience: "v12-relay",
+  clerkJwtAudience: "v12code-relay",
   apnsDeliveryJobSigningSecret: Redacted.make("apns-job-secret"),
   cloudMintPrivateKey: Redacted.make("cloud-private-key"),
   cloudMintPublicKey: "cloud-public-key",

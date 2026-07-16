@@ -1,7 +1,7 @@
 import { StackActions, useNavigation } from "@react-navigation/native";
 import { useCallback, useMemo, useSyncExternalStore, type PropsWithChildren } from "react";
 
-import { V12KeyboardCommands } from "../../native/V12KeyboardCommands";
+import { V12CodeKeyboardCommands } from "../../native/V12CodeKeyboardCommands";
 import {
   dispatchHardwareKeyboardCommand,
   getHardwareKeyboardCommandRegistrationVersion,
@@ -66,8 +66,8 @@ export function HardwareKeyboardCommandProvider({
   );
 
   return (
-    <V12KeyboardCommands enabledCommands={enabledCommands} onCommand={onCommand}>
+    <V12CodeKeyboardCommands enabledCommands={enabledCommands} onCommand={onCommand}>
       {children}
-    </V12KeyboardCommands>
+    </V12CodeKeyboardCommands>
   );
 }

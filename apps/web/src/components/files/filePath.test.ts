@@ -4,8 +4,8 @@ import { fileBreadcrumbs } from "./filePath";
 
 describe("fileBreadcrumbs", () => {
   it("builds project, directory, and file crumbs", () => {
-    expect(fileBreadcrumbs("v12", "apps/web/src/main.tsx")).toEqual([
-      { label: "v12", path: "", kind: "project" },
+    expect(fileBreadcrumbs("v12code", "apps/web/src/main.tsx")).toEqual([
+      { label: "v12code", path: "", kind: "project" },
       { label: "apps", path: "apps", kind: "directory" },
       { label: "web", path: "apps/web", kind: "directory" },
       { label: "src", path: "apps/web/src", kind: "directory" },

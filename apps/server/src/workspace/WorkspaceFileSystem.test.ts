@@ -24,7 +24,7 @@ const TestLayer = Layer.empty.pipe(
   Layer.provideMerge(VcsDriverRegistry.layer.pipe(Layer.provide(VcsProcess.layer))),
   Layer.provide(
     ServerConfig.ServerConfig.layerTest(process.cwd(), {
-      prefix: "v12-workspace-files-test-",
+      prefix: "v12code-workspace-files-test-",
     }),
   ),
   Layer.provideMerge(NodeServices.layer),
@@ -33,7 +33,7 @@ const TestLayer = Layer.empty.pipe(
 const makeTempDir = Effect.gen(function* () {
   const fileSystem = yield* FileSystem.FileSystem;
   return yield* fileSystem.makeTempDirectoryScoped({
-    prefix: "v12-workspace-files-",
+    prefix: "v12code-workspace-files-",
   });
 });
 

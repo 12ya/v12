@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test";
 
-import { ProviderInstanceId, type ServerConfig } from "@v12/contracts";
+import { ProviderInstanceId, type ServerConfig } from "@v12code/contracts";
 
 import { buildModelOptions } from "./modelOptions";
 

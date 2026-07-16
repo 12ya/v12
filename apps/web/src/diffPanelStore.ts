@@ -1,5 +1,5 @@
-import { scopedThreadKey } from "@v12/client-runtime/environment";
-import type { ScopedThreadRef, TurnId } from "@v12/contracts";
+import { scopedThreadKey } from "@v12code/client-runtime/environment";
+import type { ScopedThreadRef, TurnId } from "@v12code/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -117,7 +117,7 @@ export const useDiffPanelStore = create<DiffPanelStoreState>()(
         }),
     }),
     {
-      name: "v12:diff-panel-state:v1",
+      name: "v12code:diff-panel-state:v1",
       version: 1,
       storage: createJSONStorage(() =>
         resolveStorage(typeof window !== "undefined" ? window.localStorage : undefined),

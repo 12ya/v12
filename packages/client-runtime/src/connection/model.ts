@@ -1,4 +1,4 @@
-import { EnvironmentId } from "@v12/contracts";
+import { EnvironmentId } from "@v12code/contracts";
 import * as Schema from "effect/Schema";
 
 const ConnectionTargetBase = {

@@ -1,14 +1,14 @@
 {
-  "name": "v12",
+  "name": "v12code",
   "version": "0.0.28",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/12ya/v12",
+    "url": "https://github.com/12ya/v12code",
     "directory": "apps/server"
   },
   "bin": {
-    "v12": "./dist/bin.mjs"
+    "v12code": "./dist/bin.mjs"
   },
   "files": [
     "dist"
@@ -37,10 +37,10 @@
     "@effect/vitest": "catalog:",
     "@types/bun": "1.3.14",
     "@types/node": "catalog:",
-    "@v12/contracts": "workspace:*",
-    "@v12/shared": "workspace:*",
-    "@v12/tailscale": "workspace:*",
-    "@v12/web": "workspace:*",
+    "@v12code/contracts": "workspace:*",
+    "@v12code/shared": "workspace:*",
+    "@v12code/tailscale": "workspace:*",
+    "@v12code/web": "workspace:*",
     "effect-acp": "workspace:*",
     "effect-codex-app-server": "workspace:*",
     "vite-plus": "catalog:"

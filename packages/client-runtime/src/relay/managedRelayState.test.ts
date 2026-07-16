@@ -1,9 +1,9 @@
-import { EnvironmentId } from "@v12/contracts";
+import { EnvironmentId } from "@v12code/contracts";
 import type {
   RelayClientDeviceRecord,
   RelayClientEnvironmentRecord,
   RelayEnvironmentStatusResponse,
-} from "@v12/contracts/relay";
+} from "@v12code/contracts/relay";
 import { describe, expect, it } from "@effect/vitest";
 import * as Effect from "effect/Effect";
 import * as Fiber from "effect/Fiber";

@@ -11,7 +11,7 @@ import {
   type UserInputQuestion,
   type ThreadId,
   type TurnId,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 
 import type {
   ChatMessage,

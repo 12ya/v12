@@ -15,9 +15,9 @@ import {
   PUBLISH_ICON_OVERRIDES,
 } from "../../../scripts/lib/brand-assets.ts";
 import { resolveCatalogDependencies } from "../../../scripts/lib/resolve-catalog.ts";
-import { fromJsonStringPretty } from "@v12/shared/schemaJson";
-import { fromYaml } from "@v12/shared/schemaYaml";
-import { resolveSpawnCommand } from "@v12/shared/shell";
+import { fromJsonStringPretty } from "@v12code/shared/schemaJson";
+import { fromYaml } from "@v12code/shared/schemaYaml";
+import { resolveSpawnCommand } from "@v12code/shared/shell";
 import serverPackageJson from "../package.json" with { type: "json" };
 import {
   ServerCliBuildAssetMissingError,
@@ -205,7 +205,7 @@ const createVpPmPublishArgs = (config: PublishCommandConfig): ReadonlyArray<stri
   const args = [
     "publish",
     "--filter",
-    "v12",
+    "v12code",
     "--access",
     config.access,
     "--tag",
@@ -319,7 +319,7 @@ const publishCmd = Command.make(
 // ---------------------------------------------------------------------------
 
 const cli = Command.make("cli").pipe(
-  Command.withDescription("V12 server build & publish CLI."),
+  Command.withDescription("V12Code server build & publish CLI."),
   Command.withSubcommands([buildCmd, publishCmd]),
 );
 

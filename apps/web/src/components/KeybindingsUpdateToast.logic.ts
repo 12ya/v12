@@ -1,4 +1,4 @@
-import type { ServerConfigStreamEvent } from "@v12/contracts";
+import type { ServerConfigStreamEvent } from "@v12code/contracts";
 
 export const KEYBINDINGS_SUCCESS_TOAST_COOLDOWN_MS = 2_000;
 

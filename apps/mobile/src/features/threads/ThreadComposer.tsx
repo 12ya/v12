@@ -6,14 +6,14 @@ import type {
   OrchestrationThreadShell,
   ProviderInteractionMode,
   RuntimeMode,
-  ServerConfig as V12ServerConfig,
-} from "@v12/contracts";
+  ServerConfig as V12CodeServerConfig,
+} from "@v12code/contracts";
 import {
   detectComposerTrigger,
   replaceTextRange,
   serializeComposerFileLink,
   type ComposerTrigger,
-} from "@v12/shared/composerTrigger";
+} from "@v12code/shared/composerTrigger";
 import type { ReactNode } from "react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import {
@@ -54,7 +54,7 @@ import {
   insertRankedSearchResult,
   normalizeSearchQuery,
   scoreQueryMatch,
-} from "@v12/shared/searchRanking";
+} from "@v12code/shared/searchRanking";
 import {
   applyProviderOptionMenuEvent,
   buildProviderOptionMenuActions,
@@ -92,7 +92,7 @@ export interface ThreadComposerProps {
    */
   readonly threadSyncPhase?: "loading" | "syncing" | null;
   readonly selectedThread: OrchestrationThreadShell;
-  readonly serverConfig: V12ServerConfig | null;
+  readonly serverConfig: V12CodeServerConfig | null;
   readonly queueCount: number;
   readonly activeThreadBusy: boolean;
   readonly environmentId: EnvironmentId;
@@ -244,7 +244,7 @@ const ComposerConnectionStatusPill = memo(function ComposerConnectionStatusPill(
           <View className="h-2 w-2 rounded-full bg-red-500" />
         )}
         <Text
-          className="max-w-[260px] text-sm font-v12-bold leading-snug text-foreground"
+          className="max-w-[260px] text-sm font-v12code-bold leading-snug text-foreground"
           numberOfLines={1}
         >
           {props.status.label}
@@ -511,7 +511,7 @@ export const ThreadComposer = memo(function ThreadComposer(props: ThreadComposer
     // the app is foregrounded and the activity token can be registered.
     armAgentAwarenessLiveActivityForLocalWork({
       threadTitle: props.selectedThread.title,
-      projectTitle: props.environmentLabel ?? "V12",
+      projectTitle: props.environmentLabel ?? "V12Code",
     });
     try {
       await onSendMessage();
@@ -814,7 +814,7 @@ export const ThreadComposer = memo(function ThreadComposer(props: ThreadComposer
               ))}
               {props.draftAttachments.length > 3 ? (
                 <View className="size-[30px] items-center justify-center rounded-lg bg-subtle-strong">
-                  <Text className="text-foreground-muted text-2xs font-v12-bold">
+                  <Text className="text-foreground-muted text-2xs font-v12code-bold">
                     +{props.draftAttachments.length - 3}
                   </Text>
                 </View>

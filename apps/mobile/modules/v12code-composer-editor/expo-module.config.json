@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["V12CodeComposerEditorModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.v12codecomposereditor.V12CodeComposerEditorModule"]
+  }
+}

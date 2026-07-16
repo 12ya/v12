@@ -103,13 +103,13 @@ export interface RelayPublicConfig {
 
 const publicConfigEnvEntries = (config: RelayPublicConfig) =>
   ({
-    V12_RELAY_URL: config.relayUrl,
-    V12_MOBILE_OTLP_TRACES_URL: config.mobileTracingUrl,
-    V12_MOBILE_OTLP_TRACES_DATASET: config.mobileTracingDataset,
-    V12_MOBILE_OTLP_TRACES_TOKEN: config.mobileTracingToken,
-    V12_RELAY_CLIENT_OTLP_TRACES_URL: config.clientTracingUrl,
-    V12_RELAY_CLIENT_OTLP_TRACES_DATASET: config.clientTracingDataset,
-    V12_RELAY_CLIENT_OTLP_TRACES_TOKEN: config.clientTracingToken,
+    V12CODE_RELAY_URL: config.relayUrl,
+    V12CODE_MOBILE_OTLP_TRACES_URL: config.mobileTracingUrl,
+    V12CODE_MOBILE_OTLP_TRACES_DATASET: config.mobileTracingDataset,
+    V12CODE_MOBILE_OTLP_TRACES_TOKEN: config.mobileTracingToken,
+    V12CODE_RELAY_CLIENT_OTLP_TRACES_URL: config.clientTracingUrl,
+    V12CODE_RELAY_CLIENT_OTLP_TRACES_DATASET: config.clientTracingDataset,
+    V12CODE_RELAY_CLIENT_OTLP_TRACES_TOKEN: config.clientTracingToken,
   }) as const;
 
 export function reconcileRootEnvPublicConfig(contents: string, config: RelayPublicConfig): string {
@@ -141,8 +141,8 @@ export function reconcileRootEnvRelayUrl(contents: string, relayUrl: string): st
     clientTracingToken: "",
   })
     .split("\n")
-    .filter((line) => !line.startsWith("V12_MOBILE_OTLP_TRACES_"))
-    .filter((line) => !line.startsWith("V12_RELAY_CLIENT_OTLP_TRACES_"))
+    .filter((line) => !line.startsWith("V12CODE_MOBILE_OTLP_TRACES_"))
+    .filter((line) => !line.startsWith("V12CODE_RELAY_CLIENT_OTLP_TRACES_"))
     .join("\n");
 }
 
@@ -170,9 +170,9 @@ export function serializeGithubOutput(entries: Readonly<Record<string, string | 
 
 export function serializeRelayClientTracingEnvironment(config: RelayPublicConfig): string {
   return serializeGithubOutput({
-    V12_RELAY_CLIENT_OTLP_TRACES_URL: config.clientTracingUrl,
-    V12_RELAY_CLIENT_OTLP_TRACES_DATASET: config.clientTracingDataset,
-    V12_RELAY_CLIENT_OTLP_TRACES_TOKEN: config.clientTracingToken,
+    V12CODE_RELAY_CLIENT_OTLP_TRACES_URL: config.clientTracingUrl,
+    V12CODE_RELAY_CLIENT_OTLP_TRACES_DATASET: config.clientTracingDataset,
+    V12CODE_RELAY_CLIENT_OTLP_TRACES_TOKEN: config.clientTracingToken,
   });
 }
 
@@ -339,7 +339,7 @@ export function publicConfigFromOutput(output: unknown): RelayPublicConfig | nul
 const readRelayPublicConfig = Effect.fn("relay.deploy.readState")(function* (stage: string) {
   const state = yield* State.State;
   const service = yield* state;
-  const output = yield* service.getOutput({ stack: "V12Relay", stage });
+  const output = yield* service.getOutput({ stack: "V12CodeRelay", stage });
   const publicConfig = publicConfigFromOutput(output);
   if (publicConfig === null) {
     return yield* new RelayDeployError({
@@ -489,7 +489,7 @@ export const relayDeployCommand = Command.make(
     ),
   },
   deploy,
-).pipe(Command.withDescription("Deploy the V12 relay through Alchemy."));
+).pipe(Command.withDescription("Deploy the V12Code relay through Alchemy."));
 
 if (import.meta.main) {
   Command.run(relayDeployCommand, { version: "0.0.0" }).pipe(

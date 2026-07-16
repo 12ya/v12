@@ -5,8 +5,8 @@ import type {
   OrchestrationThread,
   ProjectId,
   ThreadId,
-} from "@v12/contracts";
-import { normalizeProjectPathForComparison } from "@v12/shared/path";
+} from "@v12code/contracts";
+import { normalizeProjectPathForComparison } from "@v12code/shared/path";
 import * as Effect from "effect/Effect";
 
 import { OrchestrationCommandInvariantError } from "./Errors.ts";

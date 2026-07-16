@@ -1,4 +1,4 @@
-import { HostProcessHostname, HostProcessPlatform } from "@v12/shared/hostProcess";
+import { HostProcessHostname, HostProcessPlatform } from "@v12code/shared/hostProcess";
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
 import * as Option from "effect/Option";
@@ -192,5 +192,5 @@ export const resolveServerEnvironmentLabel = Effect.fn("resolveServerEnvironment
     return hostname;
   }
 
-  return normalizeLabel(input.cwdBaseName) ?? "V12 environment";
+  return normalizeLabel(input.cwdBaseName) ?? "V12Code environment";
 });

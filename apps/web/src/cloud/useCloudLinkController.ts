@@ -1,10 +1,10 @@
 import { useAuth } from "@clerk/react";
-import { findErrorTraceId } from "@v12/client-runtime/errors";
+import { findErrorTraceId } from "@v12code/client-runtime/errors";
 import {
   isAtomCommandInterrupted,
   settlePromise,
   squashAtomCommandFailure,
-} from "@v12/client-runtime/state/runtime";
+} from "@v12code/client-runtime/state/runtime";
 import { useState } from "react";
 
 import { toastManager } from "../components/ui/toast";
@@ -24,7 +24,7 @@ export interface CloudLinkDesiredState {
 }
 
 /**
- * Drives the primary environment's V12 Connect link. V12 Connect (managed
+ * Drives the primary environment's V12Code Connect link. V12Code Connect (managed
  * tunnel) and agent-activity publishing are independent capabilities backed by
  * a single relay link, so consumers express the full desired state and
  * `reconcileCloudState` applies it: unlink when neither is wanted, otherwise
@@ -51,13 +51,18 @@ export function useCloudLinkController() {
   const [operationError, setOperationError] = useState<string | null>(null);
 
   const reportUpdateFailure = (cause: unknown) => {
-    const message = cause instanceof Error ? cause.message : "Could not update V12 Connect access.";
+    const message =
+      cause instanceof Error ? cause.message : "Could not update V12Code Connect access.";
     const traceId = findErrorTraceId(cause);
-    console.error("[v12-connect] Could not update V12 Connect", { message, traceId, cause });
+    console.error("[v12code-connect] Could not update V12Code Connect", {
+      message,
+      traceId,
+      cause,
+    });
     setOperationError(traceId ? `${message} Trace ID: ${traceId}` : message);
     toastManager.add({
       type: "error",
-      title: "Could not update V12 Connect",
+      title: "Could not update V12Code Connect",
       description: message,
       data: traceId
         ? {
@@ -93,7 +98,7 @@ export function useCloudLinkController() {
     // actually holds now.
     if (!wantsLink) {
       // Unlink works without a relay token — a failed token read must not
-      // leave the user unable to turn V12 Connect off.
+      // leave the user unable to turn V12Code Connect off.
       const unlinkResult = await unlinkPrimaryEnvironment({
         target,
         clerkToken: tokenResult._tag === "Success" ? (tokenResult.value ?? null) : null,
@@ -112,7 +117,7 @@ export function useCloudLinkController() {
       }
       const clerkToken = tokenResult.value;
       if (!clerkToken) {
-        reportUpdateFailure(new Error("Sign in to V12 Connect before enabling this."));
+        reportUpdateFailure(new Error("Sign in to V12Code Connect before enabling this."));
         return false;
       }
       if (!linked || managedTunnelActive !== desired.managedTunnel) {

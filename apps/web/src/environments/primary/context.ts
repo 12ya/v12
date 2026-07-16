@@ -2,8 +2,8 @@ import {
   attachEnvironmentDescriptor,
   createKnownEnvironment,
   type KnownEnvironment,
-} from "@v12/client-runtime/environment";
-import type { ExecutionEnvironmentDescriptor } from "@v12/contracts";
+} from "@v12code/client-runtime/environment";
+import type { ExecutionEnvironmentDescriptor } from "@v12code/contracts";
 import * as Effect from "effect/Effect";
 
 import { PrimaryEnvironmentRequestError, retryTransientBootstrap } from "./auth";

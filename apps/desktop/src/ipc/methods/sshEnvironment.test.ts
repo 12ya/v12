@@ -1,5 +1,5 @@
 import { assert, describe, it } from "@effect/vitest";
-import { SshHttpBridgeError } from "@v12/ssh/errors";
+import { SshHttpBridgeError } from "@v12code/ssh/errors";
 import * as Cause from "effect/Cause";
 import * as Effect from "effect/Effect";
 import * as Exit from "effect/Exit";
@@ -61,7 +61,7 @@ describe("SSH environment IPC", () => {
         serverVersion: "1.2.3",
         capabilities: { repositoryIdentity: true },
       });
-      assert.deepEqual(requestUrls, ["http://127.0.0.1:41773/.well-known/v12/environment"]);
+      assert.deepEqual(requestUrls, ["http://127.0.0.1:41773/.well-known/v12code/environment"]);
     }).pipe(Effect.provide(layer));
   });
 

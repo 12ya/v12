@@ -1,9 +1,13 @@
-import type { ProjectScript, ProjectScriptIcon, ResolvedKeybindingsConfig } from "@v12/contracts";
+import type {
+  ProjectScript,
+  ProjectScriptIcon,
+  ResolvedKeybindingsConfig,
+} from "@v12code/contracts";
 import {
   isAtomCommandInterrupted,
   squashAtomCommandFailure,
   type AtomCommandResult,
-} from "@v12/client-runtime/state/runtime";
+} from "@v12code/client-runtime/state/runtime";
 import {
   BugIcon,
   ChevronDownIcon,

@@ -1,6 +1,6 @@
 # Remote Architecture
 
-This document describes the target architecture for first-class remote environments in V12.
+This document describes the target architecture for first-class remote environments in V12Code.
 
 It is intentionally architecture-first. It does not define a complete implementation plan or user-facing rollout checklist. The goal is to establish the core model so remote support can be added without another broad rewrite.
 
@@ -8,7 +8,7 @@ It is intentionally architecture-first. It does not define a complete implementa
 
 - Treat remote environments as first-class product primitives, not special cases.
 - Support multiple ways to reach the same environment.
-- Keep the V12 server as the execution boundary.
+- Keep the V12Code server as the execution boundary.
 - Let desktop, mobile, and web all share the same conceptual model.
 - Avoid introducing a local control plane unless product pressure proves it is necessary.
 
@@ -21,7 +21,7 @@ It is intentionally architecture-first. It does not define a complete implementa
 
 ## High-level architecture
 
-V12 already has a clean runtime boundary: the client talks to a V12 server over HTTP/WebSocket, and the server owns orchestration, providers, terminals, git, and filesystem operations.
+V12Code already has a clean runtime boundary: the client talks to a V12Code server over HTTP/WebSocket, and the server owns orchestration, providers, terminals, git, and filesystem operations.
 
 Remote support should preserve that boundary.
 
@@ -44,10 +44,10 @@ Remote support should preserve that boundary.
 │ - desktop-managed ssh bootstrap + forward   │
 └───────────────┬──────────────────────────────┘
                 │
-                │ connects to one V12 server
+                │ connects to one V12Code server
                 │
 ┌───────────────▼──────────────────────────────┐
-│ Execution environment = one V12 server       │
+│ Execution environment = one V12Code server       │
 │                                              │
 │ - environment identity                       │
 │ - provider state                             │
@@ -56,13 +56,13 @@ Remote support should preserve that boundary.
 └──────────────────────────────────────────────┘
 ```
 
-The important decision is that remoteness is expressed at the environment connection layer, not by splitting the V12 runtime itself.
+The important decision is that remoteness is expressed at the environment connection layer, not by splitting the V12Code runtime itself.
 
 ## Domain model
 
 ### ExecutionEnvironment
 
-An `ExecutionEnvironment` is one running V12 server instance.
+An `ExecutionEnvironment` is one running V12Code server instance.
 
 It is the unit that owns:
 
@@ -103,7 +103,7 @@ This is the key abstraction that keeps SSH from taking over the model.
 
 A single environment may have many endpoints:
 
-- `wss://v12.example.com`
+- `wss://v12code.example.com`
 - `ws://10.0.0.25:3773`
 - a tunneled relay URL
 - a desktop-managed SSH tunnel that resolves to a local forwarded WebSocket URL
@@ -158,7 +158,7 @@ A hosted pairing request is a bootstrap URL for the static web app, not a transp
 Example:
 
 ```text
-https://app.v12.codes/pair?host=https://backend.example.com:3773#token=PAIRCODE
+https://app.v12code.codes/pair?host=https://backend.example.com:3773#token=PAIRCODE
 ```
 
 The hosted app reads the `host` parameter and pairing token, exchanges the token directly with that backend, then saves the resulting environment record in browser local storage.
@@ -191,7 +191,7 @@ That means:
 
 Access methods answer one question:
 
-How does the client speak WebSocket to a V12 server?
+How does the client speak WebSocket to a V12Code server?
 
 They do not answer:
 
@@ -204,7 +204,7 @@ They do not answer:
 Examples:
 
 - `ws://10.0.0.15:3773`
-- `wss://v12.example.com`
+- `wss://v12code.example.com`
 
 This is the base model and should be the first-class default.
 
@@ -212,7 +212,7 @@ Benefits:
 
 - works for desktop, mobile, and web
 - no client-specific process management required
-- best fit for hosted or self-managed remote V12 deployments
+- best fit for hosted or self-managed remote V12Code deployments
 
 Browser security rules are part of this access method. A hosted HTTPS web client can connect to `wss://` backends, but it cannot connect to plain `ws://` or `http://` LAN backends because that would be mixed content.
 
@@ -226,7 +226,7 @@ Examples:
 
 This is still direct WebSocket access from the client's perspective. The difference is that the route is mediated by a tunnel or relay.
 
-For V12, tunnels are best modeled as another `AccessEndpoint`, not as a different kind of environment.
+For V12Code, tunnels are best modeled as another `AccessEndpoint`, not as a different kind of environment.
 
 This is especially useful when:
 
@@ -235,7 +235,7 @@ This is especially useful when:
 - mobile must reach a desktop-hosted environment
 - a machine should be reachable without exposing raw LAN or public ports
 
-Tailscale-backed access sits here architecturally even though the current implementation is endpoint discovery rather than a V12-managed tunnel. It contributes private-network endpoints and lets the existing HTTP/WebSocket client path do the actual connection.
+Tailscale-backed access sits here architecturally even though the current implementation is endpoint discovery rather than a V12Code-managed tunnel. It contributes private-network endpoints and lets the existing HTTP/WebSocket client path do the actual connection.
 
 ### 3. Desktop-managed SSH access
 
@@ -245,7 +245,7 @@ The desktop main process can use SSH to:
 
 - reach a machine
 - probe it
-- launch or reuse a remote V12 server
+- launch or reuse a remote V12Code server
 - establish a local port forward
 
 After that, the renderer should still connect using an ordinary WebSocket URL against the forwarded local port.
@@ -258,7 +258,7 @@ The desktop main process owns the SSH bridge because it can spawn local SSH proc
 
 Launch methods answer a different question:
 
-How does a V12 server come to exist on the target machine?
+How does a V12Code server come to exist on the target machine?
 
 Launch and access should stay separate in the design.
 
@@ -266,7 +266,7 @@ Launch and access should stay separate in the design.
 
 The simplest launch method is no launch at all.
 
-The user or operator already runs V12 on the target machine, and the client connects through a direct or tunneled WebSocket endpoint.
+The user or operator already runs V12Code on the target machine, and the client connects through a direct or tunneled WebSocket endpoint.
 
 This should be the first remote mode shipped because it validates the environment model with minimal extra machinery.
 
@@ -282,17 +282,17 @@ Useful ideas to borrow from Zed:
 - reconnect-friendly launcher behavior
 - desktop-owned connection UX
 
-What should be different in V12:
+What should be different in V12Code:
 
 - no custom stdio/socket proxy protocol between renderer and remote runtime
 - no attempt to make the remote runtime look like an editor transport
 - keep the final client-to-server connection as WebSocket
 
-The recommended V12 flow is:
+The recommended V12Code flow is:
 
 1. Desktop connects over SSH.
-2. Desktop probes the remote machine and verifies V12 availability.
-3. Desktop launches or reuses a remote V12 server.
+2. Desktop probes the remote machine and verifies V12Code availability.
+3. Desktop launches or reuses a remote V12Code server.
 4. Desktop establishes local port forwarding.
 5. Renderer connects to the forwarded WebSocket endpoint as a normal environment.
 
@@ -307,7 +307,7 @@ Failure handling should be explicit:
 
 ### 3. Client-managed local publish
 
-This is the inverse of remote launch: a local V12 server is already running, and the client publishes it through a tunnel.
+This is the inverse of remote launch: a local V12Code server is already running, and the client publishes it through a tunnel.
 
 This is useful for:
 
@@ -322,7 +322,7 @@ These concerns are easy to conflate, but separating them prevents architectural 
 
 Examples:
 
-- A manually hosted V12 server might be reached through direct `wss`.
+- A manually hosted V12Code server might be reached through direct `wss`.
 - The same server might also be reachable through a tunnel.
 - An SSH-managed server might be launched over SSH but then reached through forwarded WebSocket.
 - A local desktop server might be published through a tunnel for mobile.
@@ -341,7 +341,7 @@ That means:
 - tunnel exposure should not rely on obscurity
 - client-saved endpoints should carry enough auth metadata to reconnect safely
 
-V12 already supports a WebSocket auth token on the server. That should become a first-class part of environment access rather than remaining an incidental query parameter convention.
+V12Code already supports a WebSocket auth token on the server. That should become a first-class part of environment access rather than remaining an incidental query parameter convention.
 
 For publicly reachable environments, authenticated access should be treated as required.
 
@@ -362,14 +362,14 @@ The important mismatch is transport shape.
 
 Zed needs a custom proxy/server protocol because its remote boundary sits below the editor and project runtime.
 
-V12 should not copy that part.
+V12Code should not copy that part.
 
-V12 already has the right runtime boundary:
+V12Code already has the right runtime boundary:
 
-- one V12 server per environment
+- one V12Code server per environment
 - ordinary HTTP/WebSocket between client and environment
 
-So V12 should borrow Zed's launch discipline, not its transport protocol.
+So V12Code should borrow Zed's launch discipline, not its transport protocol.
 
 ## Recommended rollout
 

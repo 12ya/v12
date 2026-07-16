@@ -3,8 +3,8 @@ import type * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Socket from "effect/unstable/socket/Socket";
 
-import { remoteHttpClientLayer } from "@v12/client-runtime/rpc";
-import { makeRelayClientTracingLayer } from "@v12/shared/relayTracing";
+import { remoteHttpClientLayer } from "@v12code/client-runtime/rpc";
+import { makeRelayClientTracingLayer } from "@v12code/shared/relayTracing";
 import * as PrimaryEnvironmentHttpClient from "../environments/primary/httpClient";
 import { primaryEnvironmentHttpLayer } from "../environments/primary/httpLayer";
 
@@ -18,7 +18,7 @@ function configuredRelayUrl(): string {
 
 const httpClientLayer = remoteHttpClientLayer((input, init) => globalThis.fetch(input, init));
 const relayTracingLayer = makeRelayClientTracingLayer(resolveRelayTracingConfig(), {
-  serviceName: "v12-web-relay-client",
+  serviceName: "v12code-web-relay-client",
   serviceVersion: import.meta.env.APP_VERSION,
   runtime: "browser",
   client: typeof window !== "undefined" && window.desktopBridge ? "desktop" : "web",

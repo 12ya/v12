@@ -14,14 +14,14 @@ describe("schemaYaml helpers", () => {
     const decodeConfig = Schema.decodeUnknownSync(fromYaml(ProjectConfig));
 
     expect(
-      decodeConfig(`name: v12
+      decodeConfig(`name: v12code
 enabled: true
 tags:
   - codex
   - effect
 `),
     ).toEqual({
-      name: "v12",
+      name: "v12code",
       enabled: true,
       tags: ["codex", "effect"],
     });
@@ -32,11 +32,11 @@ tags:
 
     expect(
       encodeConfig({
-        name: "v12",
+        name: "v12code",
         enabled: true,
         tags: ["codex"],
       }),
-    ).toBe(`name: v12
+    ).toBe(`name: v12code
 enabled: true
 tags:
   - codex

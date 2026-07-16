@@ -1,4 +1,4 @@
-export * from "@v12/shared/advertisedEndpoint";
+export * from "@v12code/shared/advertisedEndpoint";
 
 export const environmentEndpointUrl = (httpBaseUrl: string, pathname: string): string => {
   const url = new URL(httpBaseUrl);

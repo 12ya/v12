@@ -1,4 +1,4 @@
-import type { EnvironmentId } from "@v12/contracts";
+import type { EnvironmentId } from "@v12code/contracts";
 
 import { appAtomRegistry } from "./atom-registry";
 import { createThreadOutboxManager } from "./thread-outbox-manager";

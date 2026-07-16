@@ -3,7 +3,7 @@ import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import { ChildProcessSpawner } from "effect/unstable/process";
 
-import { VcsProcessExitError } from "@v12/contracts";
+import { VcsProcessExitError } from "@v12code/contracts";
 
 import * as VcsProcess from "../vcs/VcsProcess.ts";
 import * as GitLabCli from "./GitLabCli.ts";
@@ -43,14 +43,14 @@ layer("GitLabCli.layer", (it) => {
             JSON.stringify({
               iid: 42,
               title: "Add MR thread creation",
-              web_url: "https://gitlab.com/12ya/V12/-/merge_requests/42",
+              web_url: "https://gitlab.com/12ya/V12Code/-/merge_requests/42",
               target_branch: "main",
               source_branch: "feature/mr-threads",
               state: "opened",
               source_project_id: 101,
               target_project_id: 100,
               source_project: {
-                path_with_namespace: "octocat/v12",
+                path_with_namespace: "octocat/v12code",
               },
             }),
           ),
@@ -68,12 +68,12 @@ layer("GitLabCli.layer", (it) => {
       assert.deepStrictEqual(result, {
         number: 42,
         title: "Add MR thread creation",
-        url: "https://gitlab.com/12ya/V12/-/merge_requests/42",
+        url: "https://gitlab.com/12ya/V12Code/-/merge_requests/42",
         baseRefName: "main",
         headRefName: "feature/mr-threads",
         state: "open",
         isCrossRepository: true,
-        headRepositoryNameWithOwner: "octocat/v12",
+        headRepositoryNameWithOwner: "octocat/v12code",
         headRepositoryOwnerLogin: "octocat",
       });
       expect(mockedRun).toHaveBeenCalledWith(
@@ -96,14 +96,14 @@ layer("GitLabCli.layer", (it) => {
               {
                 iid: 0,
                 title: "invalid",
-                web_url: "https://gitlab.com/12ya/V12/-/merge_requests/0",
+                web_url: "https://gitlab.com/12ya/V12Code/-/merge_requests/0",
                 target_branch: "main",
                 source_branch: "feature/invalid",
               },
               {
                 iid: 43,
                 title: "  Valid MR  ",
-                web_url: " https://gitlab.com/12ya/V12/-/merge_requests/43 ",
+                web_url: " https://gitlab.com/12ya/V12Code/-/merge_requests/43 ",
                 target_branch: " main ",
                 source_branch: " feature/mr-list ",
                 state: "merged",
@@ -126,7 +126,7 @@ layer("GitLabCli.layer", (it) => {
         {
           number: 43,
           title: "Valid MR",
-          url: "https://gitlab.com/12ya/V12/-/merge_requests/43",
+          url: "https://gitlab.com/12ya/V12Code/-/merge_requests/43",
           baseRefName: "main",
           headRefName: "feature/mr-list",
           state: "merged",
@@ -159,10 +159,10 @@ layer("GitLabCli.layer", (it) => {
           processOutput(
             // @effect-diagnostics-next-line preferSchemaOverJson:off
             JSON.stringify({
-              path_with_namespace: "octocat/v12",
-              web_url: "https://gitlab.com/octocat/v12",
-              http_url_to_repo: "https://gitlab.com/octocat/v12.git",
-              ssh_url_to_repo: "git@gitlab.com:octocat/v12.git",
+              path_with_namespace: "octocat/v12code",
+              web_url: "https://gitlab.com/octocat/v12code",
+              http_url_to_repo: "https://gitlab.com/octocat/v12code.git",
+              ssh_url_to_repo: "git@gitlab.com:octocat/v12code.git",
             }),
           ),
         ),
@@ -172,14 +172,14 @@ layer("GitLabCli.layer", (it) => {
         const glab = yield* GitLabCli.GitLabCli;
         return yield* glab.getRepositoryCloneUrls({
           cwd: "/repo",
-          repository: "octocat/v12",
+          repository: "octocat/v12code",
         });
       });
 
       assert.deepStrictEqual(result, {
-        nameWithOwner: "octocat/v12",
-        url: "https://gitlab.com/octocat/v12",
-        sshUrl: "git@gitlab.com:octocat/v12.git",
+        nameWithOwner: "octocat/v12code",
+        url: "https://gitlab.com/octocat/v12code",
+        sshUrl: "git@gitlab.com:octocat/v12code.git",
       });
     }),
   );
@@ -194,7 +194,7 @@ layer("GitLabCli.layer", (it) => {
         baseBranch: "main",
         headSelector: "owner:feature/provider",
         title: "Provider MR",
-        bodyFile: "/tmp/v12-mr-body.md",
+        bodyFile: "/tmp/v12code-mr-body.md",
       });
 
       expect(mockedRun).toHaveBeenCalledWith(
@@ -213,7 +213,7 @@ layer("GitLabCli.layer", (it) => {
             "--raw-field",
             "title=Provider MR",
             "--field",
-            "description=@/tmp/v12-mr-body.md",
+            "description=@/tmp/v12code-mr-body.md",
           ],
         }),
       );
@@ -237,10 +237,10 @@ layer("GitLabCli.layer", (it) => {
             processOutput(
               // @effect-diagnostics-next-line preferSchemaOverJson:off
               JSON.stringify({
-                path_with_namespace: "octocat/v12",
-                web_url: "https://gitlab.com/octocat/v12",
-                http_url_to_repo: "https://gitlab.com/octocat/v12.git",
-                ssh_url_to_repo: "git@gitlab.com:octocat/v12.git",
+                path_with_namespace: "octocat/v12code",
+                web_url: "https://gitlab.com/octocat/v12code",
+                http_url_to_repo: "https://gitlab.com/octocat/v12code.git",
+                ssh_url_to_repo: "git@gitlab.com:octocat/v12code.git",
               }),
             ),
           ),
@@ -249,14 +249,14 @@ layer("GitLabCli.layer", (it) => {
       const glab = yield* GitLabCli.GitLabCli;
       const result = yield* glab.createRepository({
         cwd: "/repo",
-        repository: "octocat/v12",
+        repository: "octocat/v12code",
         visibility: "public",
       });
 
       assert.deepStrictEqual(result, {
-        nameWithOwner: "octocat/v12",
-        url: "https://gitlab.com/octocat/v12",
-        sshUrl: "git@gitlab.com:octocat/v12.git",
+        nameWithOwner: "octocat/v12code",
+        url: "https://gitlab.com/octocat/v12code",
+        sshUrl: "git@gitlab.com:octocat/v12code.git",
       });
       expect(mockedRun).toHaveBeenNthCalledWith(
         1,
@@ -277,9 +277,9 @@ layer("GitLabCli.layer", (it) => {
             "POST",
             "projects",
             "--raw-field",
-            "path=v12",
+            "path=v12code",
             "--raw-field",
-            "name=v12",
+            "name=v12code",
             "--raw-field",
             "visibility=public",
             "--raw-field",

@@ -1,12 +1,12 @@
 import Constants from "expo-constants";
-import { relayClerkTokenOptions } from "@v12/shared/relayAuth";
-import { normalizeSecureRelayUrl } from "@v12/shared/relayUrl";
+import { relayClerkTokenOptions } from "@v12code/shared/relayAuth";
+import { normalizeSecureRelayUrl } from "@v12code/shared/relayUrl";
 import * as Schema from "effect/Schema";
 
 export class CloudPublicConfigMissingError extends Schema.TaggedErrorClass<CloudPublicConfigMissingError>()(
   "CloudPublicConfigMissingError",
   {
-    key: Schema.Literal("V12_CLERK_JWT_TEMPLATE"),
+    key: Schema.Literal("V12CODE_CLERK_JWT_TEMPLATE"),
   },
 ) {
   override get message(): string {
@@ -99,7 +99,7 @@ export function hasTracingPublicConfig(
 export function resolveRelayClerkTokenOptions() {
   const { jwtTemplate } = resolveCloudPublicConfig().clerk;
   if (!jwtTemplate) {
-    throw new CloudPublicConfigMissingError({ key: "V12_CLERK_JWT_TEMPLATE" });
+    throw new CloudPublicConfigMissingError({ key: "V12CODE_CLERK_JWT_TEMPLATE" });
   }
   return relayClerkTokenOptions(jwtTemplate);
 }

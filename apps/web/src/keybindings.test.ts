@@ -5,7 +5,7 @@ import {
   type KeybindingShortcut,
   type KeybindingWhenNode,
   type ResolvedKeybindingsConfig,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import {
   formatShortcutLabel,
   isChatNewShortcut,

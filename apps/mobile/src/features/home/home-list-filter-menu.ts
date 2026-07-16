@@ -2,7 +2,7 @@ import type {
   EnvironmentId,
   SidebarProjectGroupingMode,
   SidebarThreadSortOrder,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 
 import type { HomeProjectSortOrder } from "./homeThreadList";
 import {

@@ -8,8 +8,8 @@ import {
   ProviderInstanceId,
   ThreadId,
   TurnId,
-} from "@v12/contracts";
-import type { OrchestrationThread } from "@v12/contracts";
+} from "@v12code/contracts";
+import type { OrchestrationThread } from "@v12code/contracts";
 
 import { applyThreadDetailEvent } from "./threadReducer.ts";
 
@@ -54,7 +54,7 @@ describe("applyThreadDetailEvent", () => {
         type: "project.created",
         payload: {
           projectId: ProjectId.make("project-1"),
-          title: "V12",
+          title: "V12Code",
           workspaceRoot: "/repo",
           repositoryIdentity: null,
           defaultModelSelection: null,

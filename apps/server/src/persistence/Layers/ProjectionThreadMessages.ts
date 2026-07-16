@@ -5,7 +5,7 @@ import * as Layer from "effect/Layer";
 import * as Option from "effect/Option";
 import * as Schema from "effect/Schema";
 import * as Struct from "effect/Struct";
-import { ChatAttachment } from "@v12/contracts";
+import { ChatAttachment } from "@v12code/contracts";
 
 import { toPersistenceSqlError } from "../Errors.ts";
 import {

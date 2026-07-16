@@ -6,8 +6,8 @@ import {
   type ServerProvider,
   type ServerProviderUpdatedPayload,
   type ServerProviderUpdateState,
-} from "@v12/contracts";
-import { resolveSpawnCommand } from "@v12/shared/shell";
+} from "@v12code/contracts";
+import { resolveSpawnCommand } from "@v12code/shared/shell";
 import * as Cause from "effect/Cause";
 import * as Context from "effect/Context";
 import * as Data from "effect/Data";
@@ -54,7 +54,7 @@ export interface ProviderMaintenanceRunnerShape {
 export class ProviderMaintenanceRunner extends Context.Service<
   ProviderMaintenanceRunner,
   ProviderMaintenanceRunnerShape
->()("v12/provider/providerMaintenanceRunner") {}
+>()("v12code/provider/providerMaintenanceRunner") {}
 
 class ProviderMaintenanceCommandError extends Data.TaggedError("ProviderMaintenanceCommandError")<{
   readonly message: string;
@@ -368,9 +368,9 @@ export const make = Effect.fn("ProviderMaintenanceRunner.make")(function* () {
                 startedAt,
                 finishedAt,
                 message: couldNotVerify
-                  ? "Update command completed, but V12 could not verify the provider version."
+                  ? "Update command completed, but V12Code could not verify the provider version."
                   : stillOutdated
-                    ? "Update command completed, but V12 still detects an outdated provider version."
+                    ? "Update command completed, but V12Code still detects an outdated provider version."
                     : "Provider updated.",
                 output: commandOutput(result),
               }),

@@ -1,4 +1,4 @@
-import { MessageId, type OrchestrationMessage } from "@v12/contracts";
+import { MessageId, type OrchestrationMessage } from "@v12code/contracts";
 import { describe, expect, it } from "@effect/vitest";
 
 import { buildForkContinuationInput } from "./forkContinuation.ts";
@@ -28,6 +28,6 @@ describe("buildForkContinuationInput", () => {
     });
 
     expect(result).toContain("User:\nInspect it\n\nAssistant:\nDone");
-    expect(result).toContain("<v12-current-request>\nNow fix it\n</v12-current-request>");
+    expect(result).toContain("<v12code-current-request>\nNow fix it\n</v12code-current-request>");
   });
 });

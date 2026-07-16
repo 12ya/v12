@@ -1,4 +1,4 @@
-import type { EnvironmentId } from "@v12/contracts";
+import type { EnvironmentId } from "@v12code/contracts";
 import { CloudIcon, MonitorIcon } from "lucide-react";
 import { memo, useMemo } from "react";
 

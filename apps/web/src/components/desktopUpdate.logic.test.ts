@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vite-plus/test";
-import type { DesktopUpdateActionResult, DesktopUpdateState } from "@v12/contracts";
+import type { DesktopUpdateActionResult, DesktopUpdateState } from "@v12code/contracts";
 
 import {
   canCheckForUpdate,
@@ -213,7 +213,7 @@ describe("desktop update UI helpers", () => {
         availableVersion: "1.1.0",
         downloadedVersion: "1.1.1",
       }),
-    ).toContain("Install update 1.1.1 and restart V12?");
+    ).toContain("Install update 1.1.1 and restart V12Code?");
   });
 
   it("falls back to generic install confirmation copy when no version is available", () => {
@@ -222,7 +222,7 @@ describe("desktop update UI helpers", () => {
         availableVersion: null,
         downloadedVersion: null,
       }),
-    ).toContain("Install update and restart V12?");
+    ).toContain("Install update and restart V12Code?");
   });
 });
 

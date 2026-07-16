@@ -4,8 +4,8 @@ import * as Exit from "effect/Exit";
 import * as Option from "effect/Option";
 import * as Result from "effect/Result";
 import * as Schema from "effect/Schema";
-import { PositiveInt, TrimmedNonEmptyString } from "@v12/contracts";
-import { decodeJsonResult, formatSchemaError } from "@v12/shared/schemaJson";
+import { PositiveInt, TrimmedNonEmptyString } from "@v12code/contracts";
+import { decodeJsonResult, formatSchemaError } from "@v12code/shared/schemaJson";
 
 export interface NormalizedGitLabMergeRequestRecord {
   readonly number: number;

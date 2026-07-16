@@ -8,7 +8,7 @@ import type {
   RuntimeMode,
   ServerProvider,
   ThreadId,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import { create } from "zustand";
 
 import type { ComposerImageAttachment } from "./composerDraftStore";

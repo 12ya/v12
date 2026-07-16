@@ -1,11 +1,11 @@
-import type { ArchivedSnapshotEntry } from "@v12/client-runtime/state/threads";
+import type { ArchivedSnapshotEntry } from "@v12code/client-runtime/state/threads";
 import {
   scopeProject,
   scopeThreadShell,
   type EnvironmentProject,
   type EnvironmentThreadShell,
-} from "@v12/client-runtime/state/shell";
-import type { EnvironmentId } from "@v12/contracts";
+} from "@v12code/client-runtime/state/shell";
+import type { EnvironmentId } from "@v12code/contracts";
 import * as Arr from "effect/Array";
 import * as Order from "effect/Order";
 

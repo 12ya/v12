@@ -1,4 +1,4 @@
-import type { EnvironmentThreadShell } from "@v12/client-runtime/state/shell";
+import type { EnvironmentThreadShell } from "@v12code/client-runtime/state/shell";
 
 import type { PendingNewTask } from "../../state/use-pending-new-tasks";
 import type { HomeThreadGroup } from "./homeThreadList";

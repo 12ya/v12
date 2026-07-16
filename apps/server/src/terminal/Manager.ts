@@ -31,10 +31,10 @@ import {
   type TerminalSessionStatus,
   type TerminalSummary,
   type TerminalWriteInput,
-} from "@v12/contracts";
-import { makeKeyedCoalescingWorker } from "@v12/shared/KeyedCoalescingWorker";
-import { HostProcessPlatform } from "@v12/shared/hostProcess";
-import { getTerminalLabel } from "@v12/shared/terminalLabels";
+} from "@v12code/contracts";
+import { makeKeyedCoalescingWorker } from "@v12code/shared/KeyedCoalescingWorker";
+import { HostProcessPlatform } from "@v12code/shared/hostProcess";
+import { getTerminalLabel } from "@v12code/shared/terminalLabels";
 import * as DateTime from "effect/DateTime";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
@@ -186,7 +186,7 @@ export class TerminalManager extends Context.Service<
       listener: (event: TerminalMetadataStreamEvent) => Effect.Effect<void>,
     ) => Effect.Effect<() => void>;
   }
->()("v12/terminal/Manager/TerminalManager") {}
+>()("v12code/terminal/Manager/TerminalManager") {}
 
 interface TerminalSubprocessInspectResult {
   readonly hasRunningSubprocess: boolean;
@@ -1056,7 +1056,7 @@ function toSessionKey(threadId: string, terminalId: string): string {
 
 function shouldExcludeTerminalEnvKey(key: string): boolean {
   const normalizedKey = key.toUpperCase();
-  if (normalizedKey.startsWith("V12_")) {
+  if (normalizedKey.startsWith("V12CODE_")) {
     return true;
   }
   if (normalizedKey.startsWith("VITE_")) {

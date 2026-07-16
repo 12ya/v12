@@ -1,8 +1,8 @@
-# V12 Roadmap
+# V12Code Roadmap
 
-**Product name:** V12
+**Product name:** V12Code
 
-V12 is our version of V12. The first releases focus on making long-running agent work visible,
+V12Code is our version of V12Code. The first releases focus on making long-running agent work visible,
 keeping the chat uncluttered, and making conversations easy to branch and revise.
 
 ## Product rules
@@ -23,7 +23,7 @@ Chats with attached agents must show when work is still running, even when the c
 - Show a compact activity indicator on each running chat in the sidebar.
 - Show the current state in the open chat: queued, running, waiting for input, failed, or complete.
 - Include elapsed time and the latest useful activity when available.
-- Keep the state correct when switching chats, reconnecting, or reopening V12.
+- Keep the state correct when switching chats, reconnecting, or reopening V12Code.
 - Clear stale running states after the server confirms that no work remains.
 - Use an indeterminate animation when the provider does not report measurable progress.
 
@@ -128,7 +128,7 @@ Allow selected conversation text to become a contextual task, like Codex.
 ### Done when
 
 - A task contains both the user's instruction and the selected source context.
-- The source can be reopened even after navigating away or restarting V12.
+- The source can be reopened even after navigating away or restarting V12Code.
 - Adding a task does not alter or duplicate the selected message.
 
 **Dependency:** uses the compact task HUD from Release 2 and stable message identities from the

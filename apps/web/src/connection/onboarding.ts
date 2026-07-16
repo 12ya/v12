@@ -1,9 +1,9 @@
-import { ConnectionOnboarding } from "@v12/client-runtime/connection";
+import { ConnectionOnboarding } from "@v12code/client-runtime/connection";
 import {
   createAtomCommandScheduler,
   createRuntimeCommand,
-} from "@v12/client-runtime/state/runtime";
-import type { DesktopSshEnvironmentTarget } from "@v12/contracts";
+} from "@v12code/client-runtime/state/runtime";
+import type { DesktopSshEnvironmentTarget } from "@v12code/contracts";
 import * as Effect from "effect/Effect";
 
 import { connectionAtomRuntime } from "./runtime";

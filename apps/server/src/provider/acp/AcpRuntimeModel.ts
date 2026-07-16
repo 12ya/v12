@@ -4,8 +4,8 @@ import * as Effect from "effect/Effect";
 import * as Option from "effect/Option";
 import * as Ref from "effect/Ref";
 import type * as EffectAcpSchema from "effect-acp/schema";
-import { deriveToolActivityPresentation } from "@v12/shared/toolActivity";
-import type { ToolLifecycleItemType } from "@v12/contracts";
+import { deriveToolActivityPresentation } from "@v12code/shared/toolActivity";
+import type { ToolLifecycleItemType } from "@v12code/contracts";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -500,7 +500,7 @@ export function syntheticLoadSessionResponseFromInitialize(
     ...(models ? { models } : {}),
     ...(modes ? { modes } : {}),
     _meta: {
-      v12SessionLoadReady: "replay_idle",
+      v12codeSessionLoadReady: "replay_idle",
     },
   };
 }

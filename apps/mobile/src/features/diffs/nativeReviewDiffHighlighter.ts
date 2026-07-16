@@ -99,8 +99,8 @@ const NATIVE_REVIEW_DIFF_VISIBLE_OVERSCAN_ROWS = 160;
 const NATIVE_REVIEW_DIFF_VISIBLE_MAX_ROWS = 360;
 
 const NATIVE_REVIEW_DIFF_THEME_NAME_BY_SCHEME = {
-  dark: "v12-pierre-dark",
-  light: "v12-pierre-light",
+  dark: "v12code-pierre-dark",
+  light: "v12code-pierre-light",
 } as const;
 
 const PIERRE_LIGHT_SHIKI_THEME = {

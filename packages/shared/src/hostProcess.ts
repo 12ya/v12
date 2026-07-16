@@ -3,28 +3,28 @@ import * as Effect from "effect/Effect";
 import * as NodeOS from "node:os";
 
 export const HostProcessPlatform = Context.Reference<NodeJS.Platform>(
-  "@v12/shared/hostProcess/HostProcessPlatform",
+  "@v12code/shared/hostProcess/HostProcessPlatform",
   {
     defaultValue: () => process.platform,
   },
 );
 
 export const HostProcessArchitecture = Context.Reference<NodeJS.Architecture>(
-  "@v12/shared/hostProcess/HostProcessArchitecture",
+  "@v12code/shared/hostProcess/HostProcessArchitecture",
   {
     defaultValue: () => process.arch,
   },
 );
 
 export const HostProcessHostname = Context.Reference<string>(
-  "@v12/shared/hostProcess/HostProcessHostname",
+  "@v12code/shared/hostProcess/HostProcessHostname",
   {
     defaultValue: () => NodeOS.hostname(),
   },
 );
 
 export const HostProcessEnvironment = Context.Reference<NodeJS.ProcessEnv>(
-  "@v12/shared/hostProcess/HostProcessEnvironment",
+  "@v12code/shared/hostProcess/HostProcessEnvironment",
   {
     defaultValue: () => process.env,
   },

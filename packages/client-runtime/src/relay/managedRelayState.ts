@@ -1,9 +1,12 @@
 import type {
   RelayClientEnvironmentRecord,
   RelayEnvironmentStatusResponse,
-} from "@v12/contracts/relay";
-import { RelayEnvironmentConnectScope, RelayEnvironmentStatusScope } from "@v12/contracts/relay";
-import { decodeRelayJwt } from "@v12/shared/relayJwt";
+} from "@v12code/contracts/relay";
+import {
+  RelayEnvironmentConnectScope,
+  RelayEnvironmentStatusScope,
+} from "@v12code/contracts/relay";
+import { decodeRelayJwt } from "@v12code/shared/relayJwt";
 import * as Cause from "effect/Cause";
 import * as Clock from "effect/Clock";
 import * as Data from "effect/Data";
@@ -120,7 +123,7 @@ export function createManagedRelaySession(input: ManagedRelaySessionInput): Mana
         try: () => readCachedClerkToken(nowMillis),
         catch: (cause) =>
           new ManagedRelaySessionError({
-            message: "Could not obtain the V12 Connect session token.",
+            message: "Could not obtain the V12Code Connect session token.",
             cause,
           }),
       });
@@ -178,7 +181,7 @@ function readSessionClerkToken(
         ? Effect.succeed(token)
         : Effect.fail(
             new ManagedRelaySessionError({
-              message: "The V12 Connect session token is unavailable.",
+              message: "The V12Code Connect session token is unavailable.",
             }),
           ),
     ),
@@ -223,7 +226,7 @@ function requireClerkToken(
   if (!session || session.accountId !== accountId) {
     return Effect.fail(
       new ManagedRelaySessionError({
-        message: "Sign in to V12 Connect before loading relay data.",
+        message: "Sign in to V12Code Connect before loading relay data.",
       }),
     );
   }
@@ -293,7 +296,7 @@ export function readManagedRelaySnapshotState<A>(
   let errorTraceId: string | null = null;
   if (result._tag === "Failure") {
     const cause = Cause.squash(result.cause);
-    error = cause instanceof Error ? cause.message : "Could not load V12 Connect data.";
+    error = cause instanceof Error ? cause.message : "Could not load V12Code Connect data.";
     errorTraceId = findErrorTraceId(cause);
   }
   return {

@@ -1,4 +1,4 @@
-import type { ServerConfig } from "@v12/contracts";
+import type { ServerConfig } from "@v12code/contracts";
 import * as Option from "effect/Option";
 
 import type { ConnectionCatalogEntry } from "./catalog.ts";

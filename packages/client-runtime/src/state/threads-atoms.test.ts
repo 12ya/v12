@@ -1,4 +1,4 @@
-import { EnvironmentId, ThreadId } from "@v12/contracts";
+import { EnvironmentId, ThreadId } from "@v12code/contracts";
 import { describe, expect, it } from "@effect/vitest";
 import * as Layer from "effect/Layer";
 import { Atom } from "effect/unstable/reactivity";

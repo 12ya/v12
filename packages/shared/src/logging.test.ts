@@ -13,7 +13,7 @@ import {
 const tempDirectories: string[] = [];
 
 const makeTempDirectory = (): string => {
-  const directory = NodeFS.mkdtempSync(NodePath.join(NodeOS.tmpdir(), "v12-logging-"));
+  const directory = NodeFS.mkdtempSync(NodePath.join(NodeOS.tmpdir(), "v12code-logging-"));
   tempDirectories.push(directory);
   return directory;
 };

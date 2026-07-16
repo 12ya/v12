@@ -6,14 +6,14 @@ import {
   ProviderDriverKind,
   ProviderInstanceId,
   type ServerProvider,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import {
   createModelSelection,
   normalizeModelSlug,
   resolveSelectableModel,
-} from "@v12/shared/model";
+} from "@v12code/shared/model";
 import { getComposerProviderState } from "./components/chat/composerProviderState";
-import { UnifiedSettings } from "@v12/contracts/settings";
+import { UnifiedSettings } from "@v12code/contracts/settings";
 import * as Arr from "effect/Array";
 import * as Result from "effect/Result";
 import {

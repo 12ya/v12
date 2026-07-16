@@ -1,5 +1,5 @@
-import { EnvironmentId } from "@v12/contracts";
-import type { RelayManagedEndpoint } from "@v12/contracts/relay";
+import { EnvironmentId } from "@v12code/contracts";
+import type { RelayManagedEndpoint } from "@v12code/contracts/relay";
 import {
   exchangeRemoteDpopAccessToken,
   type RemoteEnvironmentAuthError,
@@ -55,7 +55,7 @@ export class RemoteEnvironmentAuthorization extends Context.Service<
       >;
     }) => Effect.Effect<AuthorizedRemoteEnvironment, ConnectionAttemptError>;
   }
->()("@v12/client-runtime/authorization/service/RemoteEnvironmentAuthorization") {}
+>()("@v12code/client-runtime/authorization/service/RemoteEnvironmentAuthorization") {}
 
 const TOKEN_EXPIRY_SAFETY_MARGIN_MS = 60_000;
 const CACHED_ENDPOINT_FAILURE_THRESHOLD = 2;

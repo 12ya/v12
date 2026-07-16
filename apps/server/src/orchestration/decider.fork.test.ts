@@ -9,7 +9,7 @@ import {
   TurnId,
   type OrchestrationEvent,
   type OrchestrationReadModel,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import { expect, it } from "@effect/vitest";
 import * as Effect from "effect/Effect";
 
@@ -137,7 +137,7 @@ it.layer(NodeServices.layer)("thread fork decider", (it) => {
           },
           runtimeMode: "full-access",
           interactionMode: "default",
-          branch: "v12/background-child",
+          branch: "v12code/background-child",
           worktreePath: "/tmp/background-child",
           parentThreadId: sourceThreadId,
           createdAt: "2026-07-15T00:01:00.000Z",

@@ -2,7 +2,7 @@ import * as Clock from "effect/Clock";
 import type {
   RelayClientInstallProgressEvent,
   RelayClientInstallProgressStage,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import * as Config from "effect/Config";
 import * as Context from "effect/Context";
 import * as Crypto from "effect/Crypto";
@@ -20,7 +20,7 @@ import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process";
 import { HostProcessArchitecture, HostProcessPlatform } from "./hostProcess.ts";
 
 export const CLOUDFLARED_VERSION = "2026.5.2";
-export const CLOUDFLARED_PATH_ENV_NAME = "V12_CLOUDFLARED_PATH";
+export const CLOUDFLARED_PATH_ENV_NAME = "V12CODE_CLOUDFLARED_PATH";
 
 export type RelayClientExecutableSource = "override" | "managed" | "path";
 
@@ -132,7 +132,7 @@ export interface RelayClientShape {
 }
 
 export class RelayClient extends Context.Service<RelayClient, RelayClientShape>()(
-  "@v12/shared/relayClient",
+  "@v12code/shared/relayClient",
 ) {}
 
 function executableFileName(platform: NodeJS.Platform): string {
@@ -368,7 +368,7 @@ export const makeCloudflaredRelayClient = Effect.fn("cloudflared.make")(function
     if (!releaseAsset) {
       return yield* new RelayClientInstallError({
         reason: "unsupported_platform",
-        message: `V12 does not provide a managed relay client binary for ${platform}-${arch}.`,
+        message: `V12Code does not provide a managed relay client binary for ${platform}-${arch}.`,
       });
     }
 

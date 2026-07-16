@@ -1,5 +1,5 @@
 {
-  "name": "v12-relay",
+  "name": "v12code-relay",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,9 +13,9 @@
     "@effect/sql-pg": "catalog:",
     "@noble/curves": "catalog:",
     "@noble/hashes": "catalog:",
-    "@v12/client-runtime": "workspace:*",
-    "@v12/contracts": "workspace:*",
-    "@v12/shared": "workspace:*",
+    "@v12code/client-runtime": "workspace:*",
+    "@v12code/contracts": "workspace:*",
+    "@v12code/shared": "workspace:*",
     "alchemy": "https://pkg.ing/alchemy/078ff00",
     "drizzle-orm": "1.0.0-rc.3",
     "effect": "catalog:"

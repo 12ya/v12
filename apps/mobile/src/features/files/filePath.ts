@@ -1,7 +1,7 @@
 import {
   isWorkspaceBrowserPreviewPath,
   isWorkspaceImagePreviewPath,
-} from "@v12/shared/filePreview";
+} from "@v12code/shared/filePreview";
 
 export interface FileBreadcrumb {
   readonly label: string;

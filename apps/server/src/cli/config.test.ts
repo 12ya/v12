@@ -12,8 +12,8 @@ import * as Schema from "effect/Schema";
 import {
   DesktopBackendBootstrap,
   type DesktopBackendBootstrap as DesktopBackendBootstrapValue,
-} from "@v12/contracts";
-import * as NetService from "@v12/shared/Net";
+} from "@v12code/contracts";
+import * as NetService from "@v12code/shared/Net";
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import { deriveServerPaths } from "../config.ts";
 import { resolveServerConfig } from "./config.ts";
@@ -26,7 +26,7 @@ const makeDesktopBootstrap = (
   mode: "desktop",
   noBrowser: true,
   port: 4888,
-  v12Home: "/tmp/v12-bootstrap-home",
+  v12codeHome: "/tmp/v12code-bootstrap-home",
   host: "127.0.0.1",
   desktopBootstrapToken: "desktop-bootstrap-token",
   tailscaleServeEnabled: false,
@@ -44,12 +44,15 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
     otlpTracesUrl: undefined,
     otlpMetricsUrl: undefined,
     otlpExportIntervalMs: 10_000,
-    otlpServiceName: "v12-server",
+    otlpServiceName: "v12code-server",
   } as const;
 
   const openBootstrapFd = Effect.fn(function* (payload: DesktopBackendBootstrapValue) {
     const fs = yield* FileSystem.FileSystem;
-    const filePath = yield* fs.makeTempFileScoped({ prefix: "v12-bootstrap-", suffix: ".ndjson" });
+    const filePath = yield* fs.makeTempFileScoped({
+      prefix: "v12code-bootstrap-",
+      suffix: ".ndjson",
+    });
     const encoded = yield* encodeDesktopBootstrap(payload);
     yield* fs.writeFileString(filePath, `${encoded}\n`);
     const { fd } = yield* fs.open(filePath, { flag: "r" });
@@ -59,7 +62,7 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
   it.effect("falls back to effect/config values when flags are omitted", () =>
     Effect.gen(function* () {
       const { join } = yield* Path.Path;
-      const baseDir = join(NodeOS.tmpdir(), "v12-cli-config-env-base");
+      const baseDir = join(NodeOS.tmpdir(), "v12code-cli-config-env-base");
       const derivedPaths = yield* deriveServerPaths(baseDir, new URL("http://127.0.0.1:5173"));
       const resolved = yield* resolveServerConfig(
         {
@@ -83,15 +86,15 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
             ConfigProvider.layer(
               ConfigProvider.fromEnv({
                 env: {
-                  V12_LOG_LEVEL: "Warn",
-                  V12_MODE: "desktop",
-                  V12_PORT: "4001",
-                  V12_HOST: "0.0.0.0",
-                  V12_HOME: baseDir,
+                  V12CODE_LOG_LEVEL: "Warn",
+                  V12CODE_MODE: "desktop",
+                  V12CODE_PORT: "4001",
+                  V12CODE_HOST: "0.0.0.0",
+                  V12CODE_HOME: baseDir,
                   VITE_DEV_SERVER_URL: "http://127.0.0.1:5173",
-                  V12_NO_BROWSER: "true",
-                  V12_AUTO_BOOTSTRAP_PROJECT_FROM_CWD: "false",
-                  V12_LOG_WS_EVENTS: "true",
+                  V12CODE_NO_BROWSER: "true",
+                  V12CODE_AUTO_BOOTSTRAP_PROJECT_FROM_CWD: "false",
+                  V12CODE_LOG_WS_EVENTS: "true",
                 },
               }),
             ),
@@ -125,7 +128,7 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
   it.effect("uses CLI flags when provided", () =>
     Effect.gen(function* () {
       const { join } = yield* Path.Path;
-      const baseDir = join(NodeOS.tmpdir(), "v12-cli-config-flags-base");
+      const baseDir = join(NodeOS.tmpdir(), "v12code-cli-config-flags-base");
       const derivedPaths = yield* deriveServerPaths(baseDir, new URL("http://127.0.0.1:4173"));
       const resolved = yield* resolveServerConfig(
         {
@@ -149,15 +152,15 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
             ConfigProvider.layer(
               ConfigProvider.fromEnv({
                 env: {
-                  V12_LOG_LEVEL: "Warn",
-                  V12_MODE: "desktop",
-                  V12_PORT: "4001",
-                  V12_HOST: "0.0.0.0",
-                  V12_HOME: join(NodeOS.tmpdir(), "ignored-base"),
+                  V12CODE_LOG_LEVEL: "Warn",
+                  V12CODE_MODE: "desktop",
+                  V12CODE_PORT: "4001",
+                  V12CODE_HOST: "0.0.0.0",
+                  V12CODE_HOME: join(NodeOS.tmpdir(), "ignored-base"),
                   VITE_DEV_SERVER_URL: "http://127.0.0.1:5173",
-                  V12_NO_BROWSER: "false",
-                  V12_AUTO_BOOTSTRAP_PROJECT_FROM_CWD: "false",
-                  V12_LOG_WS_EVENTS: "false",
+                  V12CODE_NO_BROWSER: "false",
+                  V12CODE_AUTO_BOOTSTRAP_PROJECT_FROM_CWD: "false",
+                  V12CODE_LOG_WS_EVENTS: "false",
                 },
               }),
             ),
@@ -191,7 +194,7 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
   it.effect("preserves explicit false CLI boolean flags over env and bootstrap values", () =>
     Effect.gen(function* () {
       const { join } = yield* Path.Path;
-      const baseDir = join(NodeOS.tmpdir(), "v12-cli-config-false-flags");
+      const baseDir = join(NodeOS.tmpdir(), "v12code-cli-config-false-flags");
       const fd = yield* openBootstrapFd(
         makeDesktopBootstrap({
           noBrowser: true,
@@ -223,10 +226,10 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
             ConfigProvider.layer(
               ConfigProvider.fromEnv({
                 env: {
-                  V12_BOOTSTRAP_FD: String(fd),
-                  V12_NO_BROWSER: "true",
-                  V12_AUTO_BOOTSTRAP_PROJECT_FROM_CWD: "true",
-                  V12_LOG_WS_EVENTS: "true",
+                  V12CODE_BOOTSTRAP_FD: String(fd),
+                  V12CODE_NO_BROWSER: "true",
+                  V12CODE_AUTO_BOOTSTRAP_PROJECT_FROM_CWD: "true",
+                  V12CODE_LOG_WS_EVENTS: "true",
                 },
               }),
             ),
@@ -260,12 +263,12 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
   it.effect("uses bootstrap envelope values as fallbacks when flags and env are absent", () =>
     Effect.gen(function* () {
       const { join } = yield* Path.Path;
-      const baseDir = "/tmp/v12-bootstrap-home";
+      const baseDir = "/tmp/v12code-bootstrap-home";
       const fd = yield* openBootstrapFd(
         makeDesktopBootstrap({
           port: 4888,
           host: "127.0.0.2",
-          v12Home: baseDir,
+          v12codeHome: baseDir,
           noBrowser: true,
           desktopBootstrapToken: "desktop-token",
           tailscaleServeEnabled: false,
@@ -298,7 +301,7 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
             ConfigProvider.layer(
               ConfigProvider.fromEnv({
                 env: {
-                  V12_BOOTSTRAP_FD: String(fd),
+                  V12CODE_BOOTSTRAP_FD: String(fd),
                 },
               }),
             ),
@@ -336,7 +339,7 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
-      const baseDir = yield* fs.makeTempDirectoryScoped({ prefix: "v12-cli-config-dirs-" });
+      const baseDir = yield* fs.makeTempDirectoryScoped({ prefix: "v12code-cli-config-dirs-" });
       const customCwd = path.join(baseDir, "nested", "project");
 
       const resolved = yield* resolveServerConfig(
@@ -384,12 +387,12 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
   it.effect("applies flag then env precedence over bootstrap envelope values", () =>
     Effect.gen(function* () {
       const { join } = yield* Path.Path;
-      const baseDir = join(NodeOS.tmpdir(), "v12-cli-config-env-wins");
+      const baseDir = join(NodeOS.tmpdir(), "v12code-cli-config-env-wins");
       const fd = yield* openBootstrapFd(
         makeDesktopBootstrap({
           port: 4888,
           host: "127.0.0.2",
-          v12Home: "/tmp/v12-bootstrap-home",
+          v12codeHome: "/tmp/v12code-bootstrap-home",
           noBrowser: false,
           desktopBootstrapToken: "desktop-token",
           tailscaleServeEnabled: false,
@@ -420,12 +423,12 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
             ConfigProvider.layer(
               ConfigProvider.fromEnv({
                 env: {
-                  V12_MODE: "web",
-                  V12_BOOTSTRAP_FD: String(fd),
-                  V12_HOME: baseDir,
-                  V12_NO_BROWSER: "true",
-                  V12_AUTO_BOOTSTRAP_PROJECT_FROM_CWD: "true",
-                  V12_LOG_WS_EVENTS: "true",
+                  V12CODE_MODE: "web",
+                  V12CODE_BOOTSTRAP_FD: String(fd),
+                  V12CODE_HOME: baseDir,
+                  V12CODE_NO_BROWSER: "true",
+                  V12CODE_AUTO_BOOTSTRAP_PROJECT_FROM_CWD: "true",
+                  V12CODE_LOG_WS_EVENTS: "true",
                 },
               }),
             ),
@@ -460,7 +463,7 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
-      const baseDir = yield* fs.makeTempDirectoryScoped({ prefix: "v12-cli-config-settings-" });
+      const baseDir = yield* fs.makeTempDirectoryScoped({ prefix: "v12code-cli-config-settings-" });
       const derivedPaths = yield* deriveServerPaths(baseDir, undefined);
       yield* fs.makeDirectory(path.dirname(derivedPaths.settingsPath), { recursive: true });
       yield* fs.writeFileString(
@@ -528,7 +531,7 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
   it.effect("forces noBrowser and disables auto-bootstrap for headless startup presentation", () =>
     Effect.gen(function* () {
       const { join } = yield* Path.Path;
-      const baseDir = join(NodeOS.tmpdir(), "v12-cli-config-headless-base");
+      const baseDir = join(NodeOS.tmpdir(), "v12code-cli-config-headless-base");
       const derivedPaths = yield* deriveServerPaths(baseDir, undefined);
 
       const resolved = yield* resolveServerConfig(
@@ -556,8 +559,8 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
             ConfigProvider.layer(
               ConfigProvider.fromEnv({
                 env: {
-                  V12_NO_BROWSER: "false",
-                  V12_AUTO_BOOTSTRAP_PROJECT_FROM_CWD: "true",
+                  V12CODE_NO_BROWSER: "false",
+                  V12CODE_AUTO_BOOTSTRAP_PROJECT_FROM_CWD: "true",
                 },
               }),
             ),

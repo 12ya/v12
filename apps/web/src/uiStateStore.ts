@@ -2,14 +2,14 @@ import { Debouncer } from "@tanstack/react-pacer";
 import { create } from "zustand";
 import { normalizeProjectPathForComparison } from "./lib/projectPaths";
 
-export const PERSISTED_STATE_KEY = "v12:ui-state:v1";
+export const PERSISTED_STATE_KEY = "v12code:ui-state:v1";
 const LEGACY_PERSISTED_STATE_KEYS = [
-  "v12:renderer-state:v8",
-  "v12:renderer-state:v7",
-  "v12:renderer-state:v6",
-  "v12:renderer-state:v5",
-  "v12:renderer-state:v4",
-  "v12:renderer-state:v3",
+  "v12code:renderer-state:v8",
+  "v12code:renderer-state:v7",
+  "v12code:renderer-state:v6",
+  "v12code:renderer-state:v5",
+  "v12code:renderer-state:v4",
+  "v12code:renderer-state:v3",
   "codething:renderer-state:v4",
   "codething:renderer-state:v3",
   "codething:renderer-state:v2",

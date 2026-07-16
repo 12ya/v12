@@ -18,8 +18,8 @@
           }
         },
         {
-          "image-name": "V12.svg",
-          "name": "V12",
+          "image-name": "V12Code.svg",
+          "name": "V12Code",
           "position": {
             "scale": 10,
             "translation-in-points": [0, 0]

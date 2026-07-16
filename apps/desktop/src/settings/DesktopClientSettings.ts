@@ -1,5 +1,5 @@
-import { ClientSettingsSchema, type ClientSettings } from "@v12/contracts";
-import { fromLenientJson } from "@v12/shared/schemaJson";
+import { ClientSettingsSchema, type ClientSettings } from "@v12code/contracts";
+import { fromLenientJson } from "@v12code/shared/schemaJson";
 import * as Context from "effect/Context";
 import * as Crypto from "effect/Crypto";
 import * as Effect from "effect/Effect";
@@ -60,7 +60,7 @@ export class DesktopClientSettings extends Context.Service<
       settings: ClientSettings,
     ) => Effect.Effect<void, DesktopClientSettingsWriteError>;
   }
->()("@v12/desktop/settings/DesktopClientSettings") {}
+>()("@v12code/desktop/settings/DesktopClientSettings") {}
 
 const readClientSettings = (
   fileSystem: FileSystem.FileSystem,

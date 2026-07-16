@@ -2,7 +2,7 @@ import {
   PROVIDER_SEND_TURN_MAX_ATTACHMENTS,
   PROVIDER_SEND_TURN_MAX_IMAGE_BYTES,
   type UploadChatImageAttachment,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import { estimateBase64ByteSize } from "./base64";
 import { uuidv4 } from "./uuid";
 
@@ -24,7 +24,7 @@ export function toUploadChatImageAttachments(
   }));
 }
 
-const OWNED_PASTED_IMAGE_DIRECTORY = "v12-composer-paste";
+const OWNED_PASTED_IMAGE_DIRECTORY = "v12code-composer-paste";
 
 async function loadImagePicker() {
   try {

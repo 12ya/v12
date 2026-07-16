@@ -2,10 +2,10 @@ import { beforeEach, vi } from "vite-plus/test";
 import { describe, expect, it } from "@effect/vitest";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
-import { EnvironmentId } from "@v12/contracts";
-import { RelayMobileClientId } from "@v12/contracts/relay";
-import { ManagedRelay } from "@v12/client-runtime/relay";
-import { remoteHttpClientLayer } from "@v12/client-runtime/rpc";
+import { EnvironmentId } from "@v12code/contracts";
+import { RelayMobileClientId } from "@v12code/contracts/relay";
+import { ManagedRelay } from "@v12code/client-runtime/relay";
+import { remoteHttpClientLayer } from "@v12code/client-runtime/rpc";
 import { HttpClient } from "effect/unstable/http";
 import { MobilePreferencesStore } from "../../persistence/mobile-preferences";
 import { MobileStorage } from "../../persistence/mobile-storage";
@@ -436,7 +436,7 @@ describe("mobile cloud link environment client", () => {
             }),
           );
         }
-        if (String(url).endsWith("/.well-known/v12/environment")) {
+        if (String(url).endsWith("/.well-known/v12code/environment")) {
           return Promise.resolve(
             Response.json({
               environmentId: "env-1",
@@ -486,7 +486,7 @@ describe("mobile cloud link environment client", () => {
       const environmentTokenBody = new URLSearchParams(
         requestBodyText(environmentTokenRequest?.body),
       );
-      expect(environmentTokenBody.get("client_label")).toBe("V12 Mobile");
+      expect(environmentTokenBody.get("client_label")).toBe("V12Code Mobile");
       expect(environmentTokenBody.get("client_device_type")).toBe("mobile");
       expect(environmentTokenBody.get("client_os")).toBe("iOS");
     }),
@@ -842,7 +842,7 @@ describe("mobile cloud link environment client", () => {
               Response.json(validDpopAccessTokenResponse("environment:connect")),
             );
           }
-          if (String(url).endsWith("/.well-known/v12/environment")) {
+          if (String(url).endsWith("/.well-known/v12code/environment")) {
             return Promise.resolve(
               Response.json({
                 environmentId: "env-1",
@@ -929,7 +929,7 @@ describe("mobile cloud link environment client", () => {
               Response.json(validDpopAccessTokenResponse("environment:connect")),
             );
           }
-          if (String(url).endsWith("/.well-known/v12/environment")) {
+          if (String(url).endsWith("/.well-known/v12code/environment")) {
             return Promise.resolve(
               Response.json({
                 environmentId: "env-1",
@@ -1137,7 +1137,7 @@ describe("mobile cloud link environment client", () => {
             Promise.resolve(
               String(url).endsWith("/v1/client/dpop-token")
                 ? Response.json(validDpopAccessTokenResponse("environment:connect"))
-                : String(url).endsWith("/.well-known/v12/environment")
+                : String(url).endsWith("/.well-known/v12code/environment")
                   ? Response.json({
                       environmentId: "env-other",
                       label: "Other Desktop",

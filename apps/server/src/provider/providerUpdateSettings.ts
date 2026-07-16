@@ -1,4 +1,4 @@
-import type { ServerSettings, ServerSettingsError } from "@v12/contracts";
+import type { ServerSettings, ServerSettingsError } from "@v12code/contracts";
 import * as Effect from "effect/Effect";
 import * as Equal from "effect/Equal";
 import * as Stream from "effect/Stream";

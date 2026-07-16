@@ -5,7 +5,7 @@ import {
   TurnId,
   type OrchestrationCheckpointSummary,
   type ReviewDiffPreviewSource,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 
 import {
   buildReviewListItems,
@@ -22,7 +22,7 @@ function makeCheckpoint(
     Pick<OrchestrationCheckpointSummary, "turnId" | "checkpointTurnCount" | "completedAt">,
 ): OrchestrationCheckpointSummary {
   return {
-    checkpointRef: `refs/v12/checkpoints/thread/${input.checkpointTurnCount}` as any,
+    checkpointRef: `refs/v12code/checkpoints/thread/${input.checkpointTurnCount}` as any,
     status: "ready",
     files: [],
     assistantMessageId: MessageId.make(`msg-${input.checkpointTurnCount}`),

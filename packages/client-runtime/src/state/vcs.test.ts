@@ -1,4 +1,4 @@
-import { EnvironmentId, WS_METHODS, type VcsListRefsResult } from "@v12/contracts";
+import { EnvironmentId, WS_METHODS, type VcsListRefsResult } from "@v12code/contracts";
 import { describe, expect, it } from "@effect/vitest";
 import * as Effect from "effect/Effect";
 import * as Fiber from "effect/Fiber";

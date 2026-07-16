@@ -9,8 +9,8 @@ import {
   EnvironmentHttpForbiddenError,
   EnvironmentHttpInternalServerError,
   EnvironmentHttpUnauthorizedError,
-} from "@v12/contracts";
-import { stripPairingTokenFromUrl } from "@v12/shared/remote";
+} from "@v12code/contracts";
+import { stripPairingTokenFromUrl } from "@v12code/shared/remote";
 import {
   type RelayEnvironmentConnectResponse as RelayEnvironmentConnectResponseType,
   type RelayEnvironmentLinkResponse as RelayEnvironmentLinkResponseType,
@@ -21,12 +21,12 @@ import {
   type RelayClientEnvironmentRecord,
   type RelayEnvironmentStatusResponse as RelayEnvironmentStatusResponseType,
   type RelayManagedEndpointProviderKind,
-} from "@v12/contracts/relay";
-import { exchangeRemoteDpopAccessToken } from "@v12/client-runtime/authorization";
-import { fetchRemoteEnvironmentDescriptor } from "@v12/client-runtime/environment";
-import { findErrorTraceId } from "@v12/client-runtime/errors";
-import { ManagedRelay } from "@v12/client-runtime/relay";
-import { makeEnvironmentHttpApiClient } from "@v12/client-runtime/rpc";
+} from "@v12code/contracts/relay";
+import { exchangeRemoteDpopAccessToken } from "@v12code/client-runtime/authorization";
+import { fetchRemoteEnvironmentDescriptor } from "@v12code/client-runtime/environment";
+import { findErrorTraceId } from "@v12code/client-runtime/errors";
+import { ManagedRelay } from "@v12code/client-runtime/relay";
+import { makeEnvironmentHttpApiClient } from "@v12code/client-runtime/rpc";
 
 import { authClientMetadata } from "../../lib/authClientMetadata";
 import type { SavedRemoteConnection } from "../../lib/connection";

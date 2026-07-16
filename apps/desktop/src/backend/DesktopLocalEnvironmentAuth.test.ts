@@ -5,7 +5,7 @@ import * as Option from "effect/Option";
 import * as Ref from "effect/Ref";
 import * as HttpClient from "effect/unstable/http/HttpClient";
 import * as HttpClientResponse from "effect/unstable/http/HttpClientResponse";
-import { PRIMARY_LOCAL_ENVIRONMENT_ID } from "@v12/contracts";
+import { PRIMARY_LOCAL_ENVIRONMENT_ID } from "@v12code/contracts";
 
 import * as DesktopBackendPool from "./DesktopBackendPool.ts";
 import * as DesktopLocalEnvironmentAuth from "./DesktopLocalEnvironmentAuth.ts";
@@ -19,7 +19,7 @@ const config = {
     mode: "desktop",
     noBrowser: true,
     port: 3773,
-    v12Home: "/tmp/v12",
+    v12codeHome: "/tmp/v12code",
     host: "127.0.0.1",
     desktopBootstrapToken: "desktop-bootstrap-token",
     tailscaleServeEnabled: false,

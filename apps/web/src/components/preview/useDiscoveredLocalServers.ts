@@ -1,8 +1,8 @@
-import type { DiscoveredLocalServer } from "@v12/contracts";
-import { isLoopbackHost } from "@v12/shared/preview";
+import type { DiscoveredLocalServer } from "@v12code/contracts";
+import { isLoopbackHost } from "@v12code/shared/preview";
 import { useMemo } from "react";
 
-import type { EnvironmentId } from "@v12/contracts";
+import type { EnvironmentId } from "@v12code/contracts";
 import { resolveDiscoveredServerUrl } from "~/browser/browserTargetResolver";
 import { useDiscoveredPorts } from "~/portDiscoveryState";
 

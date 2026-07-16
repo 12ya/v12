@@ -1,5 +1,5 @@
-import { scopeThreadRef } from "@v12/client-runtime/environment";
-import { EnvironmentId, MessageId, ThreadId, TurnId } from "@v12/contracts";
+import { scopeThreadRef } from "@v12code/client-runtime/environment";
+import { EnvironmentId, MessageId, ThreadId, TurnId } from "@v12code/contracts";
 import { beforeEach, describe, expect, it } from "vite-plus/test";
 
 import {

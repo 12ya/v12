@@ -13,7 +13,7 @@ import { ManagedEndpointZone, RelayApiZone } from "./src/zone.ts";
 import Api from "./src/worker.ts";
 
 export default Alchemy.Stack(
-  "V12Relay",
+  "V12CodeRelay",
   {
     providers: Layer.mergeAll(
       Axiom.providers(),

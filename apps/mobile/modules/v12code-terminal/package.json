@@ -1,0 +1,17 @@
+{
+  "name": "@v12code/mobile-terminal-native",
+  "version": "0.0.0",
+  "private": true,
+  "expo-module": {
+    "ios": {
+      "modules": [
+        "V12CodeTerminalModule"
+      ]
+    },
+    "android": {
+      "modules": [
+        "expo.modules.v12codeterminal.V12CodeTerminalModule"
+      ]
+    }
+  }
+}

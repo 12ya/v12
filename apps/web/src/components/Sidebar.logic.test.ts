@@ -33,7 +33,7 @@ import {
   ProjectId,
   ProviderInstanceId,
   ThreadId,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import {
   DEFAULT_INTERACTION_MODE,
   DEFAULT_RUNTIME_MODE,
@@ -301,7 +301,7 @@ describe("createThreadJumpHintVisibilityController", () => {
 
 describe("getSidebarThreadIdsToPrewarm", () => {
   it("returns only the first visible thread ids up to the prewarm limit", () => {
-    expect(getSidebarThreadIdsToPrewarm(["t1", "t2", "v12"], 2)).toEqual(["t1", "t2"]);
+    expect(getSidebarThreadIdsToPrewarm(["t1", "t2", "v12code"], 2)).toEqual(["t1", "t2"]);
   });
 
   it("returns all visible thread ids when they fit within the limit", () => {
@@ -387,12 +387,12 @@ describe("resolveSidebarNewThreadSeedContext", () => {
         activeThread: {
           projectId: "project-1",
           branch: "feature/existing",
-          worktreePath: "/repo/.v12/worktrees/existing",
+          worktreePath: "/repo/.v12code/worktrees/existing",
         },
         activeDraftThread: {
           projectId: "project-1",
           branch: "feature/draft",
-          worktreePath: "/repo/.v12/worktrees/draft",
+          worktreePath: "/repo/.v12code/worktrees/draft",
           envMode: "worktree",
           startFromOrigin: true,
         },

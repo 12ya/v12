@@ -21,10 +21,10 @@ import {
   EnvironmentScopeRequiredError,
   EnvironmentAuthenticatedAuth,
   EnvironmentAuthenticatedPrincipal,
-} from "@v12/contracts";
-import type { AuthEnvironmentScope } from "@v12/contracts";
-import { parseAllowedOAuthScope } from "@v12/shared/oauthScope";
-import { causeErrorTag } from "@v12/shared/observability";
+} from "@v12code/contracts";
+import type { AuthEnvironmentScope } from "@v12code/contracts";
+import { parseAllowedOAuthScope } from "@v12code/shared/oauthScope";
+import { causeErrorTag } from "@v12code/shared/observability";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
 import { identity } from "effect/Function";

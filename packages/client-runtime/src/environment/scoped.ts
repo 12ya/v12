@@ -6,7 +6,7 @@ import {
   type ProjectId as ProjectIdType,
   type ScopedProjectRef,
   type ScopedThreadRef,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 
 export function scopeProjectRef(
   environmentId: EnvironmentIdType,

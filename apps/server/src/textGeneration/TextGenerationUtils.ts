@@ -1,4 +1,4 @@
-import { TextGenerationError } from "@v12/contracts";
+import { TextGenerationError } from "@v12code/contracts";
 import * as Schema from "effect/Schema";
 
 const isTextGenerationError = Schema.is(TextGenerationError);

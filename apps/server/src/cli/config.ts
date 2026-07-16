@@ -1,6 +1,6 @@
-import * as NetService from "@v12/shared/Net";
-import { parsePersistedServerObservabilitySettings } from "@v12/shared/serverSettings";
-import { DesktopBackendBootstrap, PortSchema } from "@v12/contracts";
+import * as NetService from "@v12code/shared/Net";
+import { parsePersistedServerObservabilitySettings } from "@v12code/shared/serverSettings";
+import { DesktopBackendBootstrap, PortSchema } from "@v12code/contracts";
 import * as Config from "effect/Config";
 import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
@@ -31,7 +31,7 @@ export const hostFlag = Flag.string("host").pipe(
   Flag.optional,
 );
 export const baseDirFlag = Flag.string("base-dir").pipe(
-  Flag.withDescription("Base directory path (equivalent to V12_HOME)."),
+  Flag.withDescription("Base directory path (equivalent to V12CODE_HOME)."),
   Flag.optional,
 );
 export const devUrlFlag = Flag.string("dev-url").pipe(
@@ -56,7 +56,7 @@ export const autoBootstrapProjectFromCwdFlag = Flag.boolean("auto-bootstrap-proj
 );
 export const logWebSocketEventsFlag = Flag.boolean("log-websocket-events").pipe(
   Flag.withDescription(
-    "Emit server-side logs for outbound WebSocket push traffic (equivalent to V12_LOG_WS_EVENTS).",
+    "Emit server-side logs for outbound WebSocket push traffic (equivalent to V12CODE_LOG_WS_EVENTS).",
   ),
   Flag.withAlias("log-ws-events"),
   Flag.optional,
@@ -74,52 +74,59 @@ export const tailscaleServePortFlag = Flag.integer("tailscale-serve-port").pipe(
 );
 
 const EnvServerConfig = Config.all({
-  logLevel: Config.logLevel("V12_LOG_LEVEL").pipe(Config.withDefault("Info")),
-  traceMinLevel: Config.logLevel("V12_TRACE_MIN_LEVEL").pipe(Config.withDefault("Info")),
-  traceTimingEnabled: Config.boolean("V12_TRACE_TIMING_ENABLED").pipe(Config.withDefault(true)),
-  traceFile: Config.string("V12_TRACE_FILE").pipe(Config.option, Config.map(Option.getOrUndefined)),
-  traceMaxBytes: Config.int("V12_TRACE_MAX_BYTES").pipe(Config.withDefault(10 * 1024 * 1024)),
-  traceMaxFiles: Config.int("V12_TRACE_MAX_FILES").pipe(Config.withDefault(10)),
-  traceBatchWindowMs: Config.int("V12_TRACE_BATCH_WINDOW_MS").pipe(Config.withDefault(200)),
-  otlpTracesUrl: Config.string("V12_OTLP_TRACES_URL").pipe(
+  logLevel: Config.logLevel("V12CODE_LOG_LEVEL").pipe(Config.withDefault("Info")),
+  traceMinLevel: Config.logLevel("V12CODE_TRACE_MIN_LEVEL").pipe(Config.withDefault("Info")),
+  traceTimingEnabled: Config.boolean("V12CODE_TRACE_TIMING_ENABLED").pipe(Config.withDefault(true)),
+  traceFile: Config.string("V12CODE_TRACE_FILE").pipe(
     Config.option,
     Config.map(Option.getOrUndefined),
   ),
-  otlpMetricsUrl: Config.string("V12_OTLP_METRICS_URL").pipe(
+  traceMaxBytes: Config.int("V12CODE_TRACE_MAX_BYTES").pipe(Config.withDefault(10 * 1024 * 1024)),
+  traceMaxFiles: Config.int("V12CODE_TRACE_MAX_FILES").pipe(Config.withDefault(10)),
+  traceBatchWindowMs: Config.int("V12CODE_TRACE_BATCH_WINDOW_MS").pipe(Config.withDefault(200)),
+  otlpTracesUrl: Config.string("V12CODE_OTLP_TRACES_URL").pipe(
     Config.option,
     Config.map(Option.getOrUndefined),
   ),
-  otlpExportIntervalMs: Config.int("V12_OTLP_EXPORT_INTERVAL_MS").pipe(Config.withDefault(10_000)),
-  otlpServiceName: Config.string("V12_OTLP_SERVICE_NAME").pipe(Config.withDefault("v12-server")),
-  mode: Config.schema(ServerConfig.RuntimeMode, "V12_MODE").pipe(
+  otlpMetricsUrl: Config.string("V12CODE_OTLP_METRICS_URL").pipe(
     Config.option,
     Config.map(Option.getOrUndefined),
   ),
-  port: Config.port("V12_PORT").pipe(Config.option, Config.map(Option.getOrUndefined)),
-  host: Config.string("V12_HOST").pipe(Config.option, Config.map(Option.getOrUndefined)),
-  v12Home: Config.string("V12_HOME").pipe(Config.option, Config.map(Option.getOrUndefined)),
+  otlpExportIntervalMs: Config.int("V12CODE_OTLP_EXPORT_INTERVAL_MS").pipe(
+    Config.withDefault(10_000),
+  ),
+  otlpServiceName: Config.string("V12CODE_OTLP_SERVICE_NAME").pipe(
+    Config.withDefault("v12code-server"),
+  ),
+  mode: Config.schema(ServerConfig.RuntimeMode, "V12CODE_MODE").pipe(
+    Config.option,
+    Config.map(Option.getOrUndefined),
+  ),
+  port: Config.port("V12CODE_PORT").pipe(Config.option, Config.map(Option.getOrUndefined)),
+  host: Config.string("V12CODE_HOST").pipe(Config.option, Config.map(Option.getOrUndefined)),
+  v12codeHome: Config.string("V12CODE_HOME").pipe(Config.option, Config.map(Option.getOrUndefined)),
   devUrl: Config.url("VITE_DEV_SERVER_URL").pipe(Config.option, Config.map(Option.getOrUndefined)),
-  noBrowser: Config.boolean("V12_NO_BROWSER").pipe(
+  noBrowser: Config.boolean("V12CODE_NO_BROWSER").pipe(
     Config.option,
     Config.map(Option.getOrUndefined),
   ),
-  bootstrapFd: Config.int("V12_BOOTSTRAP_FD").pipe(
+  bootstrapFd: Config.int("V12CODE_BOOTSTRAP_FD").pipe(
     Config.option,
     Config.map(Option.getOrUndefined),
   ),
-  autoBootstrapProjectFromCwd: Config.boolean("V12_AUTO_BOOTSTRAP_PROJECT_FROM_CWD").pipe(
+  autoBootstrapProjectFromCwd: Config.boolean("V12CODE_AUTO_BOOTSTRAP_PROJECT_FROM_CWD").pipe(
     Config.option,
     Config.map(Option.getOrUndefined),
   ),
-  logWebSocketEvents: Config.boolean("V12_LOG_WS_EVENTS").pipe(
+  logWebSocketEvents: Config.boolean("V12CODE_LOG_WS_EVENTS").pipe(
     Config.option,
     Config.map(Option.getOrUndefined),
   ),
-  tailscaleServeEnabled: Config.boolean("V12_TAILSCALE_SERVE").pipe(
+  tailscaleServeEnabled: Config.boolean("V12CODE_TAILSCALE_SERVE").pipe(
     Config.option,
     Config.map(Option.getOrUndefined),
   ),
-  tailscaleServePort: Config.port("V12_TAILSCALE_SERVE_PORT").pipe(
+  tailscaleServePort: Config.port("V12CODE_TAILSCALE_SERVE_PORT").pipe(
     Config.option,
     Config.map(Option.getOrUndefined),
   ),
@@ -258,8 +265,8 @@ export const resolveServerConfig = (
       Option.getOrUndefined(
         resolveOptionPrecedence(
           normalizedFlags.baseDir,
-          Option.fromUndefinedOr(env.v12Home),
-          Option.fromUndefinedOr(bootstrap?.v12Home),
+          Option.fromUndefinedOr(env.v12codeHome),
+          Option.fromUndefinedOr(bootstrap?.v12codeHome),
         ),
       ),
     );

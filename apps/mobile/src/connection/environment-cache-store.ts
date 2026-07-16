@@ -1,11 +1,14 @@
-import { ConnectionPersistenceError, EnvironmentCacheStore } from "@v12/client-runtime/platform";
+import {
+  ConnectionPersistenceError,
+  EnvironmentCacheStore,
+} from "@v12code/client-runtime/platform";
 import {
   type EnvironmentId,
   OrchestrationShellSnapshot,
   OrchestrationThreadDetailSnapshot,
   ServerConfig,
   VcsListRefsResult,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Option from "effect/Option";

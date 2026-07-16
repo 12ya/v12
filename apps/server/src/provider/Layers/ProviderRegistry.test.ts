@@ -22,13 +22,13 @@ import {
   type ServerProvider,
   type ServerProviderSlashCommand,
   type ServerSettings as ContractServerSettings,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import * as PlatformError from "effect/PlatformError";
 import { HttpClient, HttpClientResponse } from "effect/unstable/http";
 import { ChildProcessSpawner } from "effect/unstable/process";
-import { deepMerge } from "@v12/shared/Struct";
-import { createModelCapabilities } from "@v12/shared/model";
-import { applyServerSettingsPatch } from "@v12/shared/serverSettings";
+import { deepMerge } from "@v12code/shared/Struct";
+import { createModelCapabilities } from "@v12code/shared/model";
+import { applyServerSettingsPatch } from "@v12code/shared/serverSettings";
 
 import { checkCodexProviderStatus, type CodexAppServerProviderSnapshot } from "./CodexProvider.ts";
 import { checkClaudeProviderStatus } from "./ClaudeProvider.ts";
@@ -59,7 +59,7 @@ const disabledCodexSettings: CodexSettings = Schema.decodeSync(CodexSettings)({
   enabled: false,
 });
 
-process.env.V12_CURSOR_ENABLED = "1";
+process.env.V12CODE_CURSOR_ENABLED = "1";
 
 // ── Test helpers ────────────────────────────────────────────────────
 
@@ -654,7 +654,7 @@ it.layer(Layer.mergeAll(NodeServices.layer, ServerSettingsModule.layerTest(), Te
               Layer.provideMerge(instanceRegistryLayer),
               Layer.provideMerge(
                 ServerConfig.layerTest(process.cwd(), {
-                  prefix: "v12-provider-registry-background-refresh-",
+                  prefix: "v12code-provider-registry-background-refresh-",
                 }),
               ),
               Layer.provideMerge(NodeServices.layer),
@@ -809,7 +809,7 @@ it.layer(Layer.mergeAll(NodeServices.layer, ServerSettingsModule.layerTest(), Te
               Layer.provideMerge(instanceRegistryLayer),
               Layer.provideMerge(
                 ServerConfig.layerTest(process.cwd(), {
-                  prefix: "v12-provider-registry-merged-persist-",
+                  prefix: "v12code-provider-registry-merged-persist-",
                 }),
               ),
               Layer.provideMerge(NodeServices.layer),
@@ -906,7 +906,7 @@ it.layer(Layer.mergeAll(NodeServices.layer, ServerSettingsModule.layerTest(), Te
               Layer.provideMerge(instanceRegistryLayer),
               Layer.provideMerge(
                 ServerConfig.layerTest(process.cwd(), {
-                  prefix: "v12-provider-registry-refresh-failure-",
+                  prefix: "v12code-provider-registry-refresh-failure-",
                 }),
               ),
               Layer.provideMerge(NodeServices.layer),
@@ -1013,7 +1013,7 @@ it.layer(Layer.mergeAll(NodeServices.layer, ServerSettingsModule.layerTest(), Te
               Layer.provideMerge(instanceRegistryLayer),
               Layer.provideMerge(
                 ServerConfig.layerTest(process.cwd(), {
-                  prefix: "v12-provider-registry-sync-failure-",
+                  prefix: "v12code-provider-registry-sync-failure-",
                 }),
               ),
               Layer.provideMerge(NodeServices.layer),
@@ -1062,7 +1062,7 @@ it.layer(Layer.mergeAll(NodeServices.layer, ServerSettingsModule.layerTest(), Te
       // assertions below fail.
       it.effect("propagates real Codex probe failures to the aggregator at boot", () =>
         Effect.gen(function* () {
-          const missingBinary = `v12_codex_missing_`;
+          const missingBinary = `v12code_codex_missing_`;
           const serverSettings = yield* makeMutableServerSettingsService(
             decodeServerSettings(
               deepMerge(encodedDefaultServerSettings, {
@@ -1084,7 +1084,7 @@ it.layer(Layer.mergeAll(NodeServices.layer, ServerSettingsModule.layerTest(), Te
                 // accepts + decodes them. Cast the patch to `unknown` so
                 // the `Schema.decodeSync` below does the real validation.
                 providerInstances: {
-                  // Matches the shape the user had in `.v12/dev/settings.json`
+                  // Matches the shape the user had in `.v12code/dev/settings.json`
                   // when the bug was reported: a custom enabled Codex instance
                   // pointing at a binary the server has to actually spawn.
                   codex_personal: {
@@ -1109,7 +1109,7 @@ it.layer(Layer.mergeAll(NodeServices.layer, ServerSettingsModule.layerTest(), Te
             ),
             Layer.provideMerge(
               ServerConfig.layerTest(process.cwd(), {
-                prefix: "v12-provider-registry-",
+                prefix: "v12code-provider-registry-",
               }),
             ),
             Layer.provideMerge(TestHttpClientLive),
@@ -1176,8 +1176,8 @@ it.layer(Layer.mergeAll(NodeServices.layer, ServerSettingsModule.layerTest(), Te
       //
       it.effect("re-probes when settings change the codex binaryPath", () =>
         Effect.gen(function* () {
-          const firstMissing = `v12_codex_first_`;
-          const secondMissing = `v12_codex_second_`;
+          const firstMissing = `v12code_codex_first_`;
+          const secondMissing = `v12code_codex_second_`;
           const spawnedCommands: Array<string> = [];
           const serverSettings = yield* makeMutableServerSettingsService(
             decodeServerSettings(
@@ -1201,7 +1201,7 @@ it.layer(Layer.mergeAll(NodeServices.layer, ServerSettingsModule.layerTest(), Te
             ),
             Layer.provideMerge(
               ServerConfig.layerTest(process.cwd(), {
-                prefix: "v12-provider-registry-",
+                prefix: "v12code-provider-registry-",
               }),
             ),
             Layer.provideMerge(TestHttpClientLive),
@@ -1322,7 +1322,7 @@ it.layer(Layer.mergeAll(NodeServices.layer, ServerSettingsModule.layerTest(), Te
             ),
             Layer.provideMerge(
               ServerConfig.layerTest(process.cwd(), {
-                prefix: "v12-provider-registry-",
+                prefix: "v12code-provider-registry-",
               }),
             ),
             Layer.provideMerge(TestHttpClientLive),
@@ -1383,7 +1383,7 @@ it.layer(Layer.mergeAll(NodeServices.layer, ServerSettingsModule.layerTest(), Te
               ),
               Layer.provideMerge(
                 ServerConfig.layerTest(process.cwd(), {
-                  prefix: "v12-provider-registry-",
+                  prefix: "v12code-provider-registry-",
                 }),
               ),
               Layer.provideMerge(TestHttpClientLive),
@@ -1441,7 +1441,10 @@ it.layer(Layer.mergeAll(NodeServices.layer, ServerSettingsModule.layerTest(), Te
               ]);
               assert.strictEqual(cursorProvider?.enabled, false);
               assert.strictEqual(cursorProvider?.status, "disabled");
-              assert.strictEqual(cursorProvider?.message, "Cursor is disabled in V12 settings.");
+              assert.strictEqual(
+                cursorProvider?.message,
+                "Cursor is disabled in V12Code settings.",
+              );
               assert.strictEqual(cursorSpawned, false);
             }).pipe(Effect.provide(runtimeServices));
           }),
@@ -1455,7 +1458,7 @@ it.layer(Layer.mergeAll(NodeServices.layer, ServerSettingsModule.layerTest(), Te
           assert.strictEqual(status.enabled, false);
           assert.strictEqual(status.status, "disabled");
           assert.strictEqual(status.installed, false);
-          assert.strictEqual(status.message, "Codex is disabled in V12 settings.");
+          assert.strictEqual(status.message, "Codex is disabled in V12Code settings.");
         }),
       );
     });
@@ -1717,7 +1720,7 @@ it.layer(Layer.mergeAll(NodeServices.layer, ServerSettingsModule.layerTest(), Te
       );
 
       it.effect("runs Claude status probes with the configured Claude HOME", () => {
-        const claudeHome = "/tmp/v12-claude-home";
+        const claudeHome = "/tmp/v12code-claude-home";
         const recorded = recordingMockSpawnerLayer((args) => {
           const joined = args.join(" ");
           if (joined === "--version") return { stdout: "1.0.0\n", stderr: "", code: 0 };

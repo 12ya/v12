@@ -3,8 +3,8 @@ import type {
   ServerProcessDiagnosticsResult,
   ServerProcessSignal,
   ServerSignalProcessResult,
-} from "@v12/contracts";
-import { HostProcessPlatform } from "@v12/shared/hostProcess";
+} from "@v12code/contracts";
+import { HostProcessPlatform } from "@v12code/shared/hostProcess";
 import * as Context from "effect/Context";
 import * as DateTime from "effect/DateTime";
 import * as Duration from "effect/Duration";
@@ -41,7 +41,7 @@ export class ProcessDiagnostics extends Context.Service<
       readonly signal: ServerProcessSignal;
     }) => Effect.Effect<ServerSignalProcessResult>;
   }
->()("v12/diagnostics/ProcessDiagnostics") {}
+>()("v12code/diagnostics/ProcessDiagnostics") {}
 
 class ProcessDiagnosticsQueryTimeoutError extends Schema.TaggedErrorClass<ProcessDiagnosticsQueryTimeoutError>()(
   "ProcessDiagnosticsQueryTimeoutError",
@@ -82,7 +82,7 @@ class ProcessDiagnosticsServerProcessSignalError extends Schema.TaggedErrorClass
   { pid: Schema.Number },
 ) {
   override get message(): string {
-    return "Refusing to signal the V12 server process.";
+    return "Refusing to signal the V12Code server process.";
   }
 }
 
@@ -94,7 +94,7 @@ class ProcessDiagnosticsNotDescendantError extends Schema.TaggedErrorClass<Proce
   },
 ) {
   override get message(): string {
-    return `Process ${this.pid} is not a live descendant of the V12 server.`;
+    return `Process ${this.pid} is not a live descendant of the V12Code server.`;
   }
 }
 

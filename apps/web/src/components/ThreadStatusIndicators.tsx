@@ -1,5 +1,9 @@
-import { scopeProjectRef, scopedThreadKey, scopeThreadRef } from "@v12/client-runtime/environment";
-import type { VcsStatusResult } from "@v12/contracts";
+import {
+  scopeProjectRef,
+  scopedThreadKey,
+  scopeThreadRef,
+} from "@v12code/client-runtime/environment";
+import type { VcsStatusResult } from "@v12code/contracts";
 import { CloudIcon, FolderGit2Icon, GitPullRequestIcon, TerminalIcon } from "lucide-react";
 import { useMemo } from "react";
 import { useEnvironment, usePrimaryEnvironmentId } from "../state/environments";

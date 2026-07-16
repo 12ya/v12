@@ -1,11 +1,11 @@
-import type { EnvironmentId, ProjectEntry } from "@v12/contracts";
+import type { EnvironmentId, ProjectEntry } from "@v12code/contracts";
 import { FileTree, useFileTree } from "@pierre/trees/react";
 import { RefreshCw, Search } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
 
 import { useTheme } from "~/hooks/useTheme";
 import { cn } from "~/lib/utils";
-import { V12_PIERRE_ICONS } from "~/pierre-icons";
+import { V12CODE_PIERRE_ICONS } from "~/pierre-icons";
 
 import { useProjectEntriesQuery } from "./projectFilesQueryState";
 
@@ -54,7 +54,7 @@ export default function FileBrowserPanel({
     fileTreeSearchMode: "hide-non-matches",
     flattenEmptyDirectories: true,
     initialExpansion: 1,
-    icons: V12_PIERRE_ICONS,
+    icons: V12CODE_PIERRE_ICONS,
     onSelectionChange: (selectedPaths) => {
       const selectedPath = selectedPaths.at(-1)?.replace(/\/$/, "");
       if (selectedPath && entryKindsRef.current.get(selectedPath) === "file") {

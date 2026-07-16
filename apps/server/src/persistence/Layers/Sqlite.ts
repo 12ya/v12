@@ -52,7 +52,7 @@ export const makeSqlitePersistenceLive = Effect.fn("makeSqlitePersistenceLive")(
       filename: dbPath,
       spanAttributes: {
         "db.name": path.basename(dbPath),
-        "service.name": "v12-server",
+        "service.name": "v12code-server",
       },
     }),
   );

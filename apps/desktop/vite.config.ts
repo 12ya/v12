@@ -3,10 +3,10 @@ import { defineConfig } from "vite-plus";
 import { loadRepoEnv } from "../../scripts/lib/public-config.ts";
 
 const repoEnv = loadRepoEnv();
-const shouldLaunchElectronAfterPack = process.env.V12_DESKTOP_DEV === "1";
+const shouldLaunchElectronAfterPack = process.env.V12CODE_DESKTOP_DEV === "1";
 const publicConfigDefine = {
-  __V12_BUILD_CLERK_PUBLISHABLE_KEY__: JSON.stringify(
-    repoEnv.V12_CLERK_PUBLISHABLE_KEY?.trim() ?? "",
+  __V12CODE_BUILD_CLERK_PUBLISHABLE_KEY__: JSON.stringify(
+    repoEnv.V12CODE_CLERK_PUBLISHABLE_KEY?.trim() ?? "",
   ),
 };
 
@@ -15,13 +15,13 @@ export default defineConfig({
     tasks: {
       build: {
         command: "node scripts/build-preview-annotation-css.mjs && vp pack",
-        dependsOn: ["v12#build"],
+        dependsOn: ["v12code#build"],
         cache: false,
       },
       dev: {
         command:
-          "node scripts/build-preview-annotation-css.mjs && cross-env V12_DESKTOP_DEV=1 vp pack --watch",
-        dependsOn: ["v12#build"],
+          "node scripts/build-preview-annotation-css.mjs && cross-env V12CODE_DESKTOP_DEV=1 vp pack --watch",
+        dependsOn: ["v12code#build"],
         cache: false,
       },
       "dev:bundle": {
@@ -30,7 +30,7 @@ export default defineConfig({
       },
       "dev:electron": {
         command: "node scripts/dev-electron.mjs",
-        dependsOn: ["v12#build"],
+        dependsOn: ["v12code#build"],
         cache: false,
       },
     },
@@ -45,7 +45,7 @@ export default defineConfig({
       entry: ["src/main.ts"],
       clean: true,
       deps: {
-        alwaysBundle: (id) => id.startsWith("@v12/"),
+        alwaysBundle: (id) => id.startsWith("@v12code/"),
       },
       ...(shouldLaunchElectronAfterPack ? { onSuccess: "node scripts/dev-electron.mjs" } : {}),
     },

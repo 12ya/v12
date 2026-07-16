@@ -10,7 +10,7 @@ import type {
   ProjectEntry,
   ProjectListEntriesResult,
   ProjectSearchEntriesResult,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 
 const WORKSPACE_INDEX_MAX_ENTRIES = 25_000;
 const WORKSPACE_INDEX_PAGE_SIZE = WORKSPACE_INDEX_MAX_ENTRIES + 2;
@@ -102,7 +102,7 @@ export class WorkspaceSearchIndex extends Context.Service<
       WorkspaceSearchIndexRefreshFailed | WorkspaceSearchIndexScanTimedOut
     >;
   }
->()("v12/workspace/WorkspaceSearchIndex") {}
+>()("v12code/workspace/WorkspaceSearchIndex") {}
 
 function toPosixPath(input: string): string {
   return input.replaceAll("\\", "/");
@@ -318,7 +318,7 @@ export const make = Effect.fn("WorkspaceSearchIndex.make")(function* (cwd: strin
 export const layer = (cwd: string) => Layer.effect(WorkspaceSearchIndex, make(cwd));
 
 export class WorkspaceSearchIndexMap extends LayerMap.Service<WorkspaceSearchIndexMap>()(
-  "v12/workspace/WorkspaceSearchIndexMap",
+  "v12code/workspace/WorkspaceSearchIndexMap",
   {
     lookup: layer,
     idleTimeToLive: WORKSPACE_INDEX_IDLE_TTL,

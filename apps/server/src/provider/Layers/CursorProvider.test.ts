@@ -7,8 +7,8 @@ import * as Path from "effect/Path";
 import type * as ChildProcessSpawner from "effect/unstable/process/ChildProcessSpawner";
 import { describe, expect, it } from "vite-plus/test";
 import type * as EffectAcpSchema from "effect-acp/schema";
-import type { CursorSettings } from "@v12/contracts";
-import { createModelCapabilities } from "@v12/shared/model";
+import type { CursorSettings } from "@v12code/contracts";
+import { createModelCapabilities } from "@v12code/shared/model";
 
 import {
   buildCursorProviderSnapshot,
@@ -152,7 +152,7 @@ const makeExitLogFixture = Effect.fn("makeExitLogFixture")(function* (prefix: st
   return {
     exitLogPath,
     wrapperPath: yield* makeMockAgentWrapper({
-      V12_ACP_EXIT_LOG_PATH: exitLogPath,
+      V12CODE_ACP_EXIT_LOG_PATH: exitLogPath,
     }),
   };
 });
@@ -300,14 +300,14 @@ const baseCursorSettings: CursorSettings = {
 };
 const cursorAcpDiscoveryFailedMessage = [
   "Cursor ACP model discovery failed.",
-  "Cursor CLI setup may be incomplete; install or enable the Cursor CLI, restart V12, and try again.",
+  "Cursor CLI setup may be incomplete; install or enable the Cursor CLI, restart V12Code, and try again.",
   "See https://cursor.com/docs/cli/installation.",
   "Check server logs for ACP details.",
 ].join(" ");
-const missingCursorBinaryPath = "/definitely/not/installed/v12-cursor-agent";
+const missingCursorBinaryPath = "/definitely/not/installed/v12code-cursor-agent";
 const cursorCliCommandMissingMessage = [
   `Cursor CLI command \`${missingCursorBinaryPath}\` was not found.`,
-  `Install or enable the Cursor CLI, make sure \`${missingCursorBinaryPath}\` is on PATH, then restart V12.`,
+  `Install or enable the Cursor CLI, make sure \`${missingCursorBinaryPath}\` is on PATH, then restart V12Code.`,
   "See https://cursor.com/docs/cli/installation.",
 ].join(" ");
 
@@ -458,7 +458,7 @@ describe("checkCursorProviderStatus", () => {
         },
         {
           ...process.env,
-          V12_ACP_REQUEST_LOG_PATH: requestLogPath,
+          V12CODE_ACP_REQUEST_LOG_PATH: requestLogPath,
         },
       ),
     );

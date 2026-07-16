@@ -18,7 +18,7 @@ import type {
   OrchestrationThreadShell,
   ProjectId,
   ThreadId,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import * as Context from "effect/Context";
 import type * as Option from "effect/Option";
 import type * as Effect from "effect/Effect";
@@ -176,4 +176,4 @@ export interface ProjectionSnapshotQueryShape {
 export class ProjectionSnapshotQuery extends Context.Service<
   ProjectionSnapshotQuery,
   ProjectionSnapshotQueryShape
->()("v12/orchestration/Services/ProjectionSnapshotQuery") {}
+>()("v12code/orchestration/Services/ProjectionSnapshotQuery") {}

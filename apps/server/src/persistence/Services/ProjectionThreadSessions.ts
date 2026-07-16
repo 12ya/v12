@@ -13,7 +13,7 @@ import {
   ProviderInstanceId,
   ThreadId,
   TurnId,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import * as Option from "effect/Option";
 import * as Schema from "effect/Schema";
 import * as Context from "effect/Context";
@@ -75,4 +75,4 @@ export interface ProjectionThreadSessionRepositoryShape {
 export class ProjectionThreadSessionRepository extends Context.Service<
   ProjectionThreadSessionRepository,
   ProjectionThreadSessionRepositoryShape
->()("v12/persistence/Services/ProjectionThreadSessions/ProjectionThreadSessionRepository") {}
+>()("v12code/persistence/Services/ProjectionThreadSessions/ProjectionThreadSessionRepository") {}

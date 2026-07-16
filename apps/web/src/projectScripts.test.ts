@@ -3,7 +3,7 @@ import {
   projectScriptCwd,
   projectScriptRuntimeEnv,
   setupProjectScript,
-} from "@v12/shared/projectScripts";
+} from "@v12code/shared/projectScripts";
 
 import {
   commandForProjectScript,
@@ -55,8 +55,8 @@ describe("projectScripts helpers", () => {
     });
 
     expect(env).toMatchObject({
-      V12_PROJECT_ROOT: "/repo",
-      V12_WORKTREE_PATH: "/repo/worktree-a",
+      V12CODE_PROJECT_ROOT: "/repo",
+      V12CODE_WORKTREE_PATH: "/repo/worktree-a",
     });
   });
 
@@ -64,14 +64,14 @@ describe("projectScripts helpers", () => {
     const env = projectScriptRuntimeEnv({
       project: { cwd: "/repo" },
       extraEnv: {
-        V12_PROJECT_ROOT: "/custom-root",
+        V12CODE_PROJECT_ROOT: "/custom-root",
         CUSTOM_FLAG: "1",
       },
     });
 
-    expect(env.V12_PROJECT_ROOT).toBe("/custom-root");
+    expect(env.V12CODE_PROJECT_ROOT).toBe("/custom-root");
     expect(env.CUSTOM_FLAG).toBe("1");
-    expect(env.V12_WORKTREE_PATH).toBeUndefined();
+    expect(env.V12CODE_WORKTREE_PATH).toBeUndefined();
   });
 
   it("prefers the worktree path for script cwd resolution", () => {

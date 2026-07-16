@@ -1,8 +1,8 @@
 # Keybindings
 
-V12 reads keybindings from:
+V12Code reads keybindings from:
 
-- `~/.v12/keybindings.json`
+- `~/.v12code/keybindings.json`
 
 The file must be a JSON array of rules:
 

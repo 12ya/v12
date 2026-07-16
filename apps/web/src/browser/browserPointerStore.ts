@@ -1,4 +1,4 @@
-import type { DesktopPreviewPointerEvent } from "@v12/contracts";
+import type { DesktopPreviewPointerEvent } from "@v12code/contracts";
 import { create } from "zustand";
 
 interface BrowserPointerStoreState {

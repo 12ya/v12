@@ -1,5 +1,5 @@
-import { scopeThreadRef } from "@v12/client-runtime/environment";
-import type { EnvironmentId, ScopedThreadRef, ThreadId } from "@v12/contracts";
+import { scopeThreadRef } from "@v12code/client-runtime/environment";
+import type { EnvironmentId, ScopedThreadRef, ThreadId } from "@v12code/contracts";
 import type { DraftId } from "./composerDraftStore";
 
 export type ThreadRouteTarget =

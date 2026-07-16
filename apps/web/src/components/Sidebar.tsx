@@ -53,20 +53,20 @@ import {
   type ResolvedKeybindingsConfig,
   type SidebarProjectGroupingMode,
   ThreadId,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import {
   parseScopedThreadKey,
   scopedProjectKey,
   scopedThreadKey,
   scopeProjectRef,
   scopeThreadRef,
-} from "@v12/client-runtime/environment";
-import { safeErrorLogAttributes } from "@v12/client-runtime/errors";
+} from "@v12code/client-runtime/environment";
+import { safeErrorLogAttributes } from "@v12code/client-runtime/errors";
 import {
   isAtomCommandInterrupted,
   settlePromise,
   squashAtomCommandFailure,
-} from "@v12/client-runtime/state/runtime";
+} from "@v12code/client-runtime/state/runtime";
 import { Link, useLocation, useNavigate, useParams, useRouter } from "@tanstack/react-router";
 import {
   MAX_SIDEBAR_THREAD_PREVIEW_COUNT,
@@ -74,7 +74,7 @@ import {
   type SidebarProjectSortOrder,
   type SidebarThreadPreviewCount,
   type SidebarThreadSortOrder,
-} from "@v12/contracts/settings";
+} from "@v12code/contracts/settings";
 import { isDesktopLocalConnectionTarget } from "../connection/desktopLocal";
 import { useDesktopLocalBootstraps } from "../connection/useDesktopLocalBootstraps";
 import { isElectron } from "../env";
@@ -3041,7 +3041,7 @@ function SidebarBrand() {
       className="sidebar-brand ml-[var(--workspace-titlebar-content-left)] h-7 w-fit min-w-0 shrink-0 items-center gap-1 overflow-hidden rounded-md text-foreground outline-hidden ring-ring focus-visible:ring-2"
       to="/"
     >
-      <V12Wordmark />
+      <V12CodeWordmark />
       <span className="sidebar-brand-stage shrink-0 items-center whitespace-nowrap rounded-full bg-muted/50 px-1.5 py-0.5 text-[8px] font-medium uppercase tracking-[0.18em] text-muted-foreground/60">
         {stageLabel}
       </span>
@@ -3059,13 +3059,13 @@ function useSidebarStageLabel() {
   });
 }
 
-function V12Wordmark() {
+function V12CodeWordmark() {
   return (
     <span
-      aria-label="V12"
+      aria-label="V12Code"
       className="truncate text-sm font-semibold tracking-tight text-foreground"
     >
-      V12
+      V12Code
     </span>
   );
 }

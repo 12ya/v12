@@ -4,8 +4,8 @@ import {
   ProviderInstanceId,
   type ServerProvider,
   type ServerProviderUpdateState,
-} from "@v12/contracts";
-import { ServerProviderUpdateError } from "@v12/contracts";
+} from "@v12code/contracts";
+import { ServerProviderUpdateError } from "@v12code/contracts";
 import * as Cause from "effect/Cause";
 import * as Effect from "effect/Effect";
 import * as Exit from "effect/Exit";
@@ -17,8 +17,8 @@ import * as Sink from "effect/Sink";
 import * as Stream from "effect/Stream";
 import { HttpClient, HttpClientResponse } from "effect/unstable/http";
 import { ChildProcessSpawner } from "effect/unstable/process";
-import { HostProcessEnvironment, HostProcessPlatform } from "@v12/shared/hostProcess";
-import { SpawnExecutableResolution } from "@v12/shared/shell";
+import { HostProcessEnvironment, HostProcessPlatform } from "@v12code/shared/hostProcess";
+import { SpawnExecutableResolution } from "@v12code/shared/shell";
 
 import { ProviderRegistry, type ProviderRegistryShape } from "./Services/ProviderRegistry.ts";
 import * as ProviderMaintenanceRunner from "./providerMaintenanceRunner.ts";

@@ -1,5 +1,5 @@
-import { ManagedRelay } from "@v12/client-runtime/relay";
-import { RelayMobileClientId } from "@v12/contracts/relay";
+import { ManagedRelay } from "@v12code/client-runtime/relay";
+import { RelayMobileClientId } from "@v12code/contracts/relay";
 import * as Crypto from "effect/Crypto";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";

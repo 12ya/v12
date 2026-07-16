@@ -3,14 +3,14 @@ import {
   type ModelCapabilities,
   type OpenCodeSettings,
   type ServerProviderModel,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import * as Cause from "effect/Cause";
 import * as Data from "effect/Data";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
 
-import { createModelCapabilities } from "@v12/shared/model";
-import { compareSemverVersions } from "@v12/shared/semver";
+import { createModelCapabilities } from "@v12code/shared/model";
+import { compareSemverVersions } from "@v12code/shared/semver";
 import {
   buildServerProvider,
   nonEmptyTrimmed,
@@ -277,8 +277,8 @@ export const makePendingOpenCodeProvider = (
           auth: { status: "unknown" },
           message:
             openCodeSettings.serverUrl.trim().length > 0
-              ? "OpenCode is disabled in V12 settings. A server URL is configured."
-              : "OpenCode is disabled in V12 settings.",
+              ? "OpenCode is disabled in V12Code settings. A server URL is configured."
+              : "OpenCode is disabled in V12Code settings.",
         },
       });
     }
@@ -352,8 +352,8 @@ export const checkOpenCodeProviderStatus = Effect.fn("checkOpenCodeProviderStatu
         status: "warning",
         auth: { status: "unknown" },
         message: isExternalServer
-          ? "OpenCode is disabled in V12 settings. A server URL is configured."
-          : "OpenCode is disabled in V12 settings.",
+          ? "OpenCode is disabled in V12Code settings. A server URL is configured."
+          : "OpenCode is disabled in V12Code settings.",
       },
     });
   }
@@ -381,7 +381,7 @@ export const checkOpenCodeProviderStatus = Effect.fn("checkOpenCodeProviderStatu
     if (!version) {
       return fallback(
         new Error(
-          `Unable to determine OpenCode version from \`opencode --version\` output. V12 requires OpenCode v${MINIMUM_OPENCODE_VERSION} or newer.`,
+          `Unable to determine OpenCode version from \`opencode --version\` output. V12Code requires OpenCode v${MINIMUM_OPENCODE_VERSION} or newer.`,
         ),
         null,
       );

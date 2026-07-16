@@ -4,7 +4,7 @@ import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
 import * as Path from "effect/Path";
 import * as Schema from "effect/Schema";
-import { GrokSettings } from "@v12/contracts";
+import { GrokSettings } from "@v12code/contracts";
 
 import { buildInitialGrokProviderSnapshot, checkGrokProviderStatus } from "./GrokProvider.ts";
 
@@ -59,7 +59,7 @@ it.layer(NodeServices.layer)("checkGrokProviderStatus", (it) => {
         Effect.gen(function* () {
           const fs = yield* FileSystem.FileSystem;
           const path = yield* Path.Path;
-          const dir = yield* fs.makeTempDirectoryScoped({ prefix: "v12-grok-version-" });
+          const dir = yield* fs.makeTempDirectoryScoped({ prefix: "v12code-grok-version-" });
           const grokPath = path.join(dir, "grok");
           yield* fs.writeFileString(
             grokPath,
@@ -87,7 +87,7 @@ it.layer(NodeServices.layer)("checkGrokProviderStatus", (it) => {
         Effect.gen(function* () {
           const fs = yield* FileSystem.FileSystem;
           const path = yield* Path.Path;
-          const dir = yield* fs.makeTempDirectoryScoped({ prefix: "v12-grok-success-" });
+          const dir = yield* fs.makeTempDirectoryScoped({ prefix: "v12code-grok-success-" });
           const grokPath = path.join(dir, "grok");
           yield* fs.writeFileString(
             grokPath,

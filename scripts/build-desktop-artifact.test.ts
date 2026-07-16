@@ -38,7 +38,7 @@ import {
   STAGE_INSTALL_ARGS,
 } from "./build-desktop-artifact.ts";
 import { BRAND_ASSET_PATHS } from "./lib/brand-assets.ts";
-import { HostProcessArchitecture, HostProcessPlatform } from "@v12/shared/hostProcess";
+import { HostProcessArchitecture, HostProcessPlatform } from "@v12code/shared/hostProcess";
 
 function mockProcess(exitCode: number) {
   return ChildProcessSpawner.makeHandle({
@@ -84,8 +84,8 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
   });
 
   it("switches desktop packaging product names to nightly for nightly builds", () => {
-    assert.equal(resolveDesktopProductName("0.0.17"), "V12");
-    assert.equal(resolveDesktopProductName("0.0.17-nightly.20260413.42"), "V12 (Nightly)");
+    assert.equal(resolveDesktopProductName("0.0.17"), "V12Code");
+    assert.equal(resolveDesktopProductName("0.0.17-nightly.20260413.42"), "V12Code (Nightly)");
   });
 
   it("switches desktop packaging icons to the nightly artwork for nightly versions", () => {
@@ -109,7 +109,7 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
           ConfigProvider.layer(
             ConfigProvider.fromEnv({
               env: {
-                V12_DESKTOP_UPDATE_REPOSITORY: "12ya/v12",
+                V12CODE_DESKTOP_UPDATE_REPOSITORY: "12ya/v12code",
               },
             }),
           ),
@@ -120,7 +120,7 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
           ConfigProvider.layer(
             ConfigProvider.fromEnv({
               env: {
-                GITHUB_REPOSITORY: "12ya/v12",
+                GITHUB_REPOSITORY: "12ya/v12code",
               },
             }),
           ),
@@ -130,13 +130,13 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
       assert.deepStrictEqual(latestConfig, {
         provider: "github",
         owner: "12ya",
-        repo: "v12",
+        repo: "v12code",
         releaseType: "release",
       });
       assert.deepStrictEqual(nightlyConfig, {
         provider: "github",
         owner: "12ya",
-        repo: "v12",
+        repo: "v12code",
         releaseType: "prerelease",
         channel: "nightly",
       });
@@ -148,10 +148,10 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
       resolveDesktopRuntimeDependencies(
         {
           "@effect/platform-node": "catalog:",
-          "@v12/contracts": "workspace:*",
-          "@v12/shared": "workspace:*",
-          "@v12/ssh": "workspace:*",
-          "@v12/tailscale": "workspace:*",
+          "@v12code/contracts": "workspace:*",
+          "@v12code/shared": "workspace:*",
+          "@v12code/ssh": "workspace:*",
+          "@v12code/tailscale": "workspace:*",
           effect: "catalog:",
           electron: "41.5.0",
         },
@@ -343,24 +343,24 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
 
   it("derives macOS passkey signing configuration from the Clerk publishable key", () => {
     const configuration = resolveMacPasskeySigningConfiguration({
-      V12_APPLE_TEAM_ID: "abc1234567",
-      V12_MACOS_PROVISIONING_PROFILE: "/tmp/v12.provisionprofile",
-      V12_CLERK_PUBLISHABLE_KEY: `pk_test_${btoa("example.clerk.accounts.dev$")}`,
+      V12CODE_APPLE_TEAM_ID: "abc1234567",
+      V12CODE_MACOS_PROVISIONING_PROFILE: "/tmp/v12code.provisionprofile",
+      V12CODE_CLERK_PUBLISHABLE_KEY: `pk_test_${btoa("example.clerk.accounts.dev$")}`,
     });
 
     assert.deepStrictEqual(configuration, {
-      appId: "com.v12.v12",
+      appId: "com.v12code.v12code",
       teamId: "ABC1234567",
       rpDomains: ["example.clerk.accounts.dev"],
-      provisioningProfilePath: "/tmp/v12.provisionprofile",
+      provisioningProfilePath: "/tmp/v12code.provisionprofile",
     });
   });
 
   it("normalizes explicit macOS passkey RP domains and renders required entitlements", () => {
     const configuration = resolveMacPasskeySigningConfiguration({
-      V12_APPLE_TEAM_ID: "ABC1234567",
-      V12_MACOS_PROVISIONING_PROFILE: "/tmp/v12.provisionprofile",
-      V12_CLERK_PASSKEY_RP_DOMAINS:
+      V12CODE_APPLE_TEAM_ID: "ABC1234567",
+      V12CODE_MACOS_PROVISIONING_PROFILE: "/tmp/v12code.provisionprofile",
+      V12CODE_CLERK_PASSKEY_RP_DOMAINS:
         " Clerk.Example.com,example.clerk.accounts.dev,clerk.example.com ",
     });
     const entitlements = renderMacPasskeyEntitlements(configuration);
@@ -369,7 +369,7 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
       "clerk.example.com",
       "example.clerk.accounts.dev",
     ]);
-    assert.include(entitlements, "<string>ABC1234567.com.v12.v12</string>");
+    assert.include(entitlements, "<string>ABC1234567.com.v12code.v12code</string>");
     assert.include(entitlements, "<string>webcredentials:clerk.example.com</string>");
     assert.include(entitlements, "<string>webcredentials:example.clerk.accounts.dev</string>");
     assert.include(entitlements, "<key>com.apple.security.cs.allow-jit</key>");
@@ -386,21 +386,21 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
     };
 
     const missingProfileError = captureError({
-      V12_APPLE_TEAM_ID: "ABC1234567",
-      V12_CLERK_PASSKEY_RP_DOMAINS: "example.clerk.accounts.dev",
+      V12CODE_APPLE_TEAM_ID: "ABC1234567",
+      V12CODE_CLERK_PASSKEY_RP_DOMAINS: "example.clerk.accounts.dev",
     });
     assert.instanceOf(missingProfileError, MissingMacPasskeyProvisioningProfileError);
     assert.equal(
       missingProfileError.message,
-      "V12_MACOS_PROVISIONING_PROFILE must point to an Associated Domains provisioning profile.",
+      "V12CODE_MACOS_PROVISIONING_PROFILE must point to an Associated Domains provisioning profile.",
     );
 
     const unsafeDomain =
       "https://domain-user:domain-secret@example.clerk.accounts.dev/path?token=query-secret";
     const invalidDomainError = captureError({
-      V12_APPLE_TEAM_ID: "ABC1234567",
-      V12_MACOS_PROVISIONING_PROFILE: "/tmp/v12.provisionprofile",
-      V12_CLERK_PASSKEY_RP_DOMAINS: unsafeDomain,
+      V12CODE_APPLE_TEAM_ID: "ABC1234567",
+      V12CODE_MACOS_PROVISIONING_PROFILE: "/tmp/v12code.provisionprofile",
+      V12CODE_CLERK_PASSKEY_RP_DOMAINS: unsafeDomain,
     });
     assert.instanceOf(invalidDomainError, InvalidMacPasskeyRpDomainError);
     assert.equal(invalidDomainError.reason, "scheme-not-allowed");
@@ -416,20 +416,20 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
     assert.throws(
       () =>
         resolveMacPasskeySigningConfiguration({
-          V12_APPLE_TEAM_ID: "ABC1234567",
-          V12_MACOS_PROVISIONING_PROFILE: "/tmp/v12.provisionprofile",
-          V12_CLERK_PASSKEY_RP_DOMAINS: "example.clerk.accounts.dev:8443",
+          V12CODE_APPLE_TEAM_ID: "ABC1234567",
+          V12CODE_MACOS_PROVISIONING_PROFILE: "/tmp/v12code.provisionprofile",
+          V12CODE_CLERK_PASSKEY_RP_DOMAINS: "example.clerk.accounts.dev:8443",
         }),
       /Invalid passkey RP domain/u,
     );
     const invalidPublishableKeyError = captureError({
-      V12_APPLE_TEAM_ID: "ABC1234567",
-      V12_MACOS_PROVISIONING_PROFILE: "/tmp/v12.provisionprofile",
-      V12_CLERK_PUBLISHABLE_KEY: "pk_test_%",
+      V12CODE_APPLE_TEAM_ID: "ABC1234567",
+      V12CODE_MACOS_PROVISIONING_PROFILE: "/tmp/v12code.provisionprofile",
+      V12CODE_CLERK_PUBLISHABLE_KEY: "pk_test_%",
     });
     assert.instanceOf(invalidPublishableKeyError, InvalidMacPasskeyPublishableKeyError);
     assert.ok(invalidPublishableKeyError.cause);
-    assert.equal(invalidPublishableKeyError.message, "V12_CLERK_PUBLISHABLE_KEY is invalid.");
+    assert.equal(invalidPublishableKeyError.message, "V12CODE_CLERK_PUBLISHABLE_KEY is invalid.");
     assert.notProperty(invalidPublishableKeyError, "publishableKey");
     assert.notInclude(invalidPublishableKeyError.message, "pk_test_%");
   });
@@ -460,14 +460,16 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
     Effect.gen(function* () {
       const config = yield* createBuildConfig("mac", "dmg", "1.2.3", true, false, undefined, {
         entitlementsPath: "/tmp/entitlements.mac.plist",
-        provisioningProfilePath: "/tmp/v12.provisionprofile",
+        provisioningProfilePath: "/tmp/v12code.provisionprofile",
       });
 
       const mac = config.mac as Record<string, unknown>;
-      assert.equal(config.appId, "com.v12.v12");
+      assert.equal(config.appId, "com.v12code.v12code");
       assert.equal(mac.entitlements, "/tmp/entitlements.mac.plist");
-      assert.equal(mac.provisioningProfile, "/tmp/v12.provisionprofile");
-      assert.deepStrictEqual(mac.protocols, [{ name: "V12", schemes: ["v12", "v12-dev"] }]);
+      assert.equal(mac.provisioningProfile, "/tmp/v12code.provisionprofile");
+      assert.deepStrictEqual(mac.protocols, [
+        { name: "V12Code", schemes: ["v12code", "v12code-dev"] },
+      ]);
     }).pipe(Effect.provide(ConfigProvider.layer(ConfigProvider.fromEnv({ env: {} })))),
   );
 
@@ -640,11 +642,11 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
           ConfigProvider.layer(
             ConfigProvider.fromEnv({
               env: {
-                V12_DESKTOP_SKIP_BUILD: "true",
-                V12_DESKTOP_KEEP_STAGE: "true",
-                V12_DESKTOP_SIGNED: "true",
-                V12_DESKTOP_VERBOSE: "true",
-                V12_DESKTOP_MOCK_UPDATES: "true",
+                V12CODE_DESKTOP_SKIP_BUILD: "true",
+                V12CODE_DESKTOP_KEEP_STAGE: "true",
+                V12CODE_DESKTOP_SIGNED: "true",
+                V12CODE_DESKTOP_VERBOSE: "true",
+                V12CODE_DESKTOP_MOCK_UPDATES: "true",
               },
             }),
           ),

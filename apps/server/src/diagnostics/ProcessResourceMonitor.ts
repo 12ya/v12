@@ -5,7 +5,7 @@ import {
   type ServerProcessResourceHistoryInput,
   type ServerProcessResourceHistoryResult,
   type ServerProcessResourceHistorySummary,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import * as Context from "effect/Context";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
@@ -58,7 +58,7 @@ export class ProcessResourceMonitor extends Context.Service<
       input: ServerProcessResourceHistoryInput,
     ) => Effect.Effect<ServerProcessResourceHistoryResult>;
   }
->()("v12/diagnostics/ProcessResourceMonitor") {}
+>()("v12code/diagnostics/ProcessResourceMonitor") {}
 
 function dateTimeFromMillis(ms: number): DateTime.Utc {
   return DateTime.makeUnsafe(ms);

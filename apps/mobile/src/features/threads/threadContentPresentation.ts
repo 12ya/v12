@@ -1,4 +1,4 @@
-import { type EnvironmentConnectionPhase } from "@v12/client-runtime/connection";
+import { type EnvironmentConnectionPhase } from "@v12code/client-runtime/connection";
 
 export type ThreadContentPresentation =
   | { readonly kind: "ready" }

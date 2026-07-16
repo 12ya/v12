@@ -2,12 +2,12 @@ import type {
   EnvironmentId,
   SidebarProjectGroupingMode,
   SidebarThreadSortOrder,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import {
   DEFAULT_SIDEBAR_PROJECT_GROUPING_MODE,
   DEFAULT_SIDEBAR_PROJECT_SORT_ORDER,
   DEFAULT_SIDEBAR_THREAD_SORT_ORDER,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import {
   createContext,
   createElement,

@@ -1,4 +1,4 @@
-import type { RelayClientDeviceRecord } from "@v12/contracts/relay";
+import type { RelayClientDeviceRecord } from "@v12code/contracts/relay";
 import { RefreshCwIcon, SmartphoneIcon } from "lucide-react";
 
 import { useManagedRelayDevices } from "../../cloud/managedRelayState";
@@ -96,7 +96,8 @@ function EmptyMobileClients() {
       <EmptyHeader>
         <EmptyTitle>No mobile clients</EmptyTitle>
         <EmptyDescription>
-          Sign in to V12 on your iPhone to register it for push notifications and Live Activities.
+          Sign in to V12Code on your iPhone to register it for push notifications and Live
+          Activities.
         </EmptyDescription>
       </EmptyHeader>
     </Empty>
@@ -116,7 +117,7 @@ export function MobileClientsUserProfilePage() {
         <div>
           <h2 className="text-base font-semibold tracking-[-0.01em]">Mobile clients</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Devices registered to receive V12 Connect activity from your environments.
+            Devices registered to receive V12Code Connect activity from your environments.
           </p>
         </div>
         <Button

@@ -1,8 +1,8 @@
 import * as NodeHttpClient from "@effect/platform-node/NodeHttpClient";
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import { assert, describe, it } from "@effect/vitest";
-import * as NetService from "@v12/shared/Net";
-import { SshPasswordPromptError } from "@v12/ssh/errors";
+import * as NetService from "@v12code/shared/Net";
+import { SshPasswordPromptError } from "@v12code/ssh/errors";
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
 import * as Layer from "effect/Layer";
@@ -14,7 +14,7 @@ import * as DesktopSshPasswordPrompts from "./DesktopSshPasswordPrompts.ts";
 function makeTempHomeDir() {
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
-    return yield* fs.makeTempDirectoryScoped({ prefix: "v12-ssh-env-test-" });
+    return yield* fs.makeTempDirectoryScoped({ prefix: "v12code-ssh-env-test-" });
   });
 }
 
@@ -30,7 +30,7 @@ describe("sshEnvironment", () => {
     assert.equal(cause.message, "Failed to present SSH password prompt for devbox.");
     assert.equal(
       DesktopSshEnvironment.toSshPasswordPromptError(cause).message,
-      "V12 window is not available for SSH authentication.",
+      "V12Code window is not available for SSH authentication.",
     );
   });
 

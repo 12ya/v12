@@ -2,7 +2,7 @@ export function isCloudDebugEnabled(): boolean {
   return (
     (typeof __DEV__ !== "undefined" && __DEV__) ||
     (typeof globalThis !== "undefined" &&
-      (globalThis as { __V12_CLOUD_DEBUG__?: boolean }).__V12_CLOUD_DEBUG__ === true)
+      (globalThis as { __V12CODE_CLOUD_DEBUG__?: boolean }).__V12CODE_CLOUD_DEBUG__ === true)
   );
 }
 
@@ -11,8 +11,8 @@ export function cloudDebugLog(event: string, data?: Record<string, unknown>): vo
     return;
   }
   if (data) {
-    console.log(`[v12-cloud] ${event}`, data);
+    console.log(`[v12code-cloud] ${event}`, data);
   } else {
-    console.log(`[v12-cloud] ${event}`);
+    console.log(`[v12code-cloud] ${event}`);
   }
 }

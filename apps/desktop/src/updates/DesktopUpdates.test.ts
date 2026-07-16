@@ -1,6 +1,6 @@
 import { assert, describe, it } from "@effect/vitest";
 import * as NodeServices from "@effect/platform-node/NodeServices";
-import type { DesktopUpdateState } from "@v12/contracts";
+import type { DesktopUpdateState } from "@v12code/contracts";
 import * as Cause from "effect/Cause";
 import * as Deferred from "effect/Deferred";
 import * as Duration from "effect/Duration";
@@ -126,7 +126,7 @@ function makeHarness(options: UpdatesHarnessOptions = {}) {
 
   const environmentLayer = DesktopEnvironment.layer({
     dirname: "/repo/apps/desktop/src",
-    homeDirectory: `/tmp/v12-desktop-updates-home-${process.pid}`,
+    homeDirectory: `/tmp/v12code-desktop-updates-home-${process.pid}`,
     platform: "darwin",
     processArch: "x64",
     appVersion: "1.2.3",
@@ -139,9 +139,9 @@ function makeHarness(options: UpdatesHarnessOptions = {}) {
       Layer.mergeAll(
         NodeServices.layer,
         DesktopConfig.layerTest({
-          V12_HOME: `/tmp/v12-desktop-updates-test-${process.pid}`,
-          V12_DESKTOP_MOCK_UPDATES: "true",
-          V12_DESKTOP_MOCK_UPDATE_SERVER_PORT: "4141",
+          V12CODE_HOME: `/tmp/v12code-desktop-updates-test-${process.pid}`,
+          V12CODE_DESKTOP_MOCK_UPDATES: "true",
+          V12CODE_DESKTOP_MOCK_UPDATE_SERVER_PORT: "4141",
           ...options.env,
         }),
       ),
@@ -172,9 +172,9 @@ function makeHarness(options: UpdatesHarnessOptions = {}) {
     Layer.provideMerge(settingsLayer),
     Layer.provideMerge(
       DesktopConfig.layerTest({
-        V12_HOME: `/tmp/v12-desktop-updates-test-${process.pid}`,
-        V12_DESKTOP_MOCK_UPDATES: "true",
-        V12_DESKTOP_MOCK_UPDATE_SERVER_PORT: "4141",
+        V12CODE_HOME: `/tmp/v12code-desktop-updates-test-${process.pid}`,
+        V12CODE_DESKTOP_MOCK_UPDATES: "true",
+        V12CODE_DESKTOP_MOCK_UPDATE_SERVER_PORT: "4141",
         ...options.env,
       }),
     ),

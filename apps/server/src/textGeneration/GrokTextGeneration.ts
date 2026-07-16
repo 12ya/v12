@@ -5,11 +5,11 @@ import * as Schema from "effect/Schema";
 import { ChildProcessSpawner } from "effect/unstable/process";
 import type * as EffectAcpErrors from "effect-acp/errors";
 
-import { type GrokSettings, type ModelSelection } from "@v12/contracts";
-import { sanitizeBranchFragment, sanitizeFeatureBranchName } from "@v12/shared/git";
-import { extractJsonObject } from "@v12/shared/schemaJson";
+import { type GrokSettings, type ModelSelection } from "@v12code/contracts";
+import { sanitizeBranchFragment, sanitizeFeatureBranchName } from "@v12code/shared/git";
+import { extractJsonObject } from "@v12code/shared/schemaJson";
 
-import { TextGenerationError } from "@v12/contracts";
+import { TextGenerationError } from "@v12code/contracts";
 import * as TextGeneration from "./TextGeneration.ts";
 import {
   buildBranchNamePrompt,
@@ -64,7 +64,7 @@ export const makeGrokTextGeneration = Effect.fn("makeGrokTextGeneration")(functi
         environment,
         childProcessSpawner: commandSpawner,
         cwd,
-        clientInfo: { name: "v12-git-text", version: "0.0.0" },
+        clientInfo: { name: "v12code-git-text", version: "0.0.0" },
       });
 
       yield* runtime.handleSessionUpdate((notification) => {

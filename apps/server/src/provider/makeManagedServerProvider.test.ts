@@ -1,6 +1,6 @@
 import { describe, it, assert } from "@effect/vitest";
-import { ProviderDriverKind, ProviderInstanceId, type ServerProvider } from "@v12/contracts";
-import { createModelCapabilities } from "@v12/shared/model";
+import { ProviderDriverKind, ProviderInstanceId, type ServerProvider } from "@v12code/contracts";
+import { createModelCapabilities } from "@v12code/shared/model";
 import * as Deferred from "effect/Deferred";
 import * as Effect from "effect/Effect";
 import * as Fiber from "effect/Fiber";

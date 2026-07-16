@@ -4,8 +4,8 @@ import {
   issueRemoteWebSocketTicket,
   RemoteEnvironmentAuthUndeclaredStatusError,
   type RemoteEnvironmentAuthError,
-} from "@v12/client-runtime/authorization";
-import { fetchRemoteEnvironmentDescriptor } from "@v12/client-runtime/environment";
+} from "@v12code/client-runtime/authorization";
+import { fetchRemoteEnvironmentDescriptor } from "@v12code/client-runtime/environment";
 import {
   EnvironmentAuthInvalidError,
   DesktopDiscoveredSshHostSchema,
@@ -25,9 +25,9 @@ import {
   AuthAccessTokenResult,
   AuthSessionState,
   AuthWebSocketTicketResult,
-} from "@v12/contracts";
-import { SshHttpBridgeError } from "@v12/ssh/errors";
-import { resolveLoopbackSshHttpBaseUrl } from "@v12/ssh/tunnel";
+} from "@v12code/contracts";
+import { SshHttpBridgeError } from "@v12code/ssh/errors";
+import { resolveLoopbackSshHttpBaseUrl } from "@v12code/ssh/tunnel";
 import * as Data from "effect/Data";
 import * as Effect from "effect/Effect";
 import * as Schema from "effect/Schema";

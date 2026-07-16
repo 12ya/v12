@@ -11,40 +11,40 @@ import * as EffectAcpAgent from "effect-acp/agent";
 import * as AcpError from "effect-acp/errors";
 import type * as AcpSchema from "effect-acp/schema";
 
-const requestLogPath = process.env.V12_ACP_REQUEST_LOG_PATH;
-const exitLogPath = process.env.V12_ACP_EXIT_LOG_PATH;
-const emitToolCalls = process.env.V12_ACP_EMIT_TOOL_CALLS === "1";
+const requestLogPath = process.env.V12CODE_ACP_REQUEST_LOG_PATH;
+const exitLogPath = process.env.V12CODE_ACP_EXIT_LOG_PATH;
+const emitToolCalls = process.env.V12CODE_ACP_EMIT_TOOL_CALLS === "1";
 const emitInterleavedAssistantToolCalls =
-  process.env.V12_ACP_EMIT_INTERLEAVED_ASSISTANT_TOOL_CALLS === "1";
-const emitGenericToolPlaceholders = process.env.V12_ACP_EMIT_GENERIC_TOOL_PLACEHOLDERS === "1";
-const emitAskQuestion = process.env.V12_ACP_EMIT_ASK_QUESTION === "1";
-const emitXAiAskUserQuestion = process.env.V12_ACP_EMIT_XAI_ASK_USER_QUESTION === "1";
+  process.env.V12CODE_ACP_EMIT_INTERLEAVED_ASSISTANT_TOOL_CALLS === "1";
+const emitGenericToolPlaceholders = process.env.V12CODE_ACP_EMIT_GENERIC_TOOL_PLACEHOLDERS === "1";
+const emitAskQuestion = process.env.V12CODE_ACP_EMIT_ASK_QUESTION === "1";
+const emitXAiAskUserQuestion = process.env.V12CODE_ACP_EMIT_XAI_ASK_USER_QUESTION === "1";
 const emitXAiPromptCompleteThenHang =
-  process.env.V12_ACP_EMIT_XAI_PROMPT_COMPLETE_THEN_HANG === "1";
-const emitForeignSessionUpdates = process.env.V12_ACP_EMIT_FOREIGN_SESSION_UPDATES === "1";
-const hangPromptForever = process.env.V12_ACP_HANG_PROMPT_FOREVER === "1";
-const hangFirstPromptForever = process.env.V12_ACP_HANG_FIRST_PROMPT_FOREVER === "1";
-const emitLateUpdateAfterCancel = process.env.V12_ACP_EMIT_LATE_UPDATE_AFTER_CANCEL === "1";
+  process.env.V12CODE_ACP_EMIT_XAI_PROMPT_COMPLETE_THEN_HANG === "1";
+const emitForeignSessionUpdates = process.env.V12CODE_ACP_EMIT_FOREIGN_SESSION_UPDATES === "1";
+const hangPromptForever = process.env.V12CODE_ACP_HANG_PROMPT_FOREVER === "1";
+const hangFirstPromptForever = process.env.V12CODE_ACP_HANG_FIRST_PROMPT_FOREVER === "1";
+const emitLateUpdateAfterCancel = process.env.V12CODE_ACP_EMIT_LATE_UPDATE_AFTER_CANCEL === "1";
 const omitXAiPromptCompleteStopReason =
-  process.env.V12_ACP_OMIT_XAI_PROMPT_COMPLETE_STOP_REASON === "1";
-const failLoadSession = process.env.V12_ACP_FAIL_LOAD_SESSION === "1";
-const emitLoadReplay = process.env.V12_ACP_EMIT_LOAD_REPLAY === "1";
-const hangLoadSessionAfterReplay = process.env.V12_ACP_HANG_LOAD_SESSION_AFTER_REPLAY === "1";
-const delayLoadSessionAfterReplay = process.env.V12_ACP_DELAY_LOAD_SESSION_AFTER_REPLAY === "1";
-const loadSessionDelayMs = Number(process.env.V12_ACP_LOAD_SESSION_DELAY_MS ?? "5000");
+  process.env.V12CODE_ACP_OMIT_XAI_PROMPT_COMPLETE_STOP_REASON === "1";
+const failLoadSession = process.env.V12CODE_ACP_FAIL_LOAD_SESSION === "1";
+const emitLoadReplay = process.env.V12CODE_ACP_EMIT_LOAD_REPLAY === "1";
+const hangLoadSessionAfterReplay = process.env.V12CODE_ACP_HANG_LOAD_SESSION_AFTER_REPLAY === "1";
+const delayLoadSessionAfterReplay = process.env.V12CODE_ACP_DELAY_LOAD_SESSION_AFTER_REPLAY === "1";
+const loadSessionDelayMs = Number(process.env.V12CODE_ACP_LOAD_SESSION_DELAY_MS ?? "5000");
 const emitStaleXAiPromptCompleteBeforeSecondHang =
-  process.env.V12_ACP_EMIT_STALE_XAI_PROMPT_COMPLETE_BEFORE_SECOND_HANG === "1";
+  process.env.V12CODE_ACP_EMIT_STALE_XAI_PROMPT_COMPLETE_BEFORE_SECOND_HANG === "1";
 const emitOverlappingXAiPromptCompleteOutOfOrder =
-  process.env.V12_ACP_EMIT_OVERLAPPING_XAI_PROMPT_COMPLETE_OUT_OF_ORDER === "1";
-const failPrompt = process.env.V12_ACP_FAIL_PROMPT === "1";
-const failSetConfigOption = process.env.V12_ACP_FAIL_SET_CONFIG_OPTION === "1";
-const exitOnSetConfigOption = process.env.V12_ACP_EXIT_ON_SET_CONFIG_OPTION === "1";
-const promptResponseText = process.env.V12_ACP_PROMPT_RESPONSE_TEXT;
-const promptDelayMs = Number(process.env.V12_ACP_PROMPT_DELAY_MS ?? "0");
+  process.env.V12CODE_ACP_EMIT_OVERLAPPING_XAI_PROMPT_COMPLETE_OUT_OF_ORDER === "1";
+const failPrompt = process.env.V12CODE_ACP_FAIL_PROMPT === "1";
+const failSetConfigOption = process.env.V12CODE_ACP_FAIL_SET_CONFIG_OPTION === "1";
+const exitOnSetConfigOption = process.env.V12CODE_ACP_EXIT_ON_SET_CONFIG_OPTION === "1";
+const promptResponseText = process.env.V12CODE_ACP_PROMPT_RESPONSE_TEXT;
+const promptDelayMs = Number(process.env.V12CODE_ACP_PROMPT_DELAY_MS ?? "0");
 const permissionOptionIds = {
-  allowOnce: process.env.V12_ACP_ALLOW_ONCE_OPTION_ID ?? "allow-once",
-  allowAlways: process.env.V12_ACP_ALLOW_ALWAYS_OPTION_ID ?? "allow-always",
-  rejectOnce: process.env.V12_ACP_REJECT_ONCE_OPTION_ID ?? "reject-once",
+  allowOnce: process.env.V12CODE_ACP_ALLOW_ONCE_OPTION_ID ?? "allow-once",
+  allowAlways: process.env.V12CODE_ACP_ALLOW_ALWAYS_OPTION_ID ?? "allow-always",
+  rejectOnce: process.env.V12CODE_ACP_REJECT_ONCE_OPTION_ID ?? "reject-once",
 };
 const sessionId = "mock-session-1";
 
@@ -699,7 +699,7 @@ const program = Effect.gen(function* () {
             status: "completed",
             rawOutput: {
               exitCode: 0,
-              stdout: '{ "name": "v12" }',
+              stdout: '{ "name": "v12code" }',
               stderr: "",
             },
           },

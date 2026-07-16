@@ -1,4 +1,4 @@
-import { DEFAULT_TERMINAL_ID, type EnvironmentId, type ThreadId } from "@v12/contracts";
+import { DEFAULT_TERMINAL_ID, type EnvironmentId, type ThreadId } from "@v12code/contracts";
 import { SymbolView } from "../../components/AppSymbol";
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { Pressable, View } from "react-native";
@@ -217,7 +217,7 @@ export const ThreadTerminalPanel = memo(function ThreadTerminalPanel(
     <View className="absolute inset-x-3 bottom-28 top-28 overflow-hidden rounded-[8px] border border-white/10 bg-neutral-950 shadow-2xl">
       <View className="flex-row items-center justify-between border-b border-white/10 px-3 py-2">
         <View className="min-w-0 flex-1">
-          <Text className="font-v12-bold text-sm text-neutral-100" numberOfLines={1}>
+          <Text className="font-v12code-bold text-sm text-neutral-100" numberOfLines={1}>
             Terminal
           </Text>
           <Text className="text-2xs text-neutral-500" numberOfLines={1}>

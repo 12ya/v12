@@ -1,4 +1,4 @@
-import type { PreviewViewportSetting } from "@v12/contracts";
+import type { PreviewViewportSetting } from "@v12code/contracts";
 
 type BrowserViewportHandler = (setting: PreviewViewportSetting) => Promise<void>;
 

@@ -1,5 +1,5 @@
-import { createEnvironmentProjectAtoms } from "@v12/client-runtime/state/projects";
-import { createProjectEnvironmentAtoms } from "@v12/client-runtime/state/projects";
+import { createEnvironmentProjectAtoms } from "@v12code/client-runtime/state/projects";
+import { createProjectEnvironmentAtoms } from "@v12code/client-runtime/state/projects";
 
 import { environmentCatalog } from "../connection/catalog";
 import { connectionAtomRuntime } from "../connection/runtime";

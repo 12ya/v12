@@ -1,4 +1,4 @@
-import { EnvironmentId, ThreadId } from "@v12/contracts";
+import { EnvironmentId, ThreadId } from "@v12code/contracts";
 import { useEffect } from "react";
 
 export type HardwareKeyboardCommand =

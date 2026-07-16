@@ -1,5 +1,5 @@
-import { scopeProjectRef } from "@v12/client-runtime/environment";
-import type { EnvironmentId, ScopedProjectRef } from "@v12/contracts";
+import { scopeProjectRef } from "@v12code/client-runtime/environment";
+import type { EnvironmentId, ScopedProjectRef } from "@v12code/contracts";
 import {
   deriveLogicalProjectKeyFromSettings,
   derivePhysicalProjectKey,

@@ -21,7 +21,7 @@ import {
   type ServerProviderModel,
   type ServerSettings,
   type ServerProviderState,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 
 import { formatProviderDriverKindLabel } from "./providerModels";
 

@@ -15,8 +15,8 @@ import {
   ProviderDriverKind,
   type ProviderInstanceId,
   type ServerProviderModel,
-} from "@v12/contracts";
-import { normalizeModelSlug } from "@v12/shared/model";
+} from "@v12code/contracts";
+import { normalizeModelSlug } from "@v12code/shared/model";
 
 import { cn } from "../../lib/utils";
 import { sortModelsForProviderInstance } from "../../modelOrdering";

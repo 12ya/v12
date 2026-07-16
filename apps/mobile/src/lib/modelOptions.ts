@@ -1,12 +1,12 @@
 import type {
   ModelCapabilities,
   ModelSelection,
-  ServerConfig as V12ServerConfig,
-} from "@v12/contracts";
+  ServerConfig as V12CodeServerConfig,
+} from "@v12code/contracts";
 import {
   buildProviderOptionSelectionsFromDescriptors,
   getProviderOptionDescriptors,
-} from "@v12/shared/model";
+} from "@v12code/shared/model";
 
 export type ModelOption = {
   readonly key: string;
@@ -58,7 +58,7 @@ function normalizeSelectionOptions(
 }
 
 export function buildModelOptions(
-  config: V12ServerConfig | null | undefined,
+  config: V12CodeServerConfig | null | undefined,
   fallbackModelSelection: ModelSelection | null,
 ): ReadonlyArray<ModelOption> {
   const options = new Map<string, ModelOption>();

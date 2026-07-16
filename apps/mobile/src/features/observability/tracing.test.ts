@@ -4,8 +4,8 @@ import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import { vi } from "vite-plus/test";
 
-import { remoteHttpClientLayer } from "@v12/client-runtime/rpc";
-import { withRelayClientTracing } from "@v12/shared/relayTracing";
+import { remoteHttpClientLayer } from "@v12code/client-runtime/rpc";
+import { withRelayClientTracing } from "@v12code/shared/relayTracing";
 
 import { makeTracingLayer } from "./tracing";
 

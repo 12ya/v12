@@ -4,7 +4,7 @@
 
 Please do not open a public issue for a suspected security vulnerability.
 
-Use [GitHub private vulnerability reporting](https://github.com/12ya/v12/security/advisories/new) to send the maintainers:
+Use [GitHub private vulnerability reporting](https://github.com/12ya/v12code/security/advisories/new) to send the maintainers:
 
 - A description of the vulnerability and its impact
 - A minimal reproduction or proof of concept

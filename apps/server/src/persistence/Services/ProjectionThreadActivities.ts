@@ -13,7 +13,7 @@ import {
   OrchestrationThreadActivityTone,
   ThreadId,
   TurnId,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import * as Schema from "effect/Schema";
 import * as Context from "effect/Context";
 import type * as Effect from "effect/Effect";
@@ -81,4 +81,4 @@ export interface ProjectionThreadActivityRepositoryShape {
 export class ProjectionThreadActivityRepository extends Context.Service<
   ProjectionThreadActivityRepository,
   ProjectionThreadActivityRepositoryShape
->()("v12/persistence/Services/ProjectionThreadActivities/ProjectionThreadActivityRepository") {}
+>()("v12code/persistence/Services/ProjectionThreadActivities/ProjectionThreadActivityRepository") {}

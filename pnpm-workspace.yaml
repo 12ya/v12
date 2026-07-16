@@ -1,7 +1,7 @@
 packages:
   - apps/*
   - infra/*
-  - oxlint-plugin-v12
+  - oxlint-plugin-v12code
   - packages/*
   - scripts
 

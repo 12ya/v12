@@ -1,4 +1,4 @@
-import type { DesktopUpdateChannel } from "@v12/contracts";
+import type { DesktopUpdateChannel } from "@v12code/contracts";
 
 const NIGHTLY_VERSION_PATTERN = /-nightly\.\d{8}\.\d+$/;
 

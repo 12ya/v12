@@ -3,7 +3,7 @@ import {
   executeAtomQuery,
   type AtomCommandOptions,
   type AtomCommandResult,
-} from "@v12/client-runtime/state/runtime";
+} from "@v12code/client-runtime/state/runtime";
 import { AsyncResult, type Atom } from "effect/unstable/reactivity";
 import { useCallback, useContext } from "react";
 

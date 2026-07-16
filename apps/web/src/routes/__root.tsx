@@ -1,6 +1,6 @@
-import { type ServerLifecycleWelcomePayload } from "@v12/contracts";
-import { scopedProjectKey, scopeProjectRef } from "@v12/client-runtime/environment";
-import { squashAtomCommandFailure } from "@v12/client-runtime/state/runtime";
+import { type ServerLifecycleWelcomePayload } from "@v12code/contracts";
+import { scopedProjectKey, scopeProjectRef } from "@v12code/client-runtime/environment";
+import { squashAtomCommandFailure } from "@v12code/client-runtime/state/runtime";
 import {
   Outlet,
   createRootRoute,

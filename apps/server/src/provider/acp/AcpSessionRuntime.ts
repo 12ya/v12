@@ -18,7 +18,7 @@ import * as EffectAcpClient from "effect-acp/client";
 import * as EffectAcpErrors from "effect-acp/errors";
 import type * as EffectAcpSchema from "effect-acp/schema";
 import type * as EffectAcpProtocol from "effect-acp/protocol";
-import { resolveSpawnCommand } from "@v12/shared/shell";
+import { resolveSpawnCommand } from "@v12code/shared/shell";
 
 import {
   collectSessionConfigOptionValues,
@@ -243,7 +243,7 @@ export class AcpSessionRuntime extends Context.Service<
       payload: unknown,
     ) => Effect.Effect<void, EffectAcpErrors.AcpError>;
   }
->()("v12/provider/acp/AcpSessionRuntime") {}
+>()("v12code/provider/acp/AcpSessionRuntime") {}
 
 interface AcpStartedState extends AcpSessionRuntimeStartResult {}
 

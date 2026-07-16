@@ -1,5 +1,5 @@
 {
-  "name": "@v12/scripts",
+  "name": "@v12code/scripts",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,8 +8,8 @@
   },
   "dependencies": {
     "@effect/platform-node": "catalog:",
-    "@v12/contracts": "workspace:*",
-    "@v12/shared": "workspace:*",
+    "@v12code/contracts": "workspace:*",
+    "@v12code/shared": "workspace:*",
     "effect": "catalog:",
     "yaml": "catalog:"
   },

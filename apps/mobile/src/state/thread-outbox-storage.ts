@@ -1,4 +1,4 @@
-import { EnvironmentId, MessageId, ThreadId } from "@v12/contracts";
+import { EnvironmentId, MessageId, ThreadId } from "@v12code/contracts";
 import * as Schema from "effect/Schema";
 
 import {

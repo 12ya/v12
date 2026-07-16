@@ -4,9 +4,9 @@ import * as NodeOS from "node:os";
 
 import * as NodeRuntime from "@effect/platform-node/NodeRuntime";
 import * as NodeServices from "@effect/platform-node/NodeServices";
-import * as NetService from "@v12/shared/Net";
-import { HostProcessEnvironment } from "@v12/shared/hostProcess";
-import { resolveSpawnCommand } from "@v12/shared/shell";
+import * as NetService from "@v12code/shared/Net";
+import { HostProcessEnvironment } from "@v12code/shared/hostProcess";
+import { resolveSpawnCommand } from "@v12code/shared/shell";
 import * as Config from "effect/Config";
 import * as Effect from "effect/Effect";
 import * as Hash from "effect/Hash";
@@ -29,15 +29,22 @@ const MAX_PORT = 65535;
 const DESKTOP_DEV_LOOPBACK_HOST = "127.0.0.1";
 const DEV_PORT_PROBE_HOSTS = ["127.0.0.1", "0.0.0.0", "::1", "::"] as const;
 
-export const DEFAULT_V12_HOME = Effect.map(Effect.service(Path.Path), (path) =>
-  path.join(NodeOS.homedir(), ".v12"),
+export const DEFAULT_V12CODE_HOME = Effect.map(Effect.service(Path.Path), (path) =>
+  path.join(NodeOS.homedir(), ".v12code"),
 );
 
 const MODE_ARGS = {
-  dev: ["run", "--filter=@v12/contracts", "--filter=@v12/web", "--filter=v12", "--parallel", "dev"],
-  "dev:server": ["run", "--filter=v12", "dev"],
-  "dev:web": ["run", "--filter=@v12/web", "dev"],
-  "dev:desktop": ["run", "--filter=@v12/desktop", "--filter=@v12/web", "dev"],
+  dev: [
+    "run",
+    "--filter=@v12code/contracts",
+    "--filter=@v12code/web",
+    "--filter=v12code",
+    "--parallel",
+    "dev",
+  ],
+  "dev:server": ["run", "--filter=v12code", "dev"],
+  "dev:web": ["run", "--filter=@v12code/web", "dev"],
+  "dev:desktop": ["run", "--filter=@v12code/desktop", "--filter=@v12code/web", "dev"],
 } as const satisfies Record<string, ReadonlyArray<string>>;
 
 type DevMode = keyof typeof MODE_ARGS;
@@ -64,7 +71,7 @@ export class DevRunnerConfigurationError extends Schema.TaggedErrorClass<DevRunn
 export class DevRunnerInvalidPortOffsetError extends Schema.TaggedErrorClass<DevRunnerInvalidPortOffsetError>()(
   "DevRunnerInvalidPortOffsetError",
   {
-    configKey: Schema.Literal("V12_PORT_OFFSET"),
+    configKey: Schema.Literal("V12CODE_PORT_OFFSET"),
     portOffset: Schema.Number,
     minimum: Schema.Number,
   },
@@ -152,8 +159,8 @@ const optionalIntegerConfig = (name: string): Config.Config<number | undefined> 
     Config.map((value) => Option.getOrUndefined(value)),
   );
 const OffsetConfig = Config.all({
-  portOffset: optionalIntegerConfig("V12_PORT_OFFSET"),
-  devInstance: optionalStringConfig("V12_DEV_INSTANCE"),
+  portOffset: optionalIntegerConfig("V12CODE_PORT_OFFSET"),
+  devInstance: optionalStringConfig("V12CODE_DEV_INSTANCE"),
 });
 
 export function resolveOffset(config: {
@@ -167,7 +174,7 @@ export function resolveOffset(config: {
     if (config.portOffset < 0) {
       return Effect.fail(
         new DevRunnerInvalidPortOffsetError({
-          configKey: "V12_PORT_OFFSET",
+          configKey: "V12CODE_PORT_OFFSET",
           portOffset: config.portOffset,
           minimum: 0,
         }),
@@ -175,7 +182,7 @@ export function resolveOffset(config: {
     }
     return Effect.succeed({
       offset: config.portOffset,
-      source: `V12_PORT_OFFSET=${config.portOffset}`,
+      source: `V12CODE_PORT_OFFSET=${config.portOffset}`,
     });
   }
 
@@ -187,12 +194,12 @@ export function resolveOffset(config: {
   if (/^\d+$/.test(seed)) {
     return Effect.succeed({
       offset: Number(seed),
-      source: `numeric V12_DEV_INSTANCE=${seed}`,
+      source: `numeric V12CODE_DEV_INSTANCE=${seed}`,
     });
   }
 
   const offset = ((Hash.string(seed) >>> 0) % MAX_HASH_OFFSET) + 1;
-  return Effect.succeed({ offset, source: `hashed V12_DEV_INSTANCE=${seed}` });
+  return Effect.succeed({ offset, source: `hashed V12CODE_DEV_INSTANCE=${seed}` });
 }
 
 function resolveBaseDir(baseDir: string | undefined): Effect.Effect<string, never, Path.Path> {
@@ -204,7 +211,7 @@ function resolveBaseDir(baseDir: string | undefined): Effect.Effect<string, neve
       return path.resolve(configured);
     }
 
-    return yield* DEFAULT_V12_HOME;
+    return yield* DEFAULT_V12CODE_HOME;
   });
 }
 
@@ -213,7 +220,7 @@ interface CreateDevRunnerEnvInput {
   readonly baseEnv: NodeJS.ProcessEnv;
   readonly serverOffset: number;
   readonly webOffset: number;
-  readonly v12Home: string | undefined;
+  readonly v12codeHome: string | undefined;
   readonly noBrowser: boolean | undefined;
   readonly autoBootstrapProjectFromCwd: boolean | undefined;
   readonly logWebSocketEvents: boolean | undefined;
@@ -227,7 +234,7 @@ export function createDevRunnerEnv({
   baseEnv,
   serverOffset,
   webOffset,
-  v12Home,
+  v12codeHome,
   noBrowser,
   autoBootstrapProjectFromCwd,
   logWebSocketEvents,
@@ -238,7 +245,7 @@ export function createDevRunnerEnv({
   return Effect.gen(function* () {
     const serverPort = port ?? BASE_SERVER_PORT + serverOffset;
     const webPort = BASE_WEB_PORT + webOffset;
-    const resolvedBaseDir = yield* resolveBaseDir(v12Home);
+    const resolvedBaseDir = yield* resolveBaseDir(v12codeHome);
     const isDesktopMode = mode === "dev:desktop";
 
     const output: NodeJS.ProcessEnv = {
@@ -247,57 +254,57 @@ export function createDevRunnerEnv({
       VITE_DEV_SERVER_URL:
         devUrl?.toString() ??
         `http://${isDesktopMode ? DESKTOP_DEV_LOOPBACK_HOST : "localhost"}:${webPort}`,
-      V12_HOME: resolvedBaseDir,
+      V12CODE_HOME: resolvedBaseDir,
     };
 
     if (!isDesktopMode) {
-      output.V12_PORT = String(serverPort);
+      output.V12CODE_PORT = String(serverPort);
       output.VITE_HTTP_URL = `http://localhost:${serverPort}`;
       output.VITE_WS_URL = `ws://localhost:${serverPort}`;
     } else {
-      output.V12_PORT = String(serverPort);
+      output.V12CODE_PORT = String(serverPort);
       output.VITE_HTTP_URL = `http://${DESKTOP_DEV_LOOPBACK_HOST}:${serverPort}`;
       output.VITE_WS_URL = `ws://${DESKTOP_DEV_LOOPBACK_HOST}:${serverPort}`;
-      delete output.V12_MODE;
-      delete output.V12_NO_BROWSER;
-      delete output.V12_HOST;
+      delete output.V12CODE_MODE;
+      delete output.V12CODE_NO_BROWSER;
+      delete output.V12CODE_HOST;
     }
 
     if (!isDesktopMode && host !== undefined) {
-      output.V12_HOST = host;
+      output.V12CODE_HOST = host;
     }
 
     if (!isDesktopMode && noBrowser !== undefined) {
-      output.V12_NO_BROWSER = noBrowser ? "1" : "0";
+      output.V12CODE_NO_BROWSER = noBrowser ? "1" : "0";
     } else if (!isDesktopMode) {
-      delete output.V12_NO_BROWSER;
+      delete output.V12CODE_NO_BROWSER;
     }
 
     if (autoBootstrapProjectFromCwd !== undefined) {
-      output.V12_AUTO_BOOTSTRAP_PROJECT_FROM_CWD = autoBootstrapProjectFromCwd ? "1" : "0";
+      output.V12CODE_AUTO_BOOTSTRAP_PROJECT_FROM_CWD = autoBootstrapProjectFromCwd ? "1" : "0";
     } else {
-      delete output.V12_AUTO_BOOTSTRAP_PROJECT_FROM_CWD;
+      delete output.V12CODE_AUTO_BOOTSTRAP_PROJECT_FROM_CWD;
     }
 
     if (logWebSocketEvents !== undefined) {
-      output.V12_LOG_WS_EVENTS = logWebSocketEvents ? "1" : "0";
+      output.V12CODE_LOG_WS_EVENTS = logWebSocketEvents ? "1" : "0";
     } else {
-      delete output.V12_LOG_WS_EVENTS;
+      delete output.V12CODE_LOG_WS_EVENTS;
     }
 
     if (mode === "dev") {
-      output.V12_MODE = "web";
-      delete output.V12_DESKTOP_WS_URL;
+      output.V12CODE_MODE = "web";
+      delete output.V12CODE_DESKTOP_WS_URL;
     }
 
     if (mode === "dev:server" || mode === "dev:web") {
-      output.V12_MODE = "web";
-      delete output.V12_DESKTOP_WS_URL;
+      output.V12CODE_MODE = "web";
+      delete output.V12CODE_DESKTOP_WS_URL;
     }
 
     if (isDesktopMode) {
       output.HOST = DESKTOP_DEV_LOOPBACK_HOST;
-      delete output.V12_DESKTOP_WS_URL;
+      delete output.V12CODE_DESKTOP_WS_URL;
     }
 
     return output;
@@ -461,7 +468,7 @@ export function resolveModePortOffsets<R = NetService.NetService>({
 
 interface DevRunnerCliInput {
   readonly mode: DevMode;
-  readonly v12Home: string | undefined;
+  readonly v12codeHome: string | undefined;
   readonly noBrowser: boolean | undefined;
   readonly autoBootstrapProjectFromCwd: boolean | undefined;
   readonly logWebSocketEvents: boolean | undefined;
@@ -478,7 +485,7 @@ export function runDevRunnerWithInput(input: DevRunnerCliInput) {
       Effect.mapError(
         (cause) =>
           new DevRunnerConfigurationError({
-            configKeys: ["V12_PORT_OFFSET", "V12_DEV_INSTANCE"],
+            configKeys: ["V12CODE_PORT_OFFSET", "V12CODE_DEV_INSTANCE"],
             cause,
           }),
       ),
@@ -499,7 +506,7 @@ export function runDevRunnerWithInput(input: DevRunnerCliInput) {
       baseEnv: hostEnvironment,
       serverOffset,
       webOffset,
-      v12Home: input.v12Home,
+      v12codeHome: input.v12codeHome,
       noBrowser: input.noBrowser,
       autoBootstrapProjectFromCwd: input.autoBootstrapProjectFromCwd,
       logWebSocketEvents: input.logWebSocketEvents,
@@ -514,7 +521,7 @@ export function runDevRunnerWithInput(input: DevRunnerCliInput) {
         : "";
 
     yield* Effect.logInfo(
-      `[dev-runner] mode=${input.mode} source=${source}${selectionSuffix} serverPort=${String(env.V12_PORT)} webPort=${String(env.PORT)} baseDir=${String(env.V12_HOME)}`,
+      `[dev-runner] mode=${input.mode} source=${source}${selectionSuffix} serverPort=${String(env.V12CODE_PORT)} webPort=${String(env.PORT)} baseDir=${String(env.V12CODE_HOME)}`,
     );
 
     if (input.dryRun) {
@@ -578,33 +585,33 @@ const devRunnerCli = Command.make("dev-runner", {
   mode: Argument.choice("mode", DEV_RUNNER_MODES).pipe(
     Argument.withDescription("Development mode to run."),
   ),
-  v12Home: Flag.string("home-dir").pipe(
-    Flag.withDescription("Base directory for all V12 data (equivalent to V12_HOME)."),
-    Flag.withFallbackConfig(optionalStringConfig("V12_HOME")),
+  v12codeHome: Flag.string("home-dir").pipe(
+    Flag.withDescription("Base directory for all V12Code data (equivalent to V12CODE_HOME)."),
+    Flag.withFallbackConfig(optionalStringConfig("V12CODE_HOME")),
   ),
   noBrowser: Flag.boolean("no-browser").pipe(
-    Flag.withDescription("Browser auto-open toggle (equivalent to V12_NO_BROWSER)."),
-    Flag.withFallbackConfig(optionalBooleanConfig("V12_NO_BROWSER")),
+    Flag.withDescription("Browser auto-open toggle (equivalent to V12CODE_NO_BROWSER)."),
+    Flag.withFallbackConfig(optionalBooleanConfig("V12CODE_NO_BROWSER")),
   ),
   autoBootstrapProjectFromCwd: Flag.boolean("auto-bootstrap-project-from-cwd").pipe(
     Flag.withDescription(
-      "Auto-bootstrap toggle (equivalent to V12_AUTO_BOOTSTRAP_PROJECT_FROM_CWD).",
+      "Auto-bootstrap toggle (equivalent to V12CODE_AUTO_BOOTSTRAP_PROJECT_FROM_CWD).",
     ),
-    Flag.withFallbackConfig(optionalBooleanConfig("V12_AUTO_BOOTSTRAP_PROJECT_FROM_CWD")),
+    Flag.withFallbackConfig(optionalBooleanConfig("V12CODE_AUTO_BOOTSTRAP_PROJECT_FROM_CWD")),
   ),
   logWebSocketEvents: Flag.boolean("log-websocket-events").pipe(
-    Flag.withDescription("WebSocket event logging toggle (equivalent to V12_LOG_WS_EVENTS)."),
+    Flag.withDescription("WebSocket event logging toggle (equivalent to V12CODE_LOG_WS_EVENTS)."),
     Flag.withAlias("log-ws-events"),
-    Flag.withFallbackConfig(optionalBooleanConfig("V12_LOG_WS_EVENTS")),
+    Flag.withFallbackConfig(optionalBooleanConfig("V12CODE_LOG_WS_EVENTS")),
   ),
   host: Flag.string("host").pipe(
-    Flag.withDescription("Server host/interface override (forwards to V12_HOST)."),
-    Flag.withFallbackConfig(optionalStringConfig("V12_HOST")),
+    Flag.withDescription("Server host/interface override (forwards to V12CODE_HOST)."),
+    Flag.withFallbackConfig(optionalStringConfig("V12CODE_HOST")),
   ),
   port: Flag.integer("port").pipe(
     Flag.withSchema(Schema.Int.check(Schema.isBetween({ minimum: 1, maximum: 65535 }))),
-    Flag.withDescription("Server port override (forwards to V12_PORT)."),
-    Flag.withFallbackConfig(optionalPortConfig("V12_PORT")),
+    Flag.withDescription("Server port override (forwards to V12CODE_PORT)."),
+    Flag.withFallbackConfig(optionalPortConfig("V12CODE_PORT")),
   ),
   devUrl: Flag.string("dev-url").pipe(
     Flag.withSchema(Schema.URLFromString),

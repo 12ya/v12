@@ -1,4 +1,4 @@
-import type { RelayAgentActivityAggregateState } from "@v12/contracts/relay";
+import type { RelayAgentActivityAggregateState } from "@v12code/contracts/relay";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
@@ -219,7 +219,7 @@ export class ApnsClient extends Context.Service<
       readonly issuedAtUnixSeconds: number;
     }) => Effect.Effect<ApnsDeliveryResult, ApnsError>;
   }
->()("v12-relay/agentActivity/ApnsClient") {}
+>()("v12code-relay/agentActivity/ApnsClient") {}
 
 export const make = Effect.gen(function* () {
   const httpClient = yield* HttpClient.HttpClient;

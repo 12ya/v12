@@ -1,0 +1,10 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["V12CodeTerminalModule"],
+    "podspecPath": "V12CodeTerminalNative.podspec"
+  },
+  "android": {
+    "modules": ["expo.modules.v12codeterminal.V12CodeTerminalModule"]
+  }
+}

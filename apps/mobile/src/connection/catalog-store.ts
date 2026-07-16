@@ -2,8 +2,8 @@ import {
   ConnectionCatalogDocument,
   type ConnectionCatalogDocument as ConnectionCatalogDocumentType,
   EMPTY_CONNECTION_CATALOG_DOCUMENT,
-} from "@v12/client-runtime/platform";
-import { ConnectionTransientError } from "@v12/client-runtime/connection";
+} from "@v12code/client-runtime/platform";
+import { ConnectionTransientError } from "@v12code/client-runtime/connection";
 import * as Effect from "effect/Effect";
 import * as Option from "effect/Option";
 import * as Ref from "effect/Ref";
@@ -13,8 +13,8 @@ import * as Semaphore from "effect/Semaphore";
 import * as MobileSecureStorage from "../persistence/mobile-secure-storage";
 import { migrateLegacyConnectionCatalog } from "./migration";
 
-export const CONNECTION_CATALOG_KEY = "v12.connection-catalog.v1";
-export const LEGACY_CONNECTIONS_KEY = "v12.connections";
+export const CONNECTION_CATALOG_KEY = "v12code.connection-catalog.v1";
+export const LEGACY_CONNECTIONS_KEY = "v12code.connections";
 
 function catalogError(operation: string, cause: unknown) {
   return new ConnectionTransientError({

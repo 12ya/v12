@@ -3,7 +3,7 @@ import type {
   PreviewAutomationRequest,
   PreviewAutomationResponse,
   PreviewAutomationStreamEvent,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import { AsyncResult, Atom } from "effect/unstable/reactivity";
 
 import {

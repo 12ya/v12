@@ -1,4 +1,4 @@
-import type { DesktopWslState } from "@v12/contracts";
+import type { DesktopWslState } from "@v12code/contracts";
 import { describe, expect, it, vi } from "vite-plus/test";
 import { applyWslEnableSelection } from "./ConnectionsSettings.logic";
 

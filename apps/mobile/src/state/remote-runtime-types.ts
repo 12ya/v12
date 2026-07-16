@@ -1,5 +1,5 @@
-import { type EnvironmentConnectionPhase } from "@v12/client-runtime/connection";
-import { EnvironmentId, ThreadId, type ServerConfig } from "@v12/contracts";
+import { type EnvironmentConnectionPhase } from "@v12code/client-runtime/connection";
+import { EnvironmentId, ThreadId, type ServerConfig } from "@v12code/contracts";
 
 export interface EnvironmentRuntimeState {
   readonly connectionState: EnvironmentConnectionPhase;

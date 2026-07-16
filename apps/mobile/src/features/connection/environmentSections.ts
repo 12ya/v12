@@ -1,4 +1,4 @@
-import type { RelayClientEnvironmentRecord } from "@v12/contracts/relay";
+import type { RelayClientEnvironmentRecord } from "@v12code/contracts/relay";
 import type { ConnectedEnvironmentSummary } from "../../state/remote-runtime-types";
 
 export interface EnvironmentSectionsInput {

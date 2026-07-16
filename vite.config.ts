@@ -68,7 +68,7 @@ export default defineConfig({
       "apps/mobile/uniwind-types.d.ts",
     ],
     plugins: ["eslint", "oxc", "react", "unicorn", "typescript"],
-    jsPlugins: ["./oxlint-plugin-v12/index.ts"],
+    jsPlugins: ["./oxlint-plugin-v12code/index.ts"],
     categories: {
       correctness: "warn",
       suspicious: "warn",
@@ -105,17 +105,17 @@ export default defineConfig({
         {
           paths: [
             {
-              name: "@v12/client-runtime",
+              name: "@v12code/client-runtime",
               message:
-                "Import from an explicit @v12/client-runtime/* subpath. The package has no root export.",
+                "Import from an explicit @v12code/client-runtime/* subpath. The package has no root export.",
             },
           ],
         },
       ],
-      "v12/no-global-process-runtime": "error",
-      "v12/no-inline-schema-compile": "warn",
-      "v12/no-manual-effect-runtime-in-tests": "error",
-      "v12/namespace-node-imports": "error",
+      "v12code/no-global-process-runtime": "error",
+      "v12code/no-inline-schema-compile": "warn",
+      "v12code/no-manual-effect-runtime-in-tests": "error",
+      "v12code/namespace-node-imports": "error",
     },
     options: {
       // Revisit once Oxlint's tsgolint path can integrate with @effect/tsgo diagnostics.

@@ -1,5 +1,5 @@
-import type { ContextMenuItem, PreviewSessionSnapshot } from "@v12/contracts";
-import { getTerminalLabel } from "@v12/shared/terminalLabels";
+import type { ContextMenuItem, PreviewSessionSnapshot } from "@v12code/contracts";
+import { getTerminalLabel } from "@v12code/shared/terminalLabels";
 import { ClipboardList, FileDiff, Files, Globe2, Plus, TerminalSquare, X } from "lucide-react";
 import {
   type MouseEvent as ReactMouseEvent,
@@ -52,7 +52,7 @@ interface RightPanelTabsProps {
 }
 
 const SURFACE_DISABLED_REASONS = {
-  browser: "Browser previews are only available in the V12 desktop app.",
+  browser: "Browser previews are only available in the V12Code desktop app.",
   files: "Files are only available when a project is open.",
   diff: "Diff is only available for server threads in Git repositories.",
 } as const;

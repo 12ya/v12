@@ -1,4 +1,4 @@
-import { DesktopWslStateSchema } from "@v12/contracts";
+import { DesktopWslStateSchema } from "@v12code/contracts";
 import { assert, describe, it } from "@effect/vitest";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";

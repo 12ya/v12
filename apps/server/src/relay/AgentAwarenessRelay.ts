@@ -4,20 +4,20 @@ import type {
   OrchestrationProjectShell,
   OrchestrationThreadShell,
   ThreadId,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import {
   RelayApi,
   type RelayAgentActivityPublishProofPayload,
   type RelayAgentActivityState,
-} from "@v12/contracts/relay";
-import { projectThreadAwareness } from "@v12/shared/agentAwareness";
-import { makeDrainableWorker } from "@v12/shared/DrainableWorker";
-import { withRelayClientTracing } from "@v12/shared/relayTracing";
+} from "@v12code/contracts/relay";
+import { projectThreadAwareness } from "@v12code/shared/agentAwareness";
+import { makeDrainableWorker } from "@v12code/shared/DrainableWorker";
+import { withRelayClientTracing } from "@v12code/shared/relayTracing";
 import {
   normalizeRelayIssuer,
   RELAY_ACTIVITY_PUBLISH_TYP,
   signRelayJwt,
-} from "@v12/shared/relayJwt";
+} from "@v12code/shared/relayJwt";
 import * as Cause from "effect/Cause";
 import * as Context from "effect/Context";
 import * as Crypto from "effect/Crypto";
@@ -51,7 +51,7 @@ export class AgentAwarenessRelay extends Context.Service<
     readonly publishThread: (threadId: ThreadId) => Effect.Effect<void>;
     readonly start: () => Effect.Effect<void, never, Scope.Scope>;
   }
->()("v12/relay/AgentAwarenessRelay") {}
+>()("v12code/relay/AgentAwarenessRelay") {}
 
 export function eventThreadId(event: OrchestrationEvent): ThreadId | null {
   const payload = event.payload as { readonly threadId?: unknown };
@@ -196,7 +196,7 @@ const makePublishProof = Effect.fn("makePublishProof")(function* (input: {
   const now = yield* DateTime.now;
   const expiresAt = DateTime.add(now, { minutes: 5 });
   const payload = {
-    iss: `v12-env:${input.environmentId}`,
+    iss: `v12code-env:${input.environmentId}`,
     aud: normalizeRelayIssuer(input.relayIssuer),
     sub: input.environmentId,
     jti: input.jti,
@@ -587,11 +587,13 @@ export const make = Effect.gen(function* () {
       switch (startupState) {
         case "waiting-for-link":
           yield* Effect.logInfo(
-            "agent activity publishing standby; waiting for V12 Connect link reconciliation",
+            "agent activity publishing standby; waiting for V12Code Connect link reconciliation",
           );
           break;
         case "disabled":
-          yield* Effect.logInfo("agent activity publishing disabled by V12 Connect configuration");
+          yield* Effect.logInfo(
+            "agent activity publishing disabled by V12Code Connect configuration",
+          );
           break;
         case "enabled":
           yield* Effect.logInfo("agent activity publishing enabled", {

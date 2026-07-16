@@ -1,6 +1,6 @@
 "use strict";
 
-// Ships the branded V12 mark to the Live Activity / widget extension.
+// Ships the branded V12Code mark to the Live Activity / widget extension.
 //
 // expo-widgets generates ExpoWidgetsTarget without a Resources build phase and
 // has no asset support, so this plugin (a) writes an SVG template image set into
@@ -22,8 +22,8 @@ const { addWidgetAssetCatalog } = require("./lib/addWidgetAssetCatalog.cjs");
 
 const TARGET_NAME = "ExpoWidgetsTarget";
 const CATALOG_NAME = "Assets.xcassets";
-const IMAGE_SET = "V12Mark.imageset";
-const SVG_NAME = "V12Mark.svg";
+const IMAGE_SET = "V12CodeMark.imageset";
+const SVG_NAME = "V12CodeMark.svg";
 
 const CATALOG_CONTENTS = JSON.stringify({ info: { author: "expo", version: 1 } }, null, 2) + "\n";
 const IMAGE_SET_CONTENTS =

@@ -21,11 +21,11 @@ const captureError = (run: () => unknown): unknown => {
 
 describe("Clerk relay auth", () => {
   it("derives a custom Frontend API hostname from a Clerk publishable key", () => {
-    expect(clerkFrontendApiHostnameFromPublishableKey(clerkPublishableKey("clerk.v12.codes"))).toBe(
-      "clerk.v12.codes",
-    );
-    expect(clerkFrontendApiUrlFromPublishableKey(clerkPublishableKey("clerk.v12.codes"))).toBe(
-      "https://clerk.v12.codes",
+    expect(
+      clerkFrontendApiHostnameFromPublishableKey(clerkPublishableKey("clerk.v12code.codes")),
+    ).toBe("clerk.v12code.codes");
+    expect(clerkFrontendApiUrlFromPublishableKey(clerkPublishableKey("clerk.v12code.codes"))).toBe(
+      "https://clerk.v12code.codes",
     );
   });
 
@@ -40,7 +40,7 @@ describe("Clerk relay auth", () => {
 
   it("reports semantic frontend API failures without inventing a cause", () => {
     const emptyError = captureError(() => clerkFrontendApiUrlFromPublishableKey("pk_test_"));
-    const pathFrontendApi = "clerk.v12.codes/path";
+    const pathFrontendApi = "clerk.v12code.codes/path";
     const pathError = captureError(() =>
       clerkFrontendApiUrlFromPublishableKey(clerkPublishableKey(pathFrontendApi)),
     );
@@ -79,10 +79,14 @@ describe("Clerk relay auth", () => {
   it("allows standard Clerk hosts and an exact configured custom hostname", () => {
     expect(isAllowedClerkFrontendApiHostname("example.clerk.accounts.dev", null)).toBe(true);
     expect(isAllowedClerkFrontendApiHostname("example.clerk.accounts.com", null)).toBe(true);
-    expect(isAllowedClerkFrontendApiHostname("clerk.v12.codes", "clerk.v12.codes")).toBe(true);
-    expect(isAllowedClerkFrontendApiHostname("attacker.example", "clerk.v12.codes")).toBe(false);
-    expect(isAllowedClerkFrontendApiHostname("nested.clerk.v12.codes", "clerk.v12.codes")).toBe(
+    expect(isAllowedClerkFrontendApiHostname("clerk.v12code.codes", "clerk.v12code.codes")).toBe(
+      true,
+    );
+    expect(isAllowedClerkFrontendApiHostname("attacker.example", "clerk.v12code.codes")).toBe(
       false,
     );
+    expect(
+      isAllowedClerkFrontendApiHostname("nested.clerk.v12code.codes", "clerk.v12code.codes"),
+    ).toBe(false);
   });
 });

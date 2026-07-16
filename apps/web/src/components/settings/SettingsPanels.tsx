@@ -10,16 +10,16 @@ import {
   type ProviderInstanceConfig,
   type ProviderInstanceId,
   type ScopedThreadRef,
-} from "@v12/contracts";
-import { scopeThreadRef } from "@v12/client-runtime/environment";
-import { safeErrorLogAttributes } from "@v12/client-runtime/errors";
+} from "@v12code/contracts";
+import { scopeThreadRef } from "@v12code/client-runtime/environment";
+import { safeErrorLogAttributes } from "@v12code/client-runtime/errors";
 import {
   isAtomCommandInterrupted,
   settlePromise,
   squashAtomCommandFailure,
-} from "@v12/client-runtime/state/runtime";
-import { DEFAULT_UNIFIED_SETTINGS } from "@v12/contracts/settings";
-import { createModelSelection } from "@v12/shared/model";
+} from "@v12code/client-runtime/state/runtime";
+import { DEFAULT_UNIFIED_SETTINGS } from "@v12code/contracts/settings";
+import { createModelSelection } from "@v12code/shared/model";
 import * as Arr from "effect/Array";
 import * as Duration from "effect/Duration";
 import * as Equal from "effect/Equal";
@@ -518,7 +518,7 @@ export function GeneralSettingsPanel() {
       <SettingsSection title="General">
         <SettingsRow
           title="Theme"
-          description="Choose how V12 looks across the app."
+          description="Choose how V12Code looks across the app."
           resetAction={
             theme !== "system" ? (
               <SettingResetButton label="theme" onClick={() => setTheme("system")} />

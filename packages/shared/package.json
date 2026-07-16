@@ -1,5 +1,5 @@
 {
-  "name": "@v12/shared",
+  "name": "@v12code/shared",
   "private": true,
   "type": "module",
   "exports": {
@@ -195,7 +195,7 @@
   "dependencies": {
     "@noble/curves": "catalog:",
     "@noble/hashes": "catalog:",
-    "@v12/contracts": "workspace:*",
+    "@v12code/contracts": "workspace:*",
     "effect": "catalog:",
     "jose": "catalog:",
     "yaml": "catalog:"

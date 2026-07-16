@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vite-plus/test";
 
-import { type KnownTerminalSession } from "@v12/client-runtime/state/terminal";
-import { DEFAULT_TERMINAL_ID, EnvironmentId, ThreadId } from "@v12/contracts";
+import { type KnownTerminalSession } from "@v12code/client-runtime/state/terminal";
+import { DEFAULT_TERMINAL_ID, EnvironmentId, ThreadId } from "@v12code/contracts";
 
-import { getTerminalLabel } from "@v12/shared/terminalLabels";
+import { getTerminalLabel } from "@v12code/shared/terminalLabels";
 
 import {
   buildTerminalMenuSessions,

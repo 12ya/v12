@@ -25,6 +25,6 @@ describe("DesktopApp errors", () => {
   it("reports the required development port", () => {
     const error = new DesktopDevelopmentBackendPortRequiredError();
 
-    assert.equal(error.message, "V12_PORT is required in desktop development.");
+    assert.equal(error.message, "V12CODE_PORT is required in desktop development.");
   });
 });

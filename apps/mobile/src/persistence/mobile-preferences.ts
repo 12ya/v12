@@ -10,8 +10,8 @@ import * as MobileDatabase from "./mobile-database";
 import * as MobileSecureStorage from "./mobile-secure-storage";
 import { MobileStorageDecodeError, MobileStorageEncodeError } from "./mobile-storage";
 
-const PREFERENCES_KEY = "v12.preferences";
-const PREFERENCES_FALLBACK_KEY = "v12.preferences.fallback";
+const PREFERENCES_KEY = "v12code.preferences";
+const PREFERENCES_FALLBACK_KEY = "v12code.preferences.fallback";
 
 export interface Preferences {
   readonly liveActivitiesEnabled?: boolean;
@@ -59,7 +59,7 @@ export class MobilePreferencesStore extends Context.Service<
       transform: (current: Preferences) => Partial<Preferences>,
     ) => Effect.Effect<Preferences, MobilePreferencesSaveError>;
   }
->()("@v12/mobile/persistence/MobilePreferencesStore") {}
+>()("@v12code/mobile/persistence/MobilePreferencesStore") {}
 
 function sanitizePreferences(parsed: Preferences): Preferences {
   const preferences: {

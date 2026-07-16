@@ -1,4 +1,4 @@
-import { AuthStandardClientScopes, EnvironmentId } from "@v12/contracts";
+import { AuthStandardClientScopes, EnvironmentId } from "@v12code/contracts";
 import { describe, expect, it } from "@effect/vitest";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
@@ -18,7 +18,7 @@ const CLIENT_PRESENTATION_LAYER = Layer.succeed(
   ClientPresentation,
   ClientPresentation.of({
     metadata: {
-      label: "V12 Test",
+      label: "V12Code Test",
       deviceType: "desktop",
       os: "Test OS",
     },
@@ -34,7 +34,7 @@ function pairingHttpLayer(
     const url = String(input);
     calls.push({ url, init });
 
-    if (url.endsWith("/.well-known/v12/environment")) {
+    if (url.endsWith("/.well-known/v12code/environment")) {
       if (options?.failDescriptor === true) {
         return Promise.resolve(
           Response.json({ message: "descriptor unavailable" }, { status: 503 }),
@@ -102,7 +102,7 @@ describe("connection onboarding", () => {
         },
       });
       expect(calls.map((call) => call.url)).toEqual([
-        "https://remote.example.test/.well-known/v12/environment",
+        "https://remote.example.test/.well-known/v12code/environment",
         "https://remote.example.test/oauth/token",
       ]);
 
@@ -114,7 +114,7 @@ describe("connection onboarding", () => {
       const tokenParams = new URLSearchParams(tokenBody);
       expect(tokenParams.get("subject_token")).toBe("pairing-token");
       expect(tokenParams.get("scope")).toBe(AuthStandardClientScopes.join(" "));
-      expect(tokenParams.get("client_label")).toBe("V12 Test");
+      expect(tokenParams.get("client_label")).toBe("V12Code Test");
     }),
   );
 
@@ -136,7 +136,7 @@ describe("connection onboarding", () => {
       );
 
       expect(calls.map((call) => call.url)).toEqual([
-        "https://remote.example.test/.well-known/v12/environment",
+        "https://remote.example.test/.well-known/v12code/environment",
       ]);
     }),
   );

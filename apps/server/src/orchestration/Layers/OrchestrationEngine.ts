@@ -3,8 +3,8 @@ import type {
   OrchestrationReadModel,
   ProjectId,
   ThreadId,
-} from "@v12/contracts";
-import { OrchestrationCommand } from "@v12/contracts";
+} from "@v12code/contracts";
+import { OrchestrationCommand } from "@v12code/contracts";
 import * as Cause from "effect/Cause";
 import * as Clock from "effect/Clock";
 import * as Crypto from "effect/Crypto";

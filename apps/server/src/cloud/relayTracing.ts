@@ -1,4 +1,4 @@
-import { makeRelayClientTracingLayer } from "@v12/shared/relayTracing";
+import { makeRelayClientTracingLayer } from "@v12code/shared/relayTracing";
 
 import { resolveRelayClientTracingConfig } from "./publicConfig.ts";
 
@@ -7,14 +7,14 @@ const relayClientTracingConfig = resolveRelayClientTracingConfig();
 export const headlessRelayClientTracingLayer = makeRelayClientTracingLayer(
   relayClientTracingConfig,
   {
-    serviceName: "v12-headless-relay-client",
+    serviceName: "v12code-headless-relay-client",
     runtime: "node",
     client: "headless-cli",
   },
 );
 
 export const serverRelayBrokerTracingLayer = makeRelayClientTracingLayer(relayClientTracingConfig, {
-  serviceName: "v12-server",
+  serviceName: "v12code-server",
   runtime: "node",
   client: "environment-server",
   component: "relay-broker",

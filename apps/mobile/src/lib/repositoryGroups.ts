@@ -1,9 +1,9 @@
 import * as Order from "effect/Order";
 import * as Arr from "effect/Array";
-import type { RepositoryIdentity } from "@v12/contracts";
+import type { RepositoryIdentity } from "@v12code/contracts";
 
 import { scopedProjectKey } from "./scopedEntities";
-import { EnvironmentProject, EnvironmentThreadShell } from "@v12/client-runtime/state/shell";
+import { EnvironmentProject, EnvironmentThreadShell } from "@v12code/client-runtime/state/shell";
 
 const DateDescending = Order.flip(Order.Date);
 

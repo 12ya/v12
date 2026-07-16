@@ -1,5 +1,5 @@
-import { scopeProjectRef, scopeThreadRef } from "@v12/client-runtime/environment";
-import type { EnvironmentId, ThreadId } from "@v12/contracts";
+import { scopeProjectRef, scopeThreadRef } from "@v12code/client-runtime/environment";
+import type { EnvironmentId, ThreadId } from "@v12code/contracts";
 import {
   ChevronDownIcon,
   CloudIcon,

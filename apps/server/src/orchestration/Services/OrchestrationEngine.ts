@@ -10,7 +10,7 @@
  *
  * @module OrchestrationEngineService
  */
-import type { OrchestrationCommand, OrchestrationEvent } from "@v12/contracts";
+import type { OrchestrationCommand, OrchestrationEvent } from "@v12code/contracts";
 import * as Context from "effect/Context";
 import type * as Effect from "effect/Effect";
 import type * as Stream from "effect/Stream";
@@ -72,4 +72,4 @@ export interface OrchestrationEngineShape {
 export class OrchestrationEngineService extends Context.Service<
   OrchestrationEngineService,
   OrchestrationEngineShape
->()("v12/orchestration/Services/OrchestrationEngine/OrchestrationEngineService") {}
+>()("v12code/orchestration/Services/OrchestrationEngine/OrchestrationEngineService") {}

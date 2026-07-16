@@ -81,7 +81,7 @@ export function ConnectionSheetButton(props: {
       />
       <Text
         className={cn(
-          "text-xs font-v12-bold tracking-[0.8px] uppercase",
+          "text-xs font-v12code-bold tracking-[0.8px] uppercase",
           tone === "primary"
             ? "text-primary-foreground"
             : tone === "danger"

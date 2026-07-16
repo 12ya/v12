@@ -1,55 +1,55 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: var(--v12-font-sans);
-  --font-mono: var(--v12-font-mono);
-  --color-background: var(--v12-background);
-  --color-foreground: var(--v12-foreground);
-  --color-popover: var(--v12-popover);
-  --color-popover-foreground: var(--v12-popover-foreground);
-  --color-primary: var(--v12-primary);
-  --color-primary-foreground: var(--v12-primary-foreground);
-  --color-muted: var(--v12-muted);
-  --color-muted-foreground: var(--v12-muted-foreground);
-  --color-accent: var(--v12-accent);
-  --color-accent-foreground: var(--v12-accent-foreground);
-  --color-border: var(--v12-border);
-  --color-input: var(--v12-input);
-  --color-ring: var(--v12-ring);
-  --radius-sm: calc(var(--v12-radius) - 4px);
-  --radius-md: calc(var(--v12-radius) - 2px);
-  --radius-lg: var(--v12-radius);
-  --radius-xl: calc(var(--v12-radius) + 4px);
-  --radius-2xl: calc(var(--v12-radius) + 8px);
+  --font-sans: var(--v12code-font-sans);
+  --font-mono: var(--v12code-font-mono);
+  --color-background: var(--v12code-background);
+  --color-foreground: var(--v12code-foreground);
+  --color-popover: var(--v12code-popover);
+  --color-popover-foreground: var(--v12code-popover-foreground);
+  --color-primary: var(--v12code-primary);
+  --color-primary-foreground: var(--v12code-primary-foreground);
+  --color-muted: var(--v12code-muted);
+  --color-muted-foreground: var(--v12code-muted-foreground);
+  --color-accent: var(--v12code-accent);
+  --color-accent-foreground: var(--v12code-accent-foreground);
+  --color-border: var(--v12code-border);
+  --color-input: var(--v12code-input);
+  --color-ring: var(--v12code-ring);
+  --radius-sm: calc(var(--v12code-radius) - 4px);
+  --radius-md: calc(var(--v12code-radius) - 2px);
+  --radius-lg: var(--v12code-radius);
+  --radius-xl: calc(var(--v12code-radius) + 4px);
+  --radius-2xl: calc(var(--v12code-radius) + 8px);
 }
 
 :host {
-  --v12-font-sans:
+  --v12code-font-sans:
     "DM Sans Variable", "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
     sans-serif;
-  --v12-font-mono:
+  --v12code-font-mono:
     "SF Mono", "SFMono-Regular", "JetBrains Mono", Consolas, "Liberation Mono", Menlo, monospace;
-  --v12-radius: 0.625rem;
-  --v12-background: white;
-  --v12-foreground: oklch(0.269 0 0);
-  --v12-popover: white;
-  --v12-popover-foreground: oklch(0.269 0 0);
-  --v12-primary: oklch(0.488 0.217 264);
-  --v12-primary-foreground: white;
-  --v12-muted: rgb(0 0 0 / 4%);
-  --v12-muted-foreground: oklch(0.556 0 0);
-  --v12-accent: rgb(0 0 0 / 4%);
-  --v12-accent-foreground: oklch(0.269 0 0);
-  --v12-border: rgb(0 0 0 / 8%);
-  --v12-input: rgb(0 0 0 / 10%);
-  --v12-ring: oklch(0.488 0.217 264);
-  color: var(--v12-foreground);
-  font-family: var(--v12-font-sans);
+  --v12code-radius: 0.625rem;
+  --v12code-background: white;
+  --v12code-foreground: oklch(0.269 0 0);
+  --v12code-popover: white;
+  --v12code-popover-foreground: oklch(0.269 0 0);
+  --v12code-primary: oklch(0.488 0.217 264);
+  --v12code-primary-foreground: white;
+  --v12code-muted: rgb(0 0 0 / 4%);
+  --v12code-muted-foreground: oklch(0.556 0 0);
+  --v12code-accent: rgb(0 0 0 / 4%);
+  --v12code-accent-foreground: oklch(0.269 0 0);
+  --v12code-border: rgb(0 0 0 / 8%);
+  --v12code-input: rgb(0 0 0 / 10%);
+  --v12code-ring: oklch(0.488 0.217 264);
+  color: var(--v12code-foreground);
+  font-family: var(--v12code-font-sans);
 }
 
 * {
   box-sizing: border-box;
-  border-color: var(--v12-border);
+  border-color: var(--v12code-border);
 }
 
 button,
@@ -63,6 +63,6 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--v12-ring) 72%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--v12code-ring) 72%, transparent);
   outline-offset: 1px;
 }

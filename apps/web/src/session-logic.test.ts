@@ -4,7 +4,7 @@ import {
   ThreadId,
   TurnId,
   type OrchestrationThreadActivity,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import { describe, expect, it } from "vite-plus/test";
 
 import {
@@ -937,7 +937,7 @@ describe("deriveWorkLogEntries", () => {
   it("preserves MCP server, tool, arguments, and results for expanded display", () => {
     const item = {
       type: "mcpToolCall",
-      server: "v12",
+      server: "v12code",
       tool: "preview_status",
       arguments: {},
       status: "completed",
@@ -947,24 +947,24 @@ describe("deriveWorkLogEntries", () => {
       makeActivity({
         id: "mcp-tool-done",
         kind: "tool.completed",
-        summary: "v12 · preview_status",
+        summary: "v12code · preview_status",
         payload: {
           itemType: "mcp_tool_call",
-          title: "v12 · preview_status",
+          title: "v12code · preview_status",
           data: { item },
         },
       }),
     ];
 
     const [entry] = deriveWorkLogEntries(activities);
-    expect(entry?.toolTitle).toBe("v12 · preview_status");
+    expect(entry?.toolTitle).toBe("v12code · preview_status");
     expect(entry?.toolData).toEqual(item);
   });
 
   it("keeps MCP payloads while collapsing lifecycle updates", () => {
     const item = {
       type: "mcpToolCall",
-      server: "v12",
+      server: "v12code",
       tool: "preview_snapshot",
       arguments: { interactiveOnly: true },
       status: "completed",
@@ -973,7 +973,7 @@ describe("deriveWorkLogEntries", () => {
       makeActivity({
         id: "mcp-tool-progress",
         kind: "tool.updated",
-        summary: "v12 · preview_snapshot",
+        summary: "v12code · preview_snapshot",
         payload: {
           itemType: "mcp_tool_call",
           toolCallId: "call-1",
@@ -983,7 +983,7 @@ describe("deriveWorkLogEntries", () => {
       makeActivity({
         id: "mcp-tool-complete",
         kind: "tool.completed",
-        summary: "v12 · preview_snapshot",
+        summary: "v12code · preview_snapshot",
         payload: {
           itemType: "mcp_tool_call",
           toolCallId: "call-1",
@@ -1105,7 +1105,7 @@ describe("deriveWorkLogEntries", () => {
                 exitCode: 0,
                 durationMs: 1_250,
               },
-              cwd: "/workspace/v12",
+              cwd: "/workspace/v12code",
             },
           },
         },
@@ -1118,7 +1118,7 @@ describe("deriveWorkLogEntries", () => {
       detail: '{ "dev": "vite dev --port 3000" }',
       itemType: "command_execution",
       toolTitle: "bash",
-      cwd: "/workspace/v12",
+      cwd: "/workspace/v12code",
       durationMs: 1_250,
       exitCode: 0,
     });

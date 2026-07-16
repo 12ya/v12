@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vite-plus/test";
-import { EnvironmentId, ProjectId, ProviderInstanceId, ThreadId } from "@v12/contracts";
+import { EnvironmentId, ProjectId, ProviderInstanceId, ThreadId } from "@v12code/contracts";
 import type { Thread } from "../types";
 import {
   buildThreadActionItems,

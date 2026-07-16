@@ -90,17 +90,19 @@ describe("hasDeployChanges", () => {
 describe("reconcileRootEnvRelayUrl", () => {
   it("adds the relay URL to an empty root env file", () => {
     expect(reconcileRootEnvRelayUrl("", "https://relay.example.test")).toBe(
-      "V12_RELAY_URL=https://relay.example.test\n",
+      "V12CODE_RELAY_URL=https://relay.example.test\n",
     );
   });
 
   it("preserves unrelated root env entries while replacing a previous relay URL", () => {
     expect(
       reconcileRootEnvRelayUrl(
-        "V12_CLERK_PUBLISHABLE_KEY=pk_test_example\nV12_RELAY_URL=https://old.example.test\n",
+        "V12CODE_CLERK_PUBLISHABLE_KEY=pk_test_example\nV12CODE_RELAY_URL=https://old.example.test\n",
         "https://relay.example.test",
       ),
-    ).toBe("V12_CLERK_PUBLISHABLE_KEY=pk_test_example\nV12_RELAY_URL=https://relay.example.test\n");
+    ).toBe(
+      "V12CODE_CLERK_PUBLISHABLE_KEY=pk_test_example\nV12CODE_RELAY_URL=https://relay.example.test\n",
+    );
   });
 });
 
@@ -108,23 +110,23 @@ describe("reconcileRootEnvPublicConfig", () => {
   const config = {
     relayUrl: "https://relay.example.test",
     mobileTracingUrl: "https://api.axiom.co/v1/traces",
-    mobileTracingDataset: "v12-mobile-traces-dev",
+    mobileTracingDataset: "v12code-mobile-traces-dev",
     mobileTracingToken: "xaat-public-ingest",
     clientTracingUrl: "https://api.axiom.co/v1/traces",
-    clientTracingDataset: "v12-relay-client-traces-dev",
+    clientTracingDataset: "v12code-relay-client-traces-dev",
     clientTracingToken: "xaat-relay-client-ingest",
   } as const;
 
   it("adds the complete local client config", () => {
     expect(reconcileRootEnvPublicConfig("", config)).toBe(
       [
-        "V12_RELAY_URL=https://relay.example.test",
-        "V12_MOBILE_OTLP_TRACES_URL=https://api.axiom.co/v1/traces",
-        "V12_MOBILE_OTLP_TRACES_DATASET=v12-mobile-traces-dev",
-        "V12_MOBILE_OTLP_TRACES_TOKEN=xaat-public-ingest",
-        "V12_RELAY_CLIENT_OTLP_TRACES_URL=https://api.axiom.co/v1/traces",
-        "V12_RELAY_CLIENT_OTLP_TRACES_DATASET=v12-relay-client-traces-dev",
-        "V12_RELAY_CLIENT_OTLP_TRACES_TOKEN=xaat-relay-client-ingest",
+        "V12CODE_RELAY_URL=https://relay.example.test",
+        "V12CODE_MOBILE_OTLP_TRACES_URL=https://api.axiom.co/v1/traces",
+        "V12CODE_MOBILE_OTLP_TRACES_DATASET=v12code-mobile-traces-dev",
+        "V12CODE_MOBILE_OTLP_TRACES_TOKEN=xaat-public-ingest",
+        "V12CODE_RELAY_CLIENT_OTLP_TRACES_URL=https://api.axiom.co/v1/traces",
+        "V12CODE_RELAY_CLIENT_OTLP_TRACES_DATASET=v12code-relay-client-traces-dev",
+        "V12CODE_RELAY_CLIENT_OTLP_TRACES_TOKEN=xaat-relay-client-ingest",
         "",
       ].join("\n"),
     );
@@ -134,28 +136,28 @@ describe("reconcileRootEnvPublicConfig", () => {
     expect(
       reconcileRootEnvPublicConfig(
         [
-          "V12_CLERK_PUBLISHABLE_KEY=pk_test_example",
-          "V12_RELAY_URL=https://old.example.test",
-          "V12_MOBILE_OTLP_TRACES_URL=https://old.example.test/v1/traces",
-          "V12_MOBILE_OTLP_TRACES_DATASET=old-dataset",
-          "V12_MOBILE_OTLP_TRACES_TOKEN=old-token",
-          "V12_RELAY_CLIENT_OTLP_TRACES_URL=https://old.example.test/v1/traces",
-          "V12_RELAY_CLIENT_OTLP_TRACES_DATASET=old-client-dataset",
-          "V12_RELAY_CLIENT_OTLP_TRACES_TOKEN=old-client-token",
+          "V12CODE_CLERK_PUBLISHABLE_KEY=pk_test_example",
+          "V12CODE_RELAY_URL=https://old.example.test",
+          "V12CODE_MOBILE_OTLP_TRACES_URL=https://old.example.test/v1/traces",
+          "V12CODE_MOBILE_OTLP_TRACES_DATASET=old-dataset",
+          "V12CODE_MOBILE_OTLP_TRACES_TOKEN=old-token",
+          "V12CODE_RELAY_CLIENT_OTLP_TRACES_URL=https://old.example.test/v1/traces",
+          "V12CODE_RELAY_CLIENT_OTLP_TRACES_DATASET=old-client-dataset",
+          "V12CODE_RELAY_CLIENT_OTLP_TRACES_TOKEN=old-client-token",
           "",
         ].join("\n"),
         config,
       ),
     ).toBe(
       [
-        "V12_CLERK_PUBLISHABLE_KEY=pk_test_example",
-        "V12_RELAY_URL=https://relay.example.test",
-        "V12_MOBILE_OTLP_TRACES_URL=https://api.axiom.co/v1/traces",
-        "V12_MOBILE_OTLP_TRACES_DATASET=v12-mobile-traces-dev",
-        "V12_MOBILE_OTLP_TRACES_TOKEN=xaat-public-ingest",
-        "V12_RELAY_CLIENT_OTLP_TRACES_URL=https://api.axiom.co/v1/traces",
-        "V12_RELAY_CLIENT_OTLP_TRACES_DATASET=v12-relay-client-traces-dev",
-        "V12_RELAY_CLIENT_OTLP_TRACES_TOKEN=xaat-relay-client-ingest",
+        "V12CODE_CLERK_PUBLISHABLE_KEY=pk_test_example",
+        "V12CODE_RELAY_URL=https://relay.example.test",
+        "V12CODE_MOBILE_OTLP_TRACES_URL=https://api.axiom.co/v1/traces",
+        "V12CODE_MOBILE_OTLP_TRACES_DATASET=v12code-mobile-traces-dev",
+        "V12CODE_MOBILE_OTLP_TRACES_TOKEN=xaat-public-ingest",
+        "V12CODE_RELAY_CLIENT_OTLP_TRACES_URL=https://api.axiom.co/v1/traces",
+        "V12CODE_RELAY_CLIENT_OTLP_TRACES_DATASET=v12code-relay-client-traces-dev",
+        "V12CODE_RELAY_CLIENT_OTLP_TRACES_TOKEN=xaat-relay-client-ingest",
         "",
       ].join("\n"),
     );
@@ -188,9 +190,9 @@ describe("serializeRelayClientTracingEnvironment", () => {
       }),
     ).toBe(
       [
-        "V12_RELAY_CLIENT_OTLP_TRACES_URL=https://api.axiom.co/v1/traces",
-        "V12_RELAY_CLIENT_OTLP_TRACES_DATASET=relay",
-        "V12_RELAY_CLIENT_OTLP_TRACES_TOKEN=client-token",
+        "V12CODE_RELAY_CLIENT_OTLP_TRACES_URL=https://api.axiom.co/v1/traces",
+        "V12CODE_RELAY_CLIENT_OTLP_TRACES_DATASET=relay",
+        "V12CODE_RELAY_CLIENT_OTLP_TRACES_TOKEN=client-token",
         "",
       ].join("\n"),
     );

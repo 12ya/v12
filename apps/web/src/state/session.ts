@@ -1,6 +1,6 @@
 import { useAtomValue } from "@effect/atom-react";
-import { createEnvironmentSessionAtoms } from "@v12/client-runtime/state/session";
-import type { EnvironmentId } from "@v12/contracts";
+import { createEnvironmentSessionAtoms } from "@v12code/client-runtime/state/session";
+import type { EnvironmentId } from "@v12code/contracts";
 import * as Option from "effect/Option";
 import { Atom } from "effect/unstable/reactivity";
 

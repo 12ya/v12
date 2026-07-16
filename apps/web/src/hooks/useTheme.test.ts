@@ -51,7 +51,7 @@ describe("theme failure handling", () => {
       expect(error).toBeInstanceOf(ThemeStorageError);
       expect(error).toMatchObject({
         operation: "read",
-        storageKey: "v12:theme",
+        storageKey: "v12code:theme",
         cause: readCause,
       });
     }
@@ -63,7 +63,7 @@ describe("theme failure handling", () => {
       expect(error).toBeInstanceOf(ThemeStorageError);
       expect(error).toMatchObject({
         operation: "write",
-        storageKey: "v12:theme",
+        storageKey: "v12code:theme",
         theme: "dark",
         cause: writeCause,
       });
@@ -90,10 +90,10 @@ describe("theme failure handling", () => {
     await expect(import("./useTheme")).resolves.toBeDefined();
 
     expect(errorLog).toHaveBeenCalledWith(
-      "Failed to read theme preference for v12:theme.",
+      "Failed to read theme preference for v12code:theme.",
       expect.objectContaining({
         operation: "read",
-        storageKey: "v12:theme",
+        storageKey: "v12code:theme",
         errorTag: "ThemeStorageError",
       }),
     );
@@ -145,7 +145,7 @@ describe("theme failure handling", () => {
     expect(errorLog).toHaveBeenCalledTimes(1);
 
     const unsubscribe = subscribeToTheme?.(() => undefined);
-    storageHandler?.({ key: "v12:theme" } as StorageEvent);
+    storageHandler?.({ key: "v12code:theme" } as StorageEvent);
     readSnapshot?.();
 
     expect(getItem).toHaveBeenCalledTimes(2);

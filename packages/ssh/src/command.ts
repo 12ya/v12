@@ -1,7 +1,7 @@
 import * as NodeCrypto from "node:crypto";
 
-import type { DesktopSshEnvironmentTarget, DesktopUpdateChannel } from "@v12/contracts";
-import { HostProcessPlatform } from "@v12/shared/hostProcess";
+import type { DesktopSshEnvironmentTarget, DesktopUpdateChannel } from "@v12code/contracts";
+import { HostProcessPlatform } from "@v12code/shared/hostProcess";
 import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
@@ -14,7 +14,7 @@ import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process";
 import { buildSshChildEnvironment, type SshAuthOptions } from "./auth.ts";
 import { SshCommandError, SshInvalidTargetError } from "./errors.ts";
 
-const PUBLISHABLE_V12_VERSION_PATTERN = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/u;
+const PUBLISHABLE_V12CODE_VERSION_PATTERN = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/u;
 const DEFAULT_SSH_COMMAND_TIMEOUT_MS = 60_000;
 const MAX_SSH_ERROR_OUTPUT_LENGTH = 4_000;
 
@@ -364,19 +364,19 @@ export const resolveSshTarget = Effect.fn("ssh/command.resolveSshTarget")(functi
   );
 });
 
-export function resolveRemoteV12CliPackageSpec(input: {
+export function resolveRemoteV12CodeCliPackageSpec(input: {
   readonly appVersion: string;
   readonly updateChannel: DesktopUpdateChannel;
   readonly isDevelopment?: boolean;
 }): string {
   const appVersion = input.appVersion.trim();
-  if (!input.isDevelopment && PUBLISHABLE_V12_VERSION_PATTERN.test(appVersion)) {
-    return `v12@${appVersion}`;
+  if (!input.isDevelopment && PUBLISHABLE_V12CODE_VERSION_PATTERN.test(appVersion)) {
+    return `v12code@${appVersion}`;
   }
 
   if (input.isDevelopment) {
-    return "v12@nightly";
+    return "v12code@nightly";
   }
 
-  return input.updateChannel === "nightly" ? "v12@nightly" : "v12@latest";
+  return input.updateChannel === "nightly" ? "v12code@nightly" : "v12code@latest";
 }

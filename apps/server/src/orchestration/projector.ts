@@ -1,10 +1,10 @@
-import type { OrchestrationEvent, OrchestrationReadModel, ThreadId } from "@v12/contracts";
+import type { OrchestrationEvent, OrchestrationReadModel, ThreadId } from "@v12code/contracts";
 import {
   OrchestrationCheckpointSummary,
   OrchestrationMessage,
   OrchestrationSession,
   OrchestrationThread,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import * as Effect from "effect/Effect";
 import * as Schema from "effect/Schema";
 

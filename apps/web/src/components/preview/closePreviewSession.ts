@@ -1,10 +1,10 @@
-import type { AtomCommandResult } from "@v12/client-runtime/state/runtime";
+import type { AtomCommandResult } from "@v12code/client-runtime/state/runtime";
 import type {
   EnvironmentId,
   PreviewCloseInput,
   PreviewSessionSnapshot,
   ScopedThreadRef,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 
 import { beginPreviewSessionClose, cancelPreviewSessionClose } from "~/previewStateStore";
 

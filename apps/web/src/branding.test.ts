@@ -24,9 +24,9 @@ describe("branding", () => {
       value: {
         desktopBridge: {
           getAppBranding: () => ({
-            baseName: "V12",
+            baseName: "V12Code",
             stageLabel: "Nightly",
-            displayName: "V12 (Nightly)",
+            displayName: "V12Code (Nightly)",
           }),
         },
       },
@@ -34,9 +34,9 @@ describe("branding", () => {
 
     const branding = await import("./branding");
 
-    expect(branding.APP_BASE_NAME).toBe("V12");
+    expect(branding.APP_BASE_NAME).toBe("V12Code");
     expect(branding.APP_STAGE_LABEL).toBe("Nightly");
-    expect(branding.APP_DISPLAY_NAME).toBe("V12 (Nightly)");
+    expect(branding.APP_DISPLAY_NAME).toBe("V12Code (Nightly)");
   });
 
   it("normalizes hosted app channel metadata", async () => {
@@ -47,7 +47,7 @@ describe("branding", () => {
     expect(branding.HOSTED_APP_CHANNEL).toBe("nightly");
     expect(branding.HOSTED_APP_CHANNEL_LABEL).toBe("Nightly");
     expect(branding.APP_STAGE_LABEL).toBe("Nightly");
-    expect(branding.APP_DISPLAY_NAME).toBe("V12 (Nightly)");
+    expect(branding.APP_DISPLAY_NAME).toBe("V12Code (Nightly)");
   });
 
   it("ignores unknown hosted app channels", async () => {
@@ -73,33 +73,33 @@ describe("branding logic", () => {
   it("updates the display name for nightly primary server versions", () => {
     expect(
       resolveServerBackedAppDisplayName({
-        baseName: "V12",
-        fallbackDisplayName: "V12 (Alpha)",
+        baseName: "V12Code",
+        fallbackDisplayName: "V12Code (Alpha)",
         fallbackStageLabel: "Alpha",
         primaryServerVersion: "0.0.28-nightly.20260616.12",
       }),
-    ).toBe("V12 (Nightly)");
+    ).toBe("V12Code (Nightly)");
   });
 
   it("keeps the fallback display name for stable primary server versions", () => {
     expect(
       resolveServerBackedAppDisplayName({
-        baseName: "V12",
-        fallbackDisplayName: "V12 (Alpha)",
+        baseName: "V12Code",
+        fallbackDisplayName: "V12Code (Alpha)",
         fallbackStageLabel: "Alpha",
         primaryServerVersion: "0.0.27",
       }),
-    ).toBe("V12 (Alpha)");
+    ).toBe("V12Code (Alpha)");
   });
 
   it("keeps the fallback display name for malformed nightly primary server versions", () => {
     expect(
       resolveServerBackedAppDisplayName({
-        baseName: "V12",
-        fallbackDisplayName: "V12 (Alpha)",
+        baseName: "V12Code",
+        fallbackDisplayName: "V12Code (Alpha)",
         fallbackStageLabel: "Alpha",
         primaryServerVersion: "0.0.28-nightly.20260616",
       }),
-    ).toBe("V12 (Alpha)");
+    ).toBe("V12Code (Alpha)");
   });
 });

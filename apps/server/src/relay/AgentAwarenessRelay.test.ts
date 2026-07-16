@@ -11,14 +11,14 @@ import type {
   ProjectId,
   ThreadId,
   TurnId,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import type {
   RelayAgentActivityPublishProofPayload,
   RelayAgentActivityState,
-} from "@v12/contracts/relay";
-import { CommandId, ProviderInstanceId } from "@v12/contracts";
-import { RelayClientTracer } from "@v12/shared/relayTracing";
-import { RELAY_ACTIVITY_PUBLISH_TYP, verifyRelayJwt } from "@v12/shared/relayJwt";
+} from "@v12code/contracts/relay";
+import { CommandId, ProviderInstanceId } from "@v12code/contracts";
+import { RelayClientTracer } from "@v12code/shared/relayTracing";
+import { RELAY_ACTIVITY_PUBLISH_TYP, verifyRelayJwt } from "@v12code/shared/relayJwt";
 import { describe, expect, it } from "@effect/vitest";
 import * as Deferred from "effect/Deferred";
 import * as Effect from "effect/Effect";
@@ -318,7 +318,7 @@ describe.sequential("signRelayAgentActivityPublishProof", () => {
         projects: [
           {
             id: projectId,
-            title: "V12",
+            title: "V12Code",
           },
         ],
         threads: [
@@ -362,7 +362,7 @@ describe.sequential("signRelayAgentActivityPublishProof", () => {
       publicKeyEncoding: { format: "pem", type: "spki" },
     });
     const payload = {
-      iss: "v12-env:env",
+      iss: "v12code-env:env",
       aud: "https://relay.example.test",
       sub: "env",
       jti: "nonce-1",
@@ -385,7 +385,7 @@ describe.sequential("signRelayAgentActivityPublishProof", () => {
           publicKey: keyPair.publicKey,
           token: proof,
           typ: RELAY_ACTIVITY_PUBLISH_TYP,
-          issuer: "v12-env:env",
+          issuer: "v12code-env:env",
           audience: "https://relay.example.test",
           nowEpochSeconds: 150,
         }),
@@ -401,7 +401,7 @@ describe.sequential("signRelayAgentActivityPublishProof", () => {
             return `${header}.${body}.${corruptedSignature}`;
           })(),
           typ: RELAY_ACTIVITY_PUBLISH_TYP,
-          issuer: "v12-env:env",
+          issuer: "v12code-env:env",
           audience: "https://relay.example.test",
           nowEpochSeconds: 150,
         }),
@@ -422,7 +422,7 @@ describe.sequential("signRelayAgentActivityPublishProof", () => {
 
         const project = {
           id: projectId,
-          title: "V12",
+          title: "V12Code",
           workspaceRoot: "/workspace",
           repositoryIdentity: null,
           defaultModelSelection: null,
@@ -577,7 +577,7 @@ describe.sequential("signRelayAgentActivityPublishProof", () => {
 
         const project = {
           id: projectId,
-          title: "V12",
+          title: "V12Code",
           workspaceRoot: "/workspace",
           repositoryIdentity: null,
           defaultModelSelection: null,

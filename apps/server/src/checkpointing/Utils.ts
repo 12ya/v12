@@ -1,7 +1,7 @@
 import * as Encoding from "effect/Encoding";
-import { CheckpointRef, ProjectId, type ThreadId } from "@v12/contracts";
+import { CheckpointRef, ProjectId, type ThreadId } from "@v12code/contracts";
 
-export const CHECKPOINT_REFS_PREFIX = "refs/v12/checkpoints";
+export const CHECKPOINT_REFS_PREFIX = "refs/v12code/checkpoints";
 
 export function checkpointRefForThreadTurn(threadId: ThreadId, turnCount: number): CheckpointRef {
   return CheckpointRef.make(

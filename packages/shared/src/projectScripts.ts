@@ -1,4 +1,4 @@
-import type { ProjectScript } from "@v12/contracts";
+import type { ProjectScript } from "@v12code/contracts";
 
 interface ProjectScriptRuntimeEnvInput {
   project: {
@@ -21,10 +21,10 @@ export function projectScriptRuntimeEnv(
   input: ProjectScriptRuntimeEnvInput,
 ): Record<string, string> {
   const env: Record<string, string> = {
-    V12_PROJECT_ROOT: input.project.cwd,
+    V12CODE_PROJECT_ROOT: input.project.cwd,
   };
   if (input.worktreePath) {
-    env.V12_WORKTREE_PATH = input.worktreePath;
+    env.V12CODE_WORKTREE_PATH = input.worktreePath;
   }
   if (input.extraEnv) {
     return { ...env, ...input.extraEnv };

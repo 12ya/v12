@@ -1,4 +1,4 @@
-import { createAssetEnvironmentAtoms } from "@v12/client-runtime/state/assets";
+import { createAssetEnvironmentAtoms } from "@v12code/client-runtime/state/assets";
 
 import { connectionAtomRuntime } from "../connection/runtime";
 

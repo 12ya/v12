@@ -4,9 +4,9 @@ import type {
   RelayAgentActivityPublishProofPayload,
   RelayAgentActivityPublishRequest,
   RelayAgentActivityState,
-} from "@v12/contracts/relay";
-import { RELAY_ACTIVITY_PUBLISH_TYP } from "@v12/shared/relayJwt";
-import { stableStringify } from "@v12/shared/relaySigning";
+} from "@v12code/contracts/relay";
+import { RELAY_ACTIVITY_PUBLISH_TYP } from "@v12code/shared/relayJwt";
+import { stableStringify } from "@v12code/shared/relaySigning";
 import { describe, expect, it } from "@effect/vitest";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
@@ -30,12 +30,12 @@ const config = RelayConfiguration.RelayConfiguration.of({
     teamId: "team-id",
     keyId: "key-id",
     privateKey: Redacted.make("private-key"),
-    bundleId: "com.v12.v12.dev",
+    bundleId: "com.v12code.v12code.dev",
   },
   apnsDeliveryJobSigningSecret: Redacted.make("job-secret"),
   clerkSecretKey: Redacted.make("clerk-secret"),
   clerkPublishableKey: "pk_test_test",
-  clerkJwtAudience: "v12-relay",
+  clerkJwtAudience: "v12code-relay",
   cloudMintPrivateKey: Redacted.make(keyPair.privateKey),
   cloudMintPublicKey: keyPair.publicKey,
   managedEndpointBaseDomain: undefined,
@@ -68,7 +68,7 @@ function signTestJwt(payload: object, privateKey: string): string {
 const freshRequest = Effect.gen(function* () {
   const now = yield* DateTime.now;
   const payload = {
-    iss: "v12-env:env",
+    iss: "v12code-env:env",
     aud: "https://relay.example.test",
     sub: "env",
     jti: "publish-jti",

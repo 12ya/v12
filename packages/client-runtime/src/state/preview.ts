@@ -1,4 +1,4 @@
-import { WS_METHODS } from "@v12/contracts";
+import { WS_METHODS } from "@v12code/contracts";
 import { Atom } from "effect/unstable/reactivity";
 
 import type { EnvironmentRegistry } from "../connection/registry.ts";

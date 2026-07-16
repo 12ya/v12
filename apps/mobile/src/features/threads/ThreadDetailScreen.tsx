@@ -1,5 +1,5 @@
-import { type EnvironmentConnectionPhase } from "@v12/client-runtime/connection";
-import type { EnvironmentThreadStatus } from "@v12/client-runtime/state/threads";
+import { type EnvironmentConnectionPhase } from "@v12code/client-runtime/connection";
+import type { EnvironmentThreadStatus } from "@v12code/client-runtime/state/threads";
 import { useKeyboardChatComposerInset, useKeyboardScrollToEnd } from "@legendapp/list/keyboard";
 import type { LegendListRef } from "@legendapp/list/react-native";
 import type {
@@ -11,10 +11,10 @@ import type {
   ProviderApprovalDecision,
   ProviderInteractionMode,
   RuntimeMode,
-  ServerConfig as V12ServerConfig,
+  ServerConfig as V12CodeServerConfig,
   ThreadId,
-} from "@v12/contracts";
-import { formatElapsed } from "@v12/shared/orchestrationTiming";
+} from "@v12code/contracts";
+import { formatElapsed } from "@v12code/shared/orchestrationTiming";
 import * as Haptics from "expo-haptics";
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Platform, View, type GestureResponderEvent } from "react-native";
@@ -68,7 +68,7 @@ export interface ThreadDetailScreenProps {
   readonly projectWorkspaceRoot: string | null;
   readonly threadCwd: string | null;
   readonly selectedThreadQueueCount: number;
-  readonly serverConfig: V12ServerConfig | null;
+  readonly serverConfig: V12CodeServerConfig | null;
   readonly layoutVariant?: LayoutVariant;
   readonly usesAutomaticContentInsets?: boolean;
   readonly onHeaderMaterialVisibilityChange?: (visible: boolean) => void;
@@ -204,7 +204,7 @@ const WorkingDurationPill = memo(function WorkingDurationPill(props: {
             <View className="h-1.5 w-1.5 rounded-full bg-neutral-400/80 dark:bg-neutral-500/80" />
             <View className="h-1.5 w-1.5 rounded-full bg-neutral-400/60 dark:bg-neutral-500/60" />
           </View>
-          <Text className="font-v12-medium text-xs text-neutral-600 dark:text-neutral-400">
+          <Text className="font-v12code-medium text-xs text-neutral-600 dark:text-neutral-400">
             Working for {durationLabel}
           </Text>
         </View>

@@ -21,9 +21,9 @@ describe("tryOpenExternalUrl", () => {
   it("opens supported URLs", async () => {
     openURL.mockResolvedValue(undefined);
 
-    await expect(tryOpenExternalUrl("https://github.com/12ya/V12", "pull-request")).resolves.toBe(
-      true,
-    );
+    await expect(
+      tryOpenExternalUrl("https://github.com/12ya/V12Code", "pull-request"),
+    ).resolves.toBe(true);
   });
 
   it("logs stable URL context without exposing the opening failure", async () => {
@@ -32,7 +32,7 @@ describe("tryOpenExternalUrl", () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     await expect(
-      tryOpenExternalUrl("https://github.com/12ya/V12/pull/1?token=secret", "pull-request"),
+      tryOpenExternalUrl("https://github.com/12ya/V12Code/pull/1?token=secret", "pull-request"),
     ).resolves.toBe(false);
 
     expect(consoleError).toHaveBeenCalledTimes(1);

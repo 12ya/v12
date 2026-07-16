@@ -1,4 +1,4 @@
-import type { EnvironmentId } from "@v12/contracts";
+import type { EnvironmentId } from "@v12code/contracts";
 
 export interface VcsStatusTarget {
   readonly environmentId: EnvironmentId | null;

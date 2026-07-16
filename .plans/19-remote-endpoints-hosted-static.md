@@ -6,12 +6,12 @@ Make remote access feel first-class while keeping the free DIY path open.
 
 The immediate product goal is:
 
-- users can expose a backend through LAN, their own Tailscale, MagicDNS, a manual HTTPS endpoint, or later V12 Tunnel
-- users can generate a hosted pairing link for `app.v12.codes`
+- users can expose a backend through LAN, their own Tailscale, MagicDNS, a manual HTTPS endpoint, or later V12Code Tunnel
+- users can generate a hosted pairing link for `app.v12code.codes`
 - the hosted app can pair, persist, reconnect, and operate against saved environments without requiring a backend at the hosted app origin
 - all transports reuse the same backend auth, WebSocket runtime, saved environment registry, and pairing UX
 
-This plan intentionally leaves the paid V12 cloud tunnel fabric out of scope. It defines the OSS foundation that V12 Tunnel should later plug into.
+This plan intentionally leaves the paid V12Code cloud tunnel fabric out of scope. It defines the OSS foundation that V12Code Tunnel should later plug into.
 
 ## Current State
 
@@ -58,7 +58,7 @@ Examples:
 - Tailscale IP URL
 - MagicDNS/Serve URL
 - manual URL
-- future V12 Tunnel URL
+- future V12Code Tunnel URL
 - browser compatibility and exposure level
 
 Those are different lifecycles. One environment can have many endpoints, endpoints can appear/disappear as network interfaces change, and the same descriptor is returned regardless of which endpoint the client used. Extending the descriptor would blur environment identity with transport reachability and make saved environments harder to reason about.
@@ -74,7 +74,7 @@ type AdvertisedEndpointProvider =
   | "tailscale-ip"
   | "tailscale-magicdns"
   | "manual"
-  | "v12-tunnel";
+  | "v12code-tunnel";
 
 type AdvertisedEndpointVisibility = "local" | "private-network" | "tailnet" | "public";
 
@@ -113,7 +113,7 @@ What is ready:
 
 What is not solved by code alone:
 
-- `https://app.v12.codes` cannot reliably call `http://...` or `ws://...` endpoints because browsers block mixed content.
+- `https://app.v12code.codes` cannot reliably call `http://...` or `ws://...` endpoints because browsers block mixed content.
 - `wss://100.x.y.z:3773` needs a certificate the browser trusts. A raw Tailscale IP does not solve certificate trust.
 - LAN `http://192.168.x.y:3773` is usable from another desktop/native context but not from the hosted HTTPS app.
 - The UI needs to explain why an endpoint is copyable for desktop pairing but not hosted-app compatible.
@@ -122,7 +122,7 @@ Policy:
 
 - Support both HTTP/WS and HTTPS/WSS at the runtime layer.
 - Mark endpoint compatibility at the product layer.
-- Generate `app.v12.codes` links only from endpoints that are likely hosted-browser compatible, or show a warning with an explicit fallback.
+- Generate `app.v12code.codes` links only from endpoints that are likely hosted-browser compatible, or show a warning with an explicit fallback.
 
 ## Architecture
 
@@ -146,7 +146,7 @@ Endpoint records can come from several providers:
    - hidden/disabled endpoints
 
 4. **Future cloud provider**
-   - V12 Tunnel endpoint
+   - V12Code Tunnel endpoint
    - billing/account status
    - tunnel lifecycle state
 
@@ -176,7 +176,7 @@ buildHostedPairingUrl({
 Generated URL:
 
 ```text
-https://app.v12.codes/pair?host=<encoded endpoint httpBaseUrl>#token=<one-time token>
+https://app.v12code.codes/pair?host=<encoded endpoint httpBaseUrl>#token=<one-time token>
 ```
 
 Use fragment tokens by default. Continue accepting `?token=` for compatibility.
@@ -218,7 +218,7 @@ Use fragment tokens by default. Continue accepting `?token=` for compatibility.
 - Existing LAN/network access UI still works.
 - Pairing links are generated from endpoint records.
 - Loopback endpoints never produce hosted pairing links silently.
-- HTTP private-network endpoints are marked incompatible with `app.v12.codes`.
+- HTTP private-network endpoints are marked incompatible with `app.v12code.codes`.
 - No remote environment runtime changes are required for existing saved environments.
 
 ## Phase 2: BYO Tailscale/MagicDNS
@@ -262,7 +262,7 @@ Use fragment tokens by default. Continue accepting `?token=` for compatibility.
 
 ### Goals
 
-- `app.v12.codes` works as a real client shell.
+- `app.v12code.codes` works as a real client shell.
 - It can pair, persist, reconnect, and clearly explain offline/incompatible states.
 
 ### Tasks
@@ -306,25 +306,25 @@ Use fragment tokens by default. Continue accepting `?token=` for compatibility.
 
 ### Acceptance Criteria
 
-- `app.v12.codes` can pair a reachable HTTPS backend and reconnect after reload.
-- A saved environment can be used without any backend at `app.v12.codes`.
+- `app.v12code.codes` can pair a reachable HTTPS backend and reconnect after reload.
+- A saved environment can be used without any backend at `app.v12code.codes`.
 - Offline machines show a useful state instead of a generic boot error.
 - HTTP endpoints are still supported in desktop/native/local contexts.
 - Hosted HTTPS app only promises compatibility for HTTPS/WSS endpoints.
 
-## Phase 4: Future V12 Tunnel Provider
+## Phase 4: Future V12Code Tunnel Provider
 
 Not part of the current implementation, but the endpoint abstraction should make it straightforward.
 
 Future tunnel provider responsibilities:
 
-- create endpoint with `provider: "v12-tunnel"`
+- create endpoint with `provider: "v12code-tunnel"`
 - surface tunnel status
 - provide stable HTTPS URL
 - use existing backend pairing/session auth
 - never bypass server auth
 
-The tunnel fabric can later be Pipenet-derived, Tailscale-derived, or another reverse tunnel implementation. The rest of V12 should only see an `AdvertisedEndpoint`.
+The tunnel fabric can later be Pipenet-derived, Tailscale-derived, or another reverse tunnel implementation. The rest of V12Code should only see an `AdvertisedEndpoint`.
 
 ## Security Checklist
 

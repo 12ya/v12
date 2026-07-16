@@ -2,8 +2,8 @@ import { SymbolView } from "./AppSymbol";
 import { Image } from "expo-image";
 import { useState } from "react";
 import { View } from "react-native";
-import type { EnvironmentId } from "@v12/contracts";
-import { isProjectFaviconFallbackUrl } from "@v12/shared/projectFavicon";
+import type { EnvironmentId } from "@v12code/contracts";
+import { isProjectFaviconFallbackUrl } from "@v12code/shared/projectFavicon";
 import { useThemeColor } from "../lib/useThemeColor";
 import { useAssetUrl } from "../state/assets";
 

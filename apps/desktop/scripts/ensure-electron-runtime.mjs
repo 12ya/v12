@@ -5,9 +5,9 @@ import * as NodePath from "node:path";
 import * as NodeChildProcess from "node:child_process";
 
 const require = NodeModule.createRequire(import.meta.url);
-// oxlint-disable-next-line v12/no-global-process-runtime -- Standalone repair script has no Effect runtime.
+// oxlint-disable-next-line v12code/no-global-process-runtime -- Standalone repair script has no Effect runtime.
 const hostPlatform = NodeOS.platform();
-// oxlint-disable-next-line v12/no-global-process-runtime -- Standalone repair script has no Effect runtime.
+// oxlint-disable-next-line v12code/no-global-process-runtime -- Standalone repair script has no Effect runtime.
 const hostArch = NodeOS.arch();
 
 function getPlatformPath() {
@@ -116,7 +116,7 @@ function runChecked(command, args) {
 }
 
 function installElectronRuntime(electronDir, version) {
-  const tempDir = NodeFS.mkdtempSync(NodePath.join(NodeOS.tmpdir(), "v12-electron-"));
+  const tempDir = NodeFS.mkdtempSync(NodePath.join(NodeOS.tmpdir(), "v12code-electron-"));
   const zipPath = NodePath.join(tempDir, `electron-v${version}-${hostPlatform}-${hostArch}.zip`);
 
   try {

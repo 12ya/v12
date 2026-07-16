@@ -1,12 +1,12 @@
 "use client";
 
-import { scopedThreadKey } from "@v12/client-runtime/environment";
-import { squashAtomCommandFailure } from "@v12/client-runtime/state/runtime";
+import { scopedThreadKey } from "@v12code/client-runtime/environment";
+import { squashAtomCommandFailure } from "@v12code/client-runtime/state/runtime";
 import {
   FILL_PREVIEW_VIEWPORT,
   type PreviewViewportSetting,
   type ScopedThreadRef,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useComposerDraftStore } from "~/composerDraftStore";

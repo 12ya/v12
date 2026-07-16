@@ -1,6 +1,6 @@
 import { assert, describe, it } from "@effect/vitest";
 import * as NodeServices from "@effect/platform-node/NodeServices";
-import * as NetService from "@v12/shared/Net";
+import * as NetService from "@v12code/shared/Net";
 import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
 import * as Fiber from "effect/Fiber";
@@ -17,7 +17,7 @@ import {
   buildRemoteLaunchScript,
   buildRemotePairingScript,
   buildRemoteStopScript,
-  buildRemoteV12RunnerScript,
+  buildRemoteV12CodeRunnerScript,
   describeReadinessCause,
   issueRemotePairingToken,
   launchOrReuseRemoteServer,
@@ -89,16 +89,16 @@ function commandArgs(command: ChildProcess.Command): ReadonlyArray<string> {
 }
 
 describe("ssh tunnel scripts", () => {
-  it("builds the remote v12 runner with npx and npm fallbacks", () => {
-    const script = buildRemoteV12RunnerScript({ nodeEngineRange: TEST_NODE_ENGINE_RANGE });
+  it("builds the remote v12code runner with npx and npm fallbacks", () => {
+    const script = buildRemoteV12CodeRunnerScript({ nodeEngineRange: TEST_NODE_ENGINE_RANGE });
 
-    assert.include(script, "V12_NODE_SCRIPT_PATH=''");
-    assert.include(script, 'exec v12 "$@"');
-    assert.include(script, "exec npx --yes 'v12@latest' \"$@\"");
-    assert.include(script, "exec npm exec --yes 'v12@latest' -- \"$@\"");
-    assert.include(script, "could not install 'v12@latest'");
+    assert.include(script, "V12CODE_NODE_SCRIPT_PATH=''");
+    assert.include(script, 'exec v12code "$@"');
+    assert.include(script, "exec npx --yes 'v12code@latest' \"$@\"");
+    assert.include(script, "exec npm exec --yes 'v12code@latest' -- \"$@\"");
+    assert.include(script, "could not install 'v12code@latest'");
     assert.include(script, 'prepend_path_if_dir "$HOME/.local/bin"');
-    assert.include(script, `V12_NODE_ENGINE_RANGE='${TEST_NODE_ENGINE_RANGE}'`);
+    assert.include(script, `V12CODE_NODE_ENGINE_RANGE='${TEST_NODE_ENGINE_RANGE}'`);
     assert.include(script, "remote_node_satisfies_engine()");
     assert.include(script, "function satisfiesSemverRange");
     assert.include(script, "satisfiesSemverRange(rawVersion, range)");
@@ -111,40 +111,43 @@ describe("ssh tunnel scripts", () => {
     assert.include(script, 'prepend_path_if_dir "$HOME/.nodenv/shims"');
     assert.include(script, 'NVM_DIR="$HOME/.nvm"');
     assert.include(script, "nvm use --silent default");
-    assert.include(script, 'for V12_NODE_BIN in "$NVM_DIR"/versions/node/*/bin');
+    assert.include(script, 'for V12CODE_NODE_BIN in "$NVM_DIR"/versions/node/*/bin');
     assert.notInclude(script, "ensure $NVM_DIR/nvm.sh is available");
   });
 
   it("does not hard-code a remote node engine range", () => {
-    const script = buildRemoteV12RunnerScript();
+    const script = buildRemoteV12CodeRunnerScript();
 
-    assert.include(script, "V12_NODE_ENGINE_RANGE=''");
+    assert.include(script, "V12CODE_NODE_ENGINE_RANGE=''");
     assert.notInclude(script, TEST_NODE_ENGINE_RANGE);
   });
 
-  it("shell-quotes package specs in the remote v12 runner", () => {
-    const script = buildRemoteV12RunnerScript({
-      packageSpec: "v12@nightly; touch /tmp/v12-owned",
+  it("shell-quotes package specs in the remote v12code runner", () => {
+    const script = buildRemoteV12CodeRunnerScript({
+      packageSpec: "v12code@nightly; touch /tmp/v12code-owned",
     });
 
-    assert.include(script, "exec npx --yes 'v12@nightly; touch /tmp/v12-owned' \"$@\"");
-    assert.include(script, "exec npm exec --yes 'v12@nightly; touch /tmp/v12-owned' -- \"$@\"");
-    assert.notInclude(script, "exec npx --yes v12@nightly; touch /tmp/v12-owned");
+    assert.include(script, "exec npx --yes 'v12code@nightly; touch /tmp/v12code-owned' \"$@\"");
+    assert.include(
+      script,
+      "exec npm exec --yes 'v12code@nightly; touch /tmp/v12code-owned' -- \"$@\"",
+    );
+    assert.notInclude(script, "exec npx --yes v12code@nightly; touch /tmp/v12code-owned");
   });
 
-  it("builds the remote v12 runner with a node script override", () => {
-    const script = buildRemoteV12RunnerScript({
+  it("builds the remote v12code runner with a node script override", () => {
+    const script = buildRemoteV12CodeRunnerScript({
       nodeScriptPath: "/Users/julius/Development/Work/codething-mvp/apps/server/dist/bin.mjs",
     });
 
     assert.include(
       script,
-      "V12_NODE_SCRIPT_PATH='/Users/julius/Development/Work/codething-mvp/apps/server/dist/bin.mjs'",
+      "V12CODE_NODE_SCRIPT_PATH='/Users/julius/Development/Work/codething-mvp/apps/server/dist/bin.mjs'",
     );
-    assert.include(script, 'exec node "$V12_NODE_SCRIPT_PATH" "$@"');
+    assert.include(script, 'exec node "$V12CODE_NODE_SCRIPT_PATH" "$@"');
   });
 
-  it("uses the remote v12 runner for launch and pairing scripts", () => {
+  it("uses the remote v12code runner for launch and pairing scripts", () => {
     const target = {
       alias: "devbox",
       hostname: "devbox.example.com",
@@ -161,7 +164,7 @@ describe("ssh tunnel scripts", () => {
     assert.include(buildRemoteLaunchScript(), "if ! ensure_remote_node_path; then");
     assert.include(
       buildRemoteLaunchScript({ nodeEngineRange: TEST_NODE_ENGINE_RANGE }),
-      `V12_NODE_ENGINE_RANGE='${TEST_NODE_ENGINE_RANGE}'`,
+      `V12CODE_NODE_ENGINE_RANGE='${TEST_NODE_ENGINE_RANGE}'`,
     );
     assert.include(
       buildRemoteLaunchScript({ nodeEngineRange: TEST_NODE_ENGINE_RANGE }),
@@ -172,15 +175,18 @@ describe("ssh tunnel scripts", () => {
     assert.include(buildRemoteLaunchScript(), '"$RUNNER_FILE" serve --host 127.0.0.1');
     assert.include(buildRemoteLaunchScript(), '--base-dir "$DEFAULT_SERVER_HOME"');
     assert.notInclude(buildRemoteLaunchScript(), "server-home");
-    assert.include(buildRemoteLaunchScript(), "Remote V12 server did not become ready");
-    assert.include(buildRemoteLaunchScript({ packageSpec: "v12@nightly" }), "v12@nightly");
+    assert.include(buildRemoteLaunchScript(), "Remote V12Code server did not become ready");
+    assert.include(buildRemoteLaunchScript({ packageSpec: "v12code@nightly" }), "v12code@nightly");
     assert.include(
       buildRemotePairingScript(target),
       '"$RUNNER_FILE" auth pairing create --base-dir "$PAIRING_BASE_DIR" --json',
     );
     assert.include(buildRemotePairingScript(target), 'PAIRING_BASE_DIR="$DEFAULT_SERVER_HOME"');
     assert.notInclude(buildRemotePairingScript(target), "server-home");
-    assert.include(buildRemotePairingScript(target, { packageSpec: "v12@nightly" }), "v12@nightly");
+    assert.include(
+      buildRemotePairingScript(target, { packageSpec: "v12code@nightly" }),
+      "v12code@nightly",
+    );
     assert.include(
       buildRemoteStopScript(target),
       'if [ "$REMOTE_MANAGED" != "external" ] && [ -n "$REMOTE_PID" ]',

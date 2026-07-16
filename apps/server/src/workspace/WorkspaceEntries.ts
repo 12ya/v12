@@ -16,9 +16,9 @@ import type {
   ProjectListEntriesResult,
   ProjectSearchEntriesInput,
   ProjectSearchEntriesResult,
-} from "@v12/contracts";
-import { HostProcessPlatform } from "@v12/shared/hostProcess";
-import { isExplicitRelativePath, isWindowsAbsolutePath } from "@v12/shared/path";
+} from "@v12code/contracts";
+import { HostProcessPlatform } from "@v12code/shared/hostProcess";
+import { isExplicitRelativePath, isWindowsAbsolutePath } from "@v12code/shared/path";
 
 import * as WorkspacePaths from "./WorkspacePaths.ts";
 import * as WorkspaceSearchIndex from "./WorkspaceSearchIndex.ts";
@@ -95,7 +95,7 @@ export class WorkspaceEntries extends Context.Service<
     ) => Effect.Effect<ProjectSearchEntriesResult, WorkspaceEntriesError>;
     readonly refresh: (cwd: string) => Effect.Effect<void>;
   }
->()("v12/workspace/WorkspaceEntries") {}
+>()("v12code/workspace/WorkspaceEntries") {}
 
 function expandHomePath(input: string, path: Path.Path): string {
   if (input === "~") {

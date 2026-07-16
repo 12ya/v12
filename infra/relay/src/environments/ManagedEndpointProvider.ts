@@ -13,7 +13,7 @@ import type {
   RelayManagedEndpoint,
   RelayManagedEndpointOrigin,
   RelayManagedEndpointRuntimeConfig,
-} from "@v12/contracts/relay";
+} from "@v12code/contracts/relay";
 
 import * as RelayConfiguration from "../Config.ts";
 import {
@@ -132,7 +132,7 @@ export class ManagedEndpointProvider extends Context.Service<
       readonly environmentId: string;
     }) => Effect.Effect<void, ManagedEndpointDeprovisioningFailed>;
   }
->()("v12-relay/environments/ManagedEndpointProvider") {}
+>()("v12code-relay/environments/ManagedEndpointProvider") {}
 
 interface ManagedEndpointTunnel {
   readonly id?: string | null;
@@ -190,7 +190,7 @@ export class ManagedEndpointTunnelClient extends Context.Service<
     ) => Effect.Effect<string, ManagedEndpointTunnelClientError>;
     readonly delete: (tunnelId: string) => Effect.Effect<unknown, ManagedEndpointTunnelClientError>;
   }
->()("v12-relay/environments/ManagedEndpointProvider/ManagedEndpointTunnelClient") {}
+>()("v12code-relay/environments/ManagedEndpointProvider/ManagedEndpointTunnelClient") {}
 
 export const layerTunnelClient = (client: ManagedEndpointTunnelClient["Service"]) =>
   Layer.succeed(ManagedEndpointTunnelClient, client);
@@ -242,7 +242,7 @@ export class ManagedEndpointDnsClient extends Context.Service<
       dnsRecordId: string,
     ) => Effect.Effect<unknown, ManagedEndpointDnsClientError>;
   }
->()("v12-relay/environments/ManagedEndpointProvider/ManagedEndpointDnsClient") {}
+>()("v12code-relay/environments/ManagedEndpointProvider/ManagedEndpointDnsClient") {}
 
 export const layerDnsClient = (client: ManagedEndpointDnsClient["Service"]) =>
   Layer.succeed(ManagedEndpointDnsClient, client);

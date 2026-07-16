@@ -1,11 +1,14 @@
-import type { DesktopSshEnvironmentBootstrap, DesktopSshEnvironmentTarget } from "@v12/contracts";
+import type {
+  DesktopSshEnvironmentBootstrap,
+  DesktopSshEnvironmentTarget,
+} from "@v12code/contracts";
 import {
   describeReadinessCause,
   waitForHttpReady as waitForHttpReadyShared,
-} from "@v12/shared/httpReadiness";
-import * as NetService from "@v12/shared/Net";
-import { extractJsonObject, fromLenientJson } from "@v12/shared/schemaJson";
-import { satisfiesSemverRange } from "@v12/shared/semver";
+} from "@v12code/shared/httpReadiness";
+import * as NetService from "@v12code/shared/Net";
+import { extractJsonObject, fromLenientJson } from "@v12code/shared/schemaJson";
+import { satisfiesSemverRange } from "@v12code/shared/semver";
 import * as Context from "effect/Context";
 import * as Deferred from "effect/Deferred";
 import * as Effect from "effect/Effect";
@@ -54,7 +57,7 @@ const TUNNEL_SHUTDOWN_TIMEOUT_MS = 2_000;
 const REMOTE_READY_TIMEOUT_MS = 15_000;
 const REMOTE_REUSE_READY_TIMEOUT_MS = 2_000;
 
-export interface RemoteV12RunnerOptions {
+export interface RemoteV12CodeRunnerOptions {
   readonly packageSpec?: string;
   readonly nodeScriptPath?: string | null;
   readonly nodeEngineRange?: string | null;
@@ -62,7 +65,7 @@ export interface RemoteV12RunnerOptions {
 
 export interface SshEnvironmentManagerOptions {
   readonly resolveCliPackageSpec?: () => string;
-  readonly resolveCliRunner?: Effect.Effect<RemoteV12RunnerOptions>;
+  readonly resolveCliRunner?: Effect.Effect<RemoteV12CodeRunnerOptions>;
 }
 
 interface SshTunnelEntry {
@@ -112,7 +115,7 @@ function sshTargetLogFields(target: DesktopSshEnvironmentTarget) {
   };
 }
 
-function sshRunnerLogFields(runner: RemoteV12RunnerOptions | undefined) {
+function sshRunnerLogFields(runner: RemoteV12CodeRunnerOptions | undefined) {
   if (runner?.nodeScriptPath?.trim()) {
     return { runner: "node-script", nodeScriptPath: runner.nodeScriptPath.trim() };
   }
@@ -324,12 +327,12 @@ export const REMOTE_NODE_ENV_SCRIPT = `prepend_path_if_dir() {
 }
 
 remote_node_satisfies_engine() {
-  V12_NODE_ENGINE_RANGE=@@V12_NODE_ENGINE_RANGE@@
-  if [ -z "$V12_NODE_ENGINE_RANGE" ]; then
+  V12CODE_NODE_ENGINE_RANGE=@@V12CODE_NODE_ENGINE_RANGE@@
+  if [ -z "$V12CODE_NODE_ENGINE_RANGE" ]; then
     return 0
   fi
-  node - "$V12_NODE_ENGINE_RANGE" <<'NODE'
-@@V12_NODE_ENGINE_CHECK_SCRIPT@@
+  node - "$V12CODE_NODE_ENGINE_RANGE" <<'NODE'
+@@V12CODE_NODE_ENGINE_CHECK_SCRIPT@@
 NODE
 }
 
@@ -395,9 +398,9 @@ ensure_remote_node_path() {
   fi
 
   if ! command -v node >/dev/null 2>&1 && [ -d "$NVM_DIR/versions/node" ]; then
-    for V12_NODE_BIN in "$NVM_DIR"/versions/node/*/bin; do
-      if [ -x "$V12_NODE_BIN/node" ]; then
-        PATH="$V12_NODE_BIN:$PATH"
+    for V12CODE_NODE_BIN in "$NVM_DIR"/versions/node/*/bin; do
+      if [ -x "$V12CODE_NODE_BIN/node" ]; then
+        PATH="$V12CODE_NODE_BIN:$PATH"
         export PATH
       fi
     done
@@ -409,48 +412,48 @@ ensure_remote_node_path() {
 
 export const REMOTE_RUNNER_SCRIPT = `#!/bin/sh
 set -eu
-@@V12_NODE_ENV_SCRIPT@@
+@@V12CODE_NODE_ENV_SCRIPT@@
 ensure_remote_node_path || true
-V12_NODE_SCRIPT_PATH=@@V12_NODE_SCRIPT_PATH@@
-if [ -n "$V12_NODE_SCRIPT_PATH" ]; then
+V12CODE_NODE_SCRIPT_PATH=@@V12CODE_NODE_SCRIPT_PATH@@
+if [ -n "$V12CODE_NODE_SCRIPT_PATH" ]; then
   if ! command -v node >/dev/null 2>&1; then
     printf 'Remote host is missing node on PATH. Install Node or configure a supported version manager for non-interactive shells.\\n' >&2
     exit 1
   fi
-  exec node "$V12_NODE_SCRIPT_PATH" "$@"
+  exec node "$V12CODE_NODE_SCRIPT_PATH" "$@"
 fi
-if command -v v12 >/dev/null 2>&1; then
-  exec v12 "$@"
+if command -v v12code >/dev/null 2>&1; then
+  exec v12code "$@"
 fi
 if command -v npx >/dev/null 2>&1; then
-  exec npx --yes @@V12_PACKAGE_SPEC@@ "$@"
+  exec npx --yes @@V12CODE_PACKAGE_SPEC@@ "$@"
 fi
 if command -v npm >/dev/null 2>&1; then
-  exec npm exec --yes @@V12_PACKAGE_SPEC@@ -- "$@"
+  exec npm exec --yes @@V12CODE_PACKAGE_SPEC@@ -- "$@"
 fi
-printf 'Remote host is missing the v12 CLI and could not install @@V12_PACKAGE_SPEC@@ because node/npm/npx are unavailable on PATH. Install Node or configure a supported version manager for non-interactive shells.\\n' >&2
+printf 'Remote host is missing the v12code CLI and could not install @@V12CODE_PACKAGE_SPEC@@ because node/npm/npx are unavailable on PATH. Install Node or configure a supported version manager for non-interactive shells.\\n' >&2
 exit 1
 `;
 
 export const REMOTE_LAUNCH_SCRIPT = `set -eu
-@@V12_NODE_ENV_SCRIPT@@
+@@V12CODE_NODE_ENV_SCRIPT@@
 STATE_KEY="$1"
-STATE_DIR="$HOME/.v12/ssh-launch/$STATE_KEY"
-DEFAULT_SERVER_HOME="$HOME/.v12"
+STATE_DIR="$HOME/.v12code/ssh-launch/$STATE_KEY"
+DEFAULT_SERVER_HOME="$HOME/.v12code"
 DEFAULT_RUNTIME_FILE="$DEFAULT_SERVER_HOME/userdata/server-runtime.json"
 PORT_FILE="$STATE_DIR/port"
 PID_FILE="$STATE_DIR/pid"
 MANAGED_FILE="$STATE_DIR/managed"
 LOG_FILE="$STATE_DIR/server.log"
-RUNNER_FILE="$STATE_DIR/run-v12.sh"
-RUNNER_NEXT="$STATE_DIR/run-v12.next.$$"
+RUNNER_FILE="$STATE_DIR/run-v12code.sh"
+RUNNER_NEXT="$STATE_DIR/run-v12code.next.$$"
 mkdir -p "$STATE_DIR"
 cleanup_runner_next() {
   rm -f "$RUNNER_NEXT"
 }
 trap cleanup_runner_next EXIT
 cat >"$RUNNER_NEXT" <<'SH'
-@@V12_RUNNER_SCRIPT@@
+@@V12CODE_RUNNER_SCRIPT@@
 SH
 RUNNER_CHANGED=0
 if [ ! -f "$RUNNER_FILE" ] || ! cmp -s "$RUNNER_NEXT" "$RUNNER_FILE"; then
@@ -463,13 +466,13 @@ if ! ensure_remote_node_path; then
   exit 1
 fi
 pick_port() {
-  node - "$PORT_FILE" "@@V12_DEFAULT_REMOTE_PORT@@" "@@V12_REMOTE_PORT_SCAN_WINDOW@@" <<'NODE'
-@@V12_PICK_PORT_SCRIPT@@
+  node - "$PORT_FILE" "@@V12CODE_DEFAULT_REMOTE_PORT@@" "@@V12CODE_REMOTE_PORT_SCAN_WINDOW@@" <<'NODE'
+@@V12CODE_PICK_PORT_SCRIPT@@
 NODE
 }
 wait_ready() {
-  node - "$REMOTE_PORT" "$1" "@@V12_READY_PROBE_TIMEOUT_MS@@" <<'NODE'
-@@V12_WAIT_READY_SCRIPT@@
+  node - "$REMOTE_PORT" "$1" "@@V12CODE_READY_PROBE_TIMEOUT_MS@@" <<'NODE'
+@@V12CODE_WAIT_READY_SCRIPT@@
 NODE
 }
 wait_for_pid_exit() {
@@ -514,7 +517,7 @@ if [ -n "$DEFAULT_RUNTIME_INFO" ]; then
 fi
 if [ -n "$DEFAULT_REMOTE_PORT" ]; then
   REMOTE_PORT="$DEFAULT_REMOTE_PORT"
-  if wait_ready "@@V12_REUSE_READY_TIMEOUT_MS@@"; then
+  if wait_ready "@@V12CODE_REUSE_READY_TIMEOUT_MS@@"; then
     if [ "$REMOTE_MANAGED" = "managed" ]; then
       PID_TO_STOP="\${REMOTE_PID:-$DEFAULT_RUNTIME_PID}"
       if [ -n "$PID_TO_STOP" ] && kill -0 "$PID_TO_STOP" 2>/dev/null; then
@@ -540,7 +543,7 @@ if [ -n "$DEFAULT_REMOTE_PORT" ]; then
   fi
 fi
 if [ "$REMOTE_MANAGED" = "external" ]; then
-  if [ -z "$REMOTE_PORT" ] || ! wait_ready "@@V12_REUSE_READY_TIMEOUT_MS@@"; then
+  if [ -z "$REMOTE_PORT" ] || ! wait_ready "@@V12CODE_REUSE_READY_TIMEOUT_MS@@"; then
     REMOTE_PID=""
     REMOTE_PORT=""
     REMOTE_MANAGED=""
@@ -552,7 +555,7 @@ elif [ -n "$REMOTE_PID" ] && [ -n "$REMOTE_PORT" ] && kill -0 "$REMOTE_PID" 2>/d
     REMOTE_PID=""
     REMOTE_PORT=""
     REMOTE_MANAGED=""
-  elif ! wait_ready "@@V12_REUSE_READY_TIMEOUT_MS@@"; then
+  elif ! wait_ready "@@V12CODE_REUSE_READY_TIMEOUT_MS@@"; then
     kill "$REMOTE_PID" 2>/dev/null || true
     wait_for_pid_exit "$REMOTE_PID"
     REMOTE_PID=""
@@ -570,13 +573,13 @@ if [ -z "$REMOTE_PORT" ]; then
     printf 'Failed to find an available port on the remote host. Ensure node is available on PATH.\\n' >&2
     exit 1
   fi
-  nohup env V12_NO_BROWSER=1 "$RUNNER_FILE" serve --host 127.0.0.1 --port "$REMOTE_PORT" --base-dir "$DEFAULT_SERVER_HOME" >>"$LOG_FILE" 2>&1 < /dev/null &
+  nohup env V12CODE_NO_BROWSER=1 "$RUNNER_FILE" serve --host 127.0.0.1 --port "$REMOTE_PORT" --base-dir "$DEFAULT_SERVER_HOME" >>"$LOG_FILE" 2>&1 < /dev/null &
   REMOTE_PID="$!"
   printf '%s\\n' "$REMOTE_PID" >"$PID_FILE"
   printf '%s\\n' "$REMOTE_PORT" >"$PORT_FILE"
   printf 'managed\\n' >"$MANAGED_FILE"
-  if ! wait_ready "@@V12_READY_TIMEOUT_MS@@"; then
-    printf 'Remote V12 server did not become ready on 127.0.0.1:%s.\\n' "$REMOTE_PORT" >&2
+  if ! wait_ready "@@V12CODE_READY_TIMEOUT_MS@@"; then
+    printf 'Remote V12Code server did not become ready on 127.0.0.1:%s.\\n' "$REMOTE_PORT" >&2
     tail -n 80 "$LOG_FILE" >&2 2>/dev/null || true
     kill "$REMOTE_PID" 2>/dev/null || true
     wait_for_pid_exit "$REMOTE_PID"
@@ -588,12 +591,12 @@ printf '{"remotePort":%s,"serverKind":"%s"}\\n' "$REMOTE_PORT" "\${REMOTE_MANAGE
 `;
 
 export const REMOTE_PAIRING_SCRIPT = `set -eu
-STATE_DIR="$HOME/.v12/ssh-launch/@@V12_STATE_KEY@@"
-DEFAULT_SERVER_HOME="$HOME/.v12"
-RUNNER_FILE="$STATE_DIR/run-v12.sh"
+STATE_DIR="$HOME/.v12code/ssh-launch/@@V12CODE_STATE_KEY@@"
+DEFAULT_SERVER_HOME="$HOME/.v12code"
+RUNNER_FILE="$STATE_DIR/run-v12code.sh"
 mkdir -p "$STATE_DIR"
 cat >"$RUNNER_FILE" <<'SH'
-@@V12_RUNNER_SCRIPT@@
+@@V12CODE_RUNNER_SCRIPT@@
 SH
 chmod 700 "$RUNNER_FILE"
 PAIRING_BASE_DIR="$DEFAULT_SERVER_HOME"
@@ -601,7 +604,7 @@ PAIRING_BASE_DIR="$DEFAULT_SERVER_HOME"
 `;
 
 export const REMOTE_STOP_SCRIPT = `set -eu
-STATE_DIR="$HOME/.v12/ssh-launch/@@V12_STATE_KEY@@"
+STATE_DIR="$HOME/.v12code/ssh-launch/@@V12CODE_STATE_KEY@@"
 PID_FILE="$STATE_DIR/pid"
 PORT_FILE="$STATE_DIR/port"
 MANAGED_FILE="$STATE_DIR/managed"
@@ -620,67 +623,67 @@ printf '{"stopped":true}\\n'
 `;
 
 const REMOTE_LOG_TAIL_SCRIPT = `set -eu
-STATE_DIR="$HOME/.v12/ssh-launch/@@V12_STATE_KEY@@"
+STATE_DIR="$HOME/.v12code/ssh-launch/@@V12CODE_STATE_KEY@@"
 LOG_FILE="$STATE_DIR/server.log"
 if [ -f "$LOG_FILE" ]; then
   tail -n 80 "$LOG_FILE" 2>/dev/null || true
 fi
 `;
 
-export function buildRemoteV12RunnerScript(input?: RemoteV12RunnerOptions): string {
-  const packageSpec = shellSingleQuote(input?.packageSpec?.trim() || "v12@latest");
+export function buildRemoteV12CodeRunnerScript(input?: RemoteV12CodeRunnerOptions): string {
+  const packageSpec = shellSingleQuote(input?.packageSpec?.trim() || "v12code@latest");
   const nodeScriptPath = input?.nodeScriptPath?.trim() || "";
   return stripTrailingNewlines(
     applyScriptPlaceholders(REMOTE_RUNNER_SCRIPT, {
-      V12_PACKAGE_SPEC: packageSpec,
-      V12_NODE_SCRIPT_PATH: shellSingleQuote(nodeScriptPath),
-      V12_NODE_ENV_SCRIPT: buildRemoteNodeEnvScript(input),
+      V12CODE_PACKAGE_SPEC: packageSpec,
+      V12CODE_NODE_SCRIPT_PATH: shellSingleQuote(nodeScriptPath),
+      V12CODE_NODE_ENV_SCRIPT: buildRemoteNodeEnvScript(input),
     }),
   );
 }
 
-export function buildRemoteNodeEnvScript(input?: RemoteV12RunnerOptions): string {
+export function buildRemoteNodeEnvScript(input?: RemoteV12CodeRunnerOptions): string {
   return stripTrailingNewlines(
     applyScriptPlaceholders(REMOTE_NODE_ENV_SCRIPT, {
-      V12_NODE_ENGINE_RANGE: shellSingleQuote(input?.nodeEngineRange?.trim() || ""),
-      V12_NODE_ENGINE_CHECK_SCRIPT: stripTrailingNewlines(buildRemoteNodeEngineCheckScript()),
+      V12CODE_NODE_ENGINE_RANGE: shellSingleQuote(input?.nodeEngineRange?.trim() || ""),
+      V12CODE_NODE_ENGINE_CHECK_SCRIPT: stripTrailingNewlines(buildRemoteNodeEngineCheckScript()),
     }),
   );
 }
 
-export function buildRemoteLaunchScript(input?: RemoteV12RunnerOptions): string {
+export function buildRemoteLaunchScript(input?: RemoteV12CodeRunnerOptions): string {
   return applyScriptPlaceholders(REMOTE_LAUNCH_SCRIPT, {
-    V12_NODE_ENV_SCRIPT: buildRemoteNodeEnvScript(input),
-    V12_RUNNER_SCRIPT: stripTrailingNewlines(buildRemoteV12RunnerScript(input)),
-    V12_PICK_PORT_SCRIPT: stripTrailingNewlines(REMOTE_PICK_PORT_SCRIPT),
-    V12_WAIT_READY_SCRIPT: stripTrailingNewlines(REMOTE_WAIT_READY_SCRIPT),
-    V12_DEFAULT_REMOTE_PORT: String(DEFAULT_REMOTE_PORT),
-    V12_REMOTE_PORT_SCAN_WINDOW: String(REMOTE_PORT_SCAN_WINDOW),
-    V12_READY_TIMEOUT_MS: String(REMOTE_READY_TIMEOUT_MS),
-    V12_REUSE_READY_TIMEOUT_MS: String(REMOTE_REUSE_READY_TIMEOUT_MS),
-    V12_READY_PROBE_TIMEOUT_MS: String(SSH_READY_PROBE_TIMEOUT_MS),
+    V12CODE_NODE_ENV_SCRIPT: buildRemoteNodeEnvScript(input),
+    V12CODE_RUNNER_SCRIPT: stripTrailingNewlines(buildRemoteV12CodeRunnerScript(input)),
+    V12CODE_PICK_PORT_SCRIPT: stripTrailingNewlines(REMOTE_PICK_PORT_SCRIPT),
+    V12CODE_WAIT_READY_SCRIPT: stripTrailingNewlines(REMOTE_WAIT_READY_SCRIPT),
+    V12CODE_DEFAULT_REMOTE_PORT: String(DEFAULT_REMOTE_PORT),
+    V12CODE_REMOTE_PORT_SCAN_WINDOW: String(REMOTE_PORT_SCAN_WINDOW),
+    V12CODE_READY_TIMEOUT_MS: String(REMOTE_READY_TIMEOUT_MS),
+    V12CODE_REUSE_READY_TIMEOUT_MS: String(REMOTE_REUSE_READY_TIMEOUT_MS),
+    V12CODE_READY_PROBE_TIMEOUT_MS: String(SSH_READY_PROBE_TIMEOUT_MS),
   });
 }
 
 export function buildRemotePairingScript(
   target: DesktopSshEnvironmentTarget,
-  input?: RemoteV12RunnerOptions,
+  input?: RemoteV12CodeRunnerOptions,
 ): string {
   return applyScriptPlaceholders(REMOTE_PAIRING_SCRIPT, {
-    V12_STATE_KEY: remoteStateKey(target),
-    V12_RUNNER_SCRIPT: stripTrailingNewlines(buildRemoteV12RunnerScript(input)),
+    V12CODE_STATE_KEY: remoteStateKey(target),
+    V12CODE_RUNNER_SCRIPT: stripTrailingNewlines(buildRemoteV12CodeRunnerScript(input)),
   });
 }
 
 export function buildRemoteStopScript(target: DesktopSshEnvironmentTarget): string {
   return applyScriptPlaceholders(REMOTE_STOP_SCRIPT, {
-    V12_STATE_KEY: remoteStateKey(target),
+    V12CODE_STATE_KEY: remoteStateKey(target),
   });
 }
 
 function buildRemoteLogTailScript(target: DesktopSshEnvironmentTarget): string {
   return applyScriptPlaceholders(REMOTE_LOG_TAIL_SCRIPT, {
-    V12_STATE_KEY: remoteStateKey(target),
+    V12CODE_STATE_KEY: remoteStateKey(target),
   });
 }
 
@@ -688,7 +691,7 @@ export const launchOrReuseRemoteServer = Effect.fn("ssh/tunnel.launchOrReuseRemo
   function* (
     target: DesktopSshEnvironmentTarget,
     input?: SshAuthOptions,
-    runner?: RemoteV12RunnerOptions,
+    runner?: RemoteV12CodeRunnerOptions,
   ): Effect.fn.Return<
     { readonly remotePort: number; readonly remoteServerKind: "external" | "managed" | null },
     SshCommandError | SshInvalidTargetError | SshLaunchError,
@@ -744,7 +747,7 @@ export const launchOrReuseRemoteServer = Effect.fn("ssh/tunnel.launchOrReuseRemo
 export const issueRemotePairingToken = Effect.fn("ssh/tunnel.issueRemotePairingToken")(function* (
   target: DesktopSshEnvironmentTarget,
   input?: SshAuthOptions,
-  runner?: RemoteV12RunnerOptions,
+  runner?: RemoteV12CodeRunnerOptions,
 ): Effect.fn.Return<
   {
     readonly credential: string;
@@ -1301,7 +1304,7 @@ const makeSshEnvironmentManager = Effect.fn("ssh/tunnel.SshEnvironmentManager.ma
   const createTunnelEntry = Effect.fn("ssh/tunnel.ensureTunnelEntry.create")(function* (input: {
     readonly key: string;
     readonly resolvedTarget: DesktopSshEnvironmentTarget;
-    readonly runner?: RemoteV12RunnerOptions;
+    readonly runner?: RemoteV12CodeRunnerOptions;
   }): Effect.fn.Return<SshTunnelEntry, SshEnvironmentEffectError, SshEnvironmentEffectContext> {
     yield* Effect.logDebug("ssh.environment.tunnel.create.start", {
       ...sshTargetLogFields(input.resolvedTarget),
@@ -1414,7 +1417,7 @@ const makeSshEnvironmentManager = Effect.fn("ssh/tunnel.SshEnvironmentManager.ma
   const ensureTunnelEntry = Effect.fn("ssh/tunnel.ensureTunnelEntry")(function* (
     key: string,
     resolvedTarget: DesktopSshEnvironmentTarget,
-    runner?: RemoteV12RunnerOptions,
+    runner?: RemoteV12CodeRunnerOptions,
   ): Effect.fn.Return<SshTunnelEntry, SshEnvironmentEffectError, SshEnvironmentEffectContext> {
     let entry = tunnels.get(key) ?? null;
 
@@ -1591,7 +1594,7 @@ const makeSshEnvironmentManager = Effect.fn("ssh/tunnel.SshEnvironmentManager.ma
 export class SshEnvironmentManager extends Context.Service<
   SshEnvironmentManager,
   SshEnvironmentManagerShape
->()("@v12/ssh/tunnel/SshEnvironmentManager") {
+>()("@v12code/ssh/tunnel/SshEnvironmentManager") {
   static readonly layer = (options: SshEnvironmentManagerOptions = {}) =>
     Layer.effect(SshEnvironmentManager, makeSshEnvironmentManager(options));
 }

@@ -7,14 +7,14 @@ import * as Scope from "effect/Scope";
 import * as Stream from "effect/Stream";
 import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process";
 
-import { type CodexSettings, type ModelSelection } from "@v12/contracts";
-import { sanitizeBranchFragment, sanitizeFeatureBranchName } from "@v12/shared/git";
-import { resolveSpawnCommand } from "@v12/shared/shell";
+import { type CodexSettings, type ModelSelection } from "@v12code/contracts";
+import { sanitizeBranchFragment, sanitizeFeatureBranchName } from "@v12code/shared/git";
+import { resolveSpawnCommand } from "@v12code/shared/shell";
 
 import { resolveAttachmentPath } from "../attachmentStore.ts";
 import * as ServerConfig from "../config.ts";
 import { expandHomePath } from "../pathExpansion.ts";
-import { TextGenerationError } from "@v12/contracts";
+import { TextGenerationError } from "@v12code/contracts";
 import * as TextGeneration from "./TextGeneration.ts";
 import {
   buildBranchNamePrompt,
@@ -29,7 +29,7 @@ import {
   sanitizeThreadTitle,
   toJsonSchemaObject,
 } from "./TextGenerationUtils.ts";
-import { getModelSelectionStringOptionValue } from "@v12/shared/model";
+import { getModelSelectionStringOptionValue } from "@v12code/shared/model";
 import { getCodexServiceTierOptionValue } from "../codexModelOptions.ts";
 
 const CODEX_GIT_TEXT_GENERATION_REASONING_EFFORT = "low";
@@ -75,7 +75,7 @@ export const makeCodexTextGeneration = Effect.fn("makeCodexTextGeneration")(func
   ): Effect.Effect<string, TextGenerationError, Scope.Scope> =>
     fileSystem
       .makeTempFileScoped({
-        prefix: `v12-${prefix}-${process.pid}-`,
+        prefix: `v12code-${prefix}-${process.pid}-`,
       })
       .pipe(
         Effect.tap((filePath) => fileSystem.writeFileString(filePath, content)),

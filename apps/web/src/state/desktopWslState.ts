@@ -1,4 +1,4 @@
-import type { DesktopBridge, DesktopWslState } from "@v12/contracts";
+import type { DesktopBridge, DesktopWslState } from "@v12code/contracts";
 import * as Effect from "effect/Effect";
 import * as Schema from "effect/Schema";
 import { Atom } from "effect/unstable/reactivity";

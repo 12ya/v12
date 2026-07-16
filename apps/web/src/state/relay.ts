@@ -1,4 +1,4 @@
-import { createRelayEnvironmentDiscoveryAtoms } from "@v12/client-runtime/state/relay";
+import { createRelayEnvironmentDiscoveryAtoms } from "@v12code/client-runtime/state/relay";
 
 import { connectionAtomRuntime } from "../connection/runtime";
 

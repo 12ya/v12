@@ -1,5 +1,5 @@
-import { httpHeaderRedactionLayer } from "@v12/shared/httpObservability";
-import { makeLocalFileTracer, makeTraceSink } from "@v12/shared/observability";
+import { httpHeaderRedactionLayer } from "@v12code/shared/httpObservability";
+import { makeLocalFileTracer, makeTraceSink } from "@v12code/shared/observability";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as References from "effect/References";
@@ -41,7 +41,7 @@ export const ObservabilityLive = Layer.unwrap(
                 resource: {
                   serviceName: config.otlpServiceName,
                   attributes: {
-                    "service.runtime": "v12-server",
+                    "service.runtime": "v12code-server",
                     "service.mode": config.mode,
                   },
                 },
@@ -72,7 +72,7 @@ export const ObservabilityLive = Layer.unwrap(
             resource: {
               serviceName: config.otlpServiceName,
               attributes: {
-                "service.runtime": "v12-server",
+                "service.runtime": "v12code-server",
                 "service.mode": config.mode,
               },
             },

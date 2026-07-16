@@ -1,5 +1,5 @@
-import type { EnvironmentId } from "@v12/contracts";
-import type { RelayProtectedError } from "@v12/contracts/relay";
+import type { EnvironmentId } from "@v12code/contracts";
+import type { RelayProtectedError } from "@v12code/contracts/relay";
 import type { ManagedRelayClientError } from "../relay/managedRelay.ts";
 import type { RemoteEnvironmentAuthError } from "../authorization/remote.ts";
 import {

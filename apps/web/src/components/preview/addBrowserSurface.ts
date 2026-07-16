@@ -1,5 +1,8 @@
-import { mapAtomCommandResult, type AtomCommandResult } from "@v12/client-runtime/state/runtime";
-import type { ScopedThreadRef } from "@v12/contracts";
+import {
+  mapAtomCommandResult,
+  type AtomCommandResult,
+} from "@v12code/client-runtime/state/runtime";
+import type { ScopedThreadRef } from "@v12code/contracts";
 
 import type { OpenPreviewMutation } from "~/browser/openFileInPreview";
 import { useRightPanelStore } from "~/rightPanelStore";

@@ -1,4 +1,4 @@
-import type { EnvironmentId, VcsRef as ContractVcsRef } from "@v12/contracts";
+import type { EnvironmentId, VcsRef as ContractVcsRef } from "@v12code/contracts";
 
 export interface VcsRefTarget {
   readonly environmentId: EnvironmentId | null;

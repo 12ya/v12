@@ -1,14 +1,14 @@
-import { ManagedRelay } from "@v12/client-runtime/relay";
+import { ManagedRelay } from "@v12code/client-runtime/relay";
 import * as Effect from "effect/Effect";
 import * as Schema from "effect/Schema";
 import * as SecureStore from "expo-secure-store";
 
-const MANAGED_RELAY_TOKEN_CACHE_KEY = "v12.cloud.relay-access-tokens";
+const MANAGED_RELAY_TOKEN_CACHE_KEY = "v12code.cloud.relay-access-tokens";
 const MANAGED_RELAY_TOKEN_CACHE_VERSION = 1;
 
 const ManagedRelayAccessTokenCacheEntrySchema = Schema.Struct({
   accountId: Schema.String,
-  clientId: Schema.Literals(["v12-mobile", "v12-web"]),
+  clientId: Schema.Literals(["v12code-mobile", "v12code-web"]),
   relayUrl: Schema.String,
   thumbprint: Schema.String,
   scopes: Schema.Array(

@@ -2,13 +2,13 @@ import type {
   AuthClientMetadata,
   AuthClientMetadataDeviceType,
   AuthClientPresentationMetadata,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import type * as HttpServerRequest from "effect/unstable/http/HttpServerRequest";
 import * as NodeCrypto from "node:crypto";
 import * as Encoding from "effect/Encoding";
 import * as Result from "effect/Result";
 
-const SESSION_COOKIE_NAME = "v12_session";
+const SESSION_COOKIE_NAME = "v12code_session";
 
 export function resolveSessionCookieName(input: {
   readonly mode: "web" | "desktop";

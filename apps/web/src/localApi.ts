@@ -1,4 +1,4 @@
-import type { ContextMenuItem, LocalApi } from "@v12/contracts";
+import type { ContextMenuItem, LocalApi } from "@v12code/contracts";
 
 import { resetRequestLatencyStateForTests } from "./rpc/requestLatencyState";
 import { showContextMenuFallback } from "./contextMenuFallback";

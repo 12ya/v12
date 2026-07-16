@@ -223,15 +223,15 @@
 }
 
 /* ─── Custom utilities ──────────────────────────────────────────────── */
-@utility font-v12-medium {
+@utility font-v12code-medium {
   font-family: var(--font-medium);
 }
 
-@utility font-v12-bold {
+@utility font-v12code-bold {
   font-family: var(--font-bold);
 }
 
-@utility font-v12-extrabold {
+@utility font-v12code-extrabold {
   font-family: var(--font-bold);
   font-weight: 800;
 }

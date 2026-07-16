@@ -1,5 +1,5 @@
-import { EnvironmentId, type PersistedSavedEnvironmentRecord } from "@v12/contracts";
-import { fromLenientJson } from "@v12/shared/schemaJson";
+import { EnvironmentId, type PersistedSavedEnvironmentRecord } from "@v12code/contracts";
+import { fromLenientJson } from "@v12code/shared/schemaJson";
 import * as Context from "effect/Context";
 import * as Crypto from "effect/Crypto";
 import * as Effect from "effect/Effect";
@@ -190,7 +190,7 @@ export class DesktopSavedEnvironments extends Context.Service<
       environmentId: string,
     ) => Effect.Effect<void, DesktopSavedEnvironmentsMutationError>;
   }
->()("@v12/desktop/settings/DesktopSavedEnvironments") {}
+>()("@v12code/desktop/settings/DesktopSavedEnvironments") {}
 
 function toPersistedSavedEnvironmentRecord(
   record: PersistedSavedEnvironmentStorageRecord,

@@ -20,9 +20,9 @@ const defaultEnvironmentInput = {
   platform: "darwin",
   processArch: "arm64",
   appVersion: "1.2.3",
-  appPath: "/Applications/V12.app/Contents/Resources/app.asar",
+  appPath: "/Applications/V12Code.app/Contents/Resources/app.asar",
   isPackaged: true,
-  resourcesPath: "/Applications/V12.app/Contents/Resources",
+  resourcesPath: "/Applications/V12Code.app/Contents/Resources",
   runningUnderArm64Translation: false,
 } satisfies DesktopEnvironment.MakeDesktopEnvironmentInput;
 
@@ -39,7 +39,7 @@ interface ElectronAppCalls {
 const makeElectronAppLayer = (calls: ElectronAppCalls) =>
   Layer.succeed(ElectronApp.ElectronApp, {
     metadata: Effect.die("unexpected metadata read"),
-    name: Effect.succeed("V12"),
+    name: Effect.succeed("V12Code"),
     whenReady: Effect.void,
     quit: Effect.void,
     exit: () => Effect.void,
@@ -125,9 +125,11 @@ const withIdentity = <A, E, R>(
             exists: (path) =>
               input.legacyPathProbeError
                 ? Effect.fail(input.legacyPathProbeError)
-                : Effect.succeed(input.legacyPathExists === true && path.includes("V12 (Alpha)")),
+                : Effect.succeed(
+                    input.legacyPathExists === true && path.includes("V12Code (Alpha)"),
+                  ),
             readFileString: () =>
-              Effect.succeed(input.packageJson ?? '{"v12CommitHash":"abcdef1234567890"}'),
+              Effect.succeed(input.packageJson ?? '{"v12codeCommitHash":"abcdef1234567890"}'),
           }),
         ),
         Layer.provideMerge(makeAssetsLayer(input.pngIconPath ?? Option.none())),
@@ -145,14 +147,14 @@ describe("DesktopAppIdentity", () => {
         const identity = yield* DesktopAppIdentity.DesktopAppIdentity;
         const userDataPath = yield* identity.resolveUserDataPath;
 
-        assert.equal(userDataPath, "/Users/alice/Library/Application Support/V12 (Alpha)");
+        assert.equal(userDataPath, "/Users/alice/Library/Application Support/V12Code (Alpha)");
       }),
       { legacyPathExists: true },
     ),
   );
 
   it.effect("preserves failures while inspecting the legacy userData path", () => {
-    const legacyPath = "/Users/alice/Library/Application Support/V12 (Alpha)";
+    const legacyPath = "/Users/alice/Library/Application Support/V12Code (Alpha)";
     const cause = PlatformError.systemError({
       _tag: "PermissionDenied",
       module: "FileSystem",
@@ -190,8 +192,8 @@ describe("DesktopAppIdentity", () => {
         const identity = yield* DesktopAppIdentity.DesktopAppIdentity;
         yield* identity.configure;
 
-        assert.deepEqual(calls.setName, ["V12 (Alpha)"]);
-        assert.equal(calls.setAboutPanelOptions[0]?.applicationName, "V12 (Alpha)");
+        assert.deepEqual(calls.setName, ["V12Code (Alpha)"]);
+        assert.equal(calls.setAboutPanelOptions[0]?.applicationName, "V12Code (Alpha)");
         assert.equal(calls.setAboutPanelOptions[0]?.applicationVersion, "1.2.3");
         assert.equal(calls.setAboutPanelOptions[0]?.version, "0123456789ab");
         assert.deepEqual(calls.setDockIcon, ["/icon.png"]);
@@ -200,7 +202,7 @@ describe("DesktopAppIdentity", () => {
         calls,
         environment: {
           env: {
-            V12_COMMIT_HASH: "0123456789abcdef",
+            V12CODE_COMMIT_HASH: "0123456789abcdef",
           },
         },
         pngIconPath: Option.some("/icon.png"),

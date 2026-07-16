@@ -1,11 +1,14 @@
 import { useAtomValue } from "@effect/atom-react";
-import type { EnvironmentProject, EnvironmentThreadShell } from "@v12/client-runtime/state/shell";
+import type {
+  EnvironmentProject,
+  EnvironmentThreadShell,
+} from "@v12code/client-runtime/state/shell";
 import type {
   EnvironmentId,
   ScopedProjectRef,
   ScopedThreadRef,
   ServerConfig,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import { Atom } from "effect/unstable/reactivity";
 
 import { environmentProjects } from "./projects";

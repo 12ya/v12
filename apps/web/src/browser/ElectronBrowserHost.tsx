@@ -1,7 +1,7 @@
 "use client";
 
-import { parseScopedThreadKey } from "@v12/client-runtime/environment";
-import { FILL_PREVIEW_VIEWPORT } from "@v12/contracts";
+import { parseScopedThreadKey } from "@v12code/client-runtime/environment";
+import { FILL_PREVIEW_VIEWPORT } from "@v12code/contracts";
 import { useEffect, useMemo } from "react";
 
 import { isElectron } from "~/env";

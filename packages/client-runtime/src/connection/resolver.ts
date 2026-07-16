@@ -1,5 +1,5 @@
-import { RelayEnvironmentConnectScope } from "@v12/contracts/relay";
-import { withRelayClientTracing } from "@v12/shared/relayTracing";
+import { RelayEnvironmentConnectScope } from "@v12code/contracts/relay";
+import { withRelayClientTracing } from "@v12code/shared/relayTracing";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
@@ -40,7 +40,7 @@ export class ConnectionResolver extends Context.Service<
       entry: ConnectionCatalogEntry,
     ) => Effect.Effect<PreparedConnection, ConnectionAttemptError>;
   }
->()("@v12/client-runtime/connection/resolver/ConnectionResolver") {}
+>()("@v12code/client-runtime/connection/resolver/ConnectionResolver") {}
 
 const isBearerProfile = Schema.is(BearerConnectionProfile);
 const isSshProfile = Schema.is(SshConnectionProfile);

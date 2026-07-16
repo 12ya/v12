@@ -1,4 +1,4 @@
-import type { RelayDeviceRegistrationRequest } from "@v12/contracts/relay";
+import type { RelayDeviceRegistrationRequest } from "@v12code/contracts/relay";
 
 import type { Preferences } from "../../persistence/mobile-preferences";
 import { supportsAgentAwarenessPush } from "./capabilities";

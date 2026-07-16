@@ -5,13 +5,13 @@ import {
   RelayConnectionRegistration,
   RelayConnectionTarget,
   BearerConnectionTarget,
-} from "@v12/client-runtime/connection";
+} from "@v12code/client-runtime/connection";
 import {
   type ConnectionCatalogDocument,
   EMPTY_CONNECTION_CATALOG_DOCUMENT,
   registerConnectionInCatalog,
-} from "@v12/client-runtime/platform";
-import { EnvironmentId } from "@v12/contracts";
+} from "@v12code/client-runtime/platform";
+import { EnvironmentId } from "@v12code/contracts";
 import * as Effect from "effect/Effect";
 import * as Schema from "effect/Schema";
 

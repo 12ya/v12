@@ -1,5 +1,8 @@
-import { BearerConnectionTarget, PrimaryConnectionTarget } from "@v12/client-runtime/connection";
-import { EnvironmentId, PRIMARY_LOCAL_ENVIRONMENT_ID } from "@v12/contracts";
+import {
+  BearerConnectionTarget,
+  PrimaryConnectionTarget,
+} from "@v12code/client-runtime/connection";
+import { EnvironmentId, PRIMARY_LOCAL_ENVIRONMENT_ID } from "@v12code/contracts";
 import { describe, expect, it } from "vite-plus/test";
 
 import {

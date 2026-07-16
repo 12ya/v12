@@ -1,4 +1,4 @@
-import { GrokSettings, ProviderDriverKind, type ServerProvider } from "@v12/contracts";
+import { GrokSettings, ProviderDriverKind, type ServerProvider } from "@v12code/contracts";
 import * as Duration from "effect/Duration";
 import * as Crypto from "effect/Crypto";
 import * as Effect from "effect/Effect";

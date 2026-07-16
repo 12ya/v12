@@ -4,7 +4,7 @@ import {
   ServerConfig,
   type ServerConfig as ServerConfigType,
   WS_METHODS,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import { describe, expect, it } from "@effect/vitest";
 import * as Effect from "effect/Effect";
 import * as Fiber from "effect/Fiber";
@@ -115,7 +115,7 @@ const SERVER_CONFIG: ServerConfigType = {
     policy: "loopback-browser",
     bootstrapMethods: ["one-time-token"],
     sessionMethods: ["browser-session-cookie", "bearer-access-token"],
-    sessionCookieName: "v12_session",
+    sessionCookieName: "v12code_session",
   },
   cwd: "/tmp/workspace",
   keybindingsConfigPath: "/tmp/workspace/keybindings.json",

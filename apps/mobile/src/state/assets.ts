@@ -1,6 +1,6 @@
 import { useAtomValue } from "@effect/atom-react";
-import { createAssetEnvironmentAtoms, resolveAssetUrl } from "@v12/client-runtime/state/assets";
-import type { AssetResource, EnvironmentId } from "@v12/contracts";
+import { createAssetEnvironmentAtoms, resolveAssetUrl } from "@v12code/client-runtime/state/assets";
+import type { AssetResource, EnvironmentId } from "@v12code/contracts";
 import { AsyncResult, Atom } from "effect/unstable/reactivity";
 
 import { connectionAtomRuntime } from "../connection/runtime";

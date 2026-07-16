@@ -5,8 +5,8 @@ import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { PlainTextPlugin } from "@lexical/react/LexicalPlainTextPlugin";
-import { type ServerProviderSkill } from "@v12/contracts";
-import { serializeComposerFileLink } from "@v12/shared/composerTrigger";
+import { type ServerProviderSkill } from "@v12code/contracts";
+import { serializeComposerFileLink } from "@v12code/shared/composerTrigger";
 import {
   $applyNodeReplacement,
   $createRangeSelection,
@@ -1659,7 +1659,7 @@ export function ComposerPromptEditor({
   const initialSkillMetadataRef = useRef(skillMetadataByName(skills));
   const initialConfig = useMemo<InitialConfigType>(
     () => ({
-      namespace: "v12-composer-editor",
+      namespace: "v12code-composer-editor",
       editable: true,
       nodes: [ComposerMentionNode, ComposerSkillNode, ComposerTerminalContextNode],
       editorState: () => {

@@ -276,7 +276,7 @@ it.effect("accepts bootstrap metadata in thread.turn.start", () =>
         prepareWorktree: {
           projectCwd: "/tmp/workspace",
           baseBranch: "main",
-          branch: "v12/example",
+          branch: "v12code/example",
           startFromOrigin: true,
         },
         runSetupScript: true,

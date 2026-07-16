@@ -12,10 +12,10 @@ import {
 const latestAnnouncement = {
   target: "latest",
   roleId: "222222222222222222",
-  releaseName: "V12 v1.2.3",
+  releaseName: "V12Code v1.2.3",
   version: "1.2.3",
   tag: "v1.2.3",
-  releaseUrl: new URL("https://github.com/12ya/v12/releases/tag/v1.2.3"),
+  releaseUrl: new URL("https://github.com/12ya/v12code/releases/tag/v1.2.3"),
   timestamp: "2026-05-01T01:41:00.000Z",
 } as const;
 
@@ -26,23 +26,25 @@ it("builds a prerelease Discord announcement for nightly subscribers", () => {
     buildDiscordReleaseAnnouncement({
       target: "prerelease",
       roleId: "111111111111111111",
-      releaseName: "V12 Nightly 1.2.4-nightly.20260501.17 (abcdef123456)",
+      releaseName: "V12Code Nightly 1.2.4-nightly.20260501.17 (abcdef123456)",
       version: "1.2.4-nightly.20260501.17",
       tag: "v1.2.4-nightly.20260501.17",
-      releaseUrl: new URL("https://github.com/12ya/v12/releases/tag/v1.2.4-nightly.20260501.17"),
+      releaseUrl: new URL(
+        "https://github.com/12ya/v12code/releases/tag/v1.2.4-nightly.20260501.17",
+      ),
       timestamp: "2026-05-01T01:41:00.000Z",
     }),
     {
       content:
-        "<@&111111111111111111> Prerelease published: V12 Nightly 1.2.4-nightly.20260501.17 (abcdef123456)",
+        "<@&111111111111111111> Prerelease published: V12Code Nightly 1.2.4-nightly.20260501.17 (abcdef123456)",
       allowed_mentions: {
         roles: ["111111111111111111"],
       },
       embeds: [
         {
-          title: "V12 Nightly 1.2.4-nightly.20260501.17 (abcdef123456)",
-          url: "https://github.com/12ya/v12/releases/tag/v1.2.4-nightly.20260501.17",
-          description: "A new V12 prerelease is available for nightly testers.",
+          title: "V12Code Nightly 1.2.4-nightly.20260501.17 (abcdef123456)",
+          url: "https://github.com/12ya/v12code/releases/tag/v1.2.4-nightly.20260501.17",
+          description: "A new V12Code prerelease is available for nightly testers.",
           color: 0x5865f2,
           fields: [
             {
@@ -65,15 +67,15 @@ it("builds a prerelease Discord announcement for nightly subscribers", () => {
 
 it("builds a latest Discord announcement for stable subscribers", () => {
   assert.deepStrictEqual(buildDiscordReleaseAnnouncement(latestAnnouncement), {
-    content: "<@&222222222222222222> Latest published: V12 v1.2.3",
+    content: "<@&222222222222222222> Latest published: V12Code v1.2.3",
     allowed_mentions: {
       roles: ["222222222222222222"],
     },
     embeds: [
       {
-        title: "V12 v1.2.3",
-        url: "https://github.com/12ya/v12/releases/tag/v1.2.3",
-        description: "A new V12 latest release is available.",
+        title: "V12Code v1.2.3",
+        url: "https://github.com/12ya/v12code/releases/tag/v1.2.3",
+        description: "A new V12Code latest release is available.",
         color: 0x2ecc71,
         fields: [
           {

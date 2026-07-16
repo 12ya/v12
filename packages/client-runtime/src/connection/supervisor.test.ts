@@ -1,5 +1,5 @@
-import { EnvironmentId } from "@v12/contracts";
-import { RelayClientTracer } from "@v12/shared/relayTracing";
+import { EnvironmentId } from "@v12code/contracts";
+import { RelayClientTracer } from "@v12code/shared/relayTracing";
 import { describe, expect, it } from "@effect/vitest";
 import * as Deferred from "effect/Deferred";
 import * as Effect from "effect/Effect";

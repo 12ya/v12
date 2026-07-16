@@ -4,9 +4,9 @@ import {
   ProviderDriverKind,
   type ServerProvider,
   type ServerProviderModel,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import type * as EffectAcpSchema from "effect-acp/schema";
-import { causeErrorTag } from "@v12/shared/observability";
+import { causeErrorTag } from "@v12code/shared/observability";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
 import * as Exit from "effect/Exit";
@@ -14,8 +14,8 @@ import * as Option from "effect/Option";
 import * as Result from "effect/Result";
 import { HttpClient } from "effect/unstable/http";
 import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process";
-import { createModelCapabilities } from "@v12/shared/model";
-import { resolveSpawnCommand } from "@v12/shared/shell";
+import { createModelCapabilities } from "@v12code/shared/model";
+import { resolveSpawnCommand } from "@v12code/shared/shell";
 
 import {
   buildServerProvider,
@@ -72,7 +72,7 @@ export function buildInitialGrokProviderSnapshot(
           version: null,
           status: "warning",
           auth: { status: "unknown" },
-          message: "Grok is disabled in V12 settings.",
+          message: "Grok is disabled in V12Code settings.",
         },
       });
     }
@@ -140,7 +140,7 @@ const discoverGrokModelsViaAcp = (
       environment,
       childProcessSpawner,
       cwd: process.cwd(),
-      clientInfo: { name: "v12-provider-probe", version: "0.0.0" },
+      clientInfo: { name: "v12code-provider-probe", version: "0.0.0" },
     });
     const started = yield* acp.start();
     return buildGrokDiscoveredModelsFromSessionModelState(started.sessionSetupResult.models);
@@ -182,7 +182,7 @@ export const checkGrokProviderStatus = Effect.fn("checkGrokProviderStatus")(func
         version: null,
         status: "warning",
         auth: { status: "unknown" },
-        message: "Grok is disabled in V12 settings.",
+        message: "Grok is disabled in V12Code settings.",
       },
     });
   }

@@ -1,9 +1,9 @@
 # Documentation
 
-- [V12 roadmap](./project/roadmap.md)
+- [V12Code roadmap](./project/roadmap.md)
 - [Getting started](./getting-started/quick-start.md)
 - [Architecture](./architecture/overview.md)
-- [V12 Connect](./cloud/v12-connect-clerk.md)
+- [V12Code Connect](./cloud/v12code-connect-clerk.md)
 - [Integrations](./integrations/source-control-providers.md)
 - [Mobile](./mobile/app.md)
 - [Operations](./operations/ci.md)

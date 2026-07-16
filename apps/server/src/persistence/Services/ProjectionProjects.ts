@@ -6,7 +6,7 @@
  *
  * @module ProjectionProjectRepository
  */
-import { IsoDateTime, ModelSelection, ProjectId, ProjectScript } from "@v12/contracts";
+import { IsoDateTime, ModelSelection, ProjectId, ProjectScript } from "@v12code/contracts";
 import * as Option from "effect/Option";
 import * as Schema from "effect/Schema";
 import * as Context from "effect/Context";
@@ -78,4 +78,4 @@ export interface ProjectionProjectRepositoryShape {
 export class ProjectionProjectRepository extends Context.Service<
   ProjectionProjectRepository,
   ProjectionProjectRepositoryShape
->()("v12/persistence/Services/ProjectionProjects/ProjectionProjectRepository") {}
+>()("v12code/persistence/Services/ProjectionProjects/ProjectionProjectRepository") {}

@@ -1,4 +1,8 @@
-import type { DesktopRuntimeInfo, DesktopUpdateChannel, DesktopUpdateState } from "@v12/contracts";
+import type {
+  DesktopRuntimeInfo,
+  DesktopUpdateChannel,
+  DesktopUpdateState,
+} from "@v12code/contracts";
 
 export function nextStatusAfterDownloadFailure(
   currentState: DesktopUpdateState,

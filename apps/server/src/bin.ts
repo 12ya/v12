@@ -5,7 +5,7 @@ import * as Layer from "effect/Layer";
 import { Command } from "effect/unstable/cli";
 import * as CliError from "effect/unstable/cli/CliError";
 
-import * as NetService from "@v12/shared/Net";
+import * as NetService from "@v12code/shared/Net";
 import packageJson from "../package.json" with { type: "json" };
 import { authCommand } from "./cli/auth.ts";
 import { connectCommand } from "./cli/connect.ts";
@@ -17,7 +17,7 @@ import { runServerCommand, serveCommand, startCommand } from "./cli/server.ts";
 const CliRuntimeLayer = Layer.mergeAll(NodeServices.layer, NetService.layer);
 
 const connectPublicConfigMissingMessage =
-  "V12 Connect commands are unavailable: this build is missing V12 Connect public configuration.";
+  "V12Code Connect commands are unavailable: this build is missing V12Code Connect public configuration.";
 
 class ConnectPublicConfigMissingError extends CliError.UserError {
   override get message() {
@@ -26,12 +26,12 @@ class ConnectPublicConfigMissingError extends CliError.UserError {
 }
 
 const connectUnavailableCommand = Command.make("connect").pipe(
-  Command.withDescription("V12 Connect is unavailable in builds without public configuration."),
+  Command.withDescription("V12Code Connect is unavailable in builds without public configuration."),
   Command.withHidden,
   Command.withHandler(() =>
     Effect.fail(
       new CliError.ShowHelp({
-        commandPath: ["v12", "connect"],
+        commandPath: ["v12code", "connect"],
         errors: [new ConnectPublicConfigMissingError({ cause: connectPublicConfigMissingMessage })],
       }),
     ),
@@ -39,8 +39,8 @@ const connectUnavailableCommand = Command.make("connect").pipe(
 );
 
 export const makeCli = ({ cloudEnabled = hasCloudPublicConfig } = {}) =>
-  Command.make("v12", { ...sharedServerCommandFlags }).pipe(
-    Command.withDescription("Run the V12 server."),
+  Command.make("v12code", { ...sharedServerCommandFlags }).pipe(
+    Command.withDescription("Run the V12Code server."),
     Command.withHandler((flags) => runServerCommand(flags)),
     Command.withSubcommands([
       startCommand,

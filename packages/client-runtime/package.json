@@ -1,5 +1,5 @@
 {
-  "name": "@v12/client-runtime",
+  "name": "@v12code/client-runtime",
   "private": true,
   "type": "module",
   "exports": {
@@ -137,8 +137,8 @@
     "test": "vp test run"
   },
   "dependencies": {
-    "@v12/contracts": "workspace:*",
-    "@v12/shared": "workspace:*",
+    "@v12code/contracts": "workspace:*",
+    "@v12code/shared": "workspace:*",
     "effect": "catalog:"
   },
   "devDependencies": {

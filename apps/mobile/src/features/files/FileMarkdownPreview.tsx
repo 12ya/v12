@@ -54,7 +54,7 @@ function useMarkdownPreviewStyles(): MarkdownPreviewStyles {
     const renderers: CustomRenderers = {
       link: ({ href, children }) => (
         <NativeText
-          className="font-v12-medium"
+          className="font-v12code-medium"
           onPress={() => {
             if (href) {
               void tryOpenExternalUrl(href, "markdown-link");

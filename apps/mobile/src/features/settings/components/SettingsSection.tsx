@@ -11,7 +11,7 @@ export function SettingsSection(props: {
 }) {
   return (
     <View className="gap-2">
-      <Text className="px-2 text-sm font-v12-medium text-foreground-muted">{props.title}</Text>
+      <Text className="px-2 text-sm font-v12code-medium text-foreground-muted">{props.title}</Text>
       <View
         className={
           props.card

@@ -1,4 +1,4 @@
-import { EnvironmentId, ThreadId } from "@v12/contracts";
+import { EnvironmentId, ThreadId } from "@v12code/contracts";
 import { describe, expect, it } from "vite-plus/test";
 
 import {

@@ -18,7 +18,7 @@ export class ConnectionCredentialStore extends Context.Service<
     ) => Effect.Effect<void, ConnectionAttemptError>;
     readonly remove: (connectionId: string) => Effect.Effect<void, ConnectionAttemptError>;
   }
->()("@v12/client-runtime/connection/credentialStore/ConnectionCredentialStore") {}
+>()("@v12code/client-runtime/connection/credentialStore/ConnectionCredentialStore") {}
 
 export const make = (service: ConnectionCredentialStore["Service"]) =>
   ConnectionCredentialStore.of(service);

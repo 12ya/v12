@@ -18,8 +18,8 @@ import type {
   VcsStatusRemoteResult,
   VcsStatusResult,
   VcsStatusStreamEvent,
-} from "@v12/contracts";
-import { GitManagerError } from "@v12/contracts";
+} from "@v12code/contracts";
+import { GitManagerError } from "@v12code/contracts";
 
 import * as VcsStatusBroadcaster from "./VcsStatusBroadcaster.ts";
 import * as GitWorkflowService from "../git/GitWorkflowService.ts";
@@ -50,7 +50,7 @@ const remoteStatusWithPr: VcsStatusRemoteResult = {
   pr: {
     number: 2978,
     title: "[codex] Rewrite client connection architecture",
-    url: "https://github.com/12ya/V12/pull/2978",
+    url: "https://github.com/12ya/V12Code/pull/2978",
     baseRef: "main",
     headRef: "codex/connection-state-audit",
     state: "open",
@@ -310,10 +310,10 @@ describe("VcsStatusBroadcaster", () => {
       const fileSystem = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
       const realDir = yield* fileSystem.makeTempDirectoryScoped({
-        prefix: "v12-vcs-status-real-",
+        prefix: "v12code-vcs-status-real-",
       });
       const linkParent = yield* fileSystem.makeTempDirectoryScoped({
-        prefix: "v12-vcs-status-link-",
+        prefix: "v12code-vcs-status-link-",
       });
       const linkDir = path.join(linkParent, "repo-link");
       yield* fileSystem.symlink(realDir, linkDir);

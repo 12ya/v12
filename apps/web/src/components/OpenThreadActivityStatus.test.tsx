@@ -6,7 +6,7 @@ import {
   type OrchestrationLatestTurn,
   type OrchestrationSession,
   type OrchestrationThreadActivity,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vite-plus/test";
 

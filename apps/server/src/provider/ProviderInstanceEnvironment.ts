@@ -1,4 +1,4 @@
-import type { ProviderInstanceEnvironment } from "@v12/contracts";
+import type { ProviderInstanceEnvironment } from "@v12code/contracts";
 
 export function mergeProviderInstanceEnvironment(
   environment: ProviderInstanceEnvironment | undefined,

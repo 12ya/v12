@@ -1,6 +1,6 @@
-import { EnvironmentId } from "@v12/contracts";
-import { stripPairingTokenFromUrl } from "@v12/shared/remote";
-import { type EnvironmentConnectionPhase } from "@v12/client-runtime/connection";
+import { EnvironmentId } from "@v12code/contracts";
+import { stripPairingTokenFromUrl } from "@v12code/shared/remote";
+import { type EnvironmentConnectionPhase } from "@v12code/client-runtime/connection";
 
 export { authClientMetadata } from "./authClientMetadata";
 

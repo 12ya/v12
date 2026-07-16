@@ -23,7 +23,7 @@ export interface RelayClientTracingResource {
 }
 
 export class RelayClientTracer extends Context.Reference(
-  "@v12/shared/relayTracing/RelayClientTracer",
+  "@v12code/shared/relayTracing/RelayClientTracer",
   {
     defaultValue: () => Option.none<Tracer.Tracer>(),
   },
@@ -144,7 +144,7 @@ export function makeRelayClientTracingLayer(
       attributes: {
         "service.runtime": resource.runtime,
         "service.component": resource.component ?? "relay-client",
-        "v12.client.surface": resource.client,
+        "v12code.client.surface": resource.client,
       },
     },
   }).pipe(Layer.provide(OtlpSerialization.layerJson));

@@ -10,8 +10,8 @@ import type {
   ReviewDiffPreviewInput,
   ReviewDiffPreviewResult,
   VcsRepositoryIdentity,
-} from "@v12/contracts";
-import { CheckpointRef } from "@v12/contracts";
+} from "@v12code/contracts";
+import { CheckpointRef } from "@v12code/contracts";
 import * as VcsProcess from "./VcsProcess.ts";
 
 export interface VcsCaptureCheckpointInput {
@@ -77,4 +77,4 @@ export class VcsDriver extends Context.Service<
       input: ReviewDiffPreviewInput,
     ) => Effect.Effect<ReviewDiffPreviewResult, VcsError>;
   }
->()("v12/vcs/VcsDriver") {}
+>()("v12code/vcs/VcsDriver") {}

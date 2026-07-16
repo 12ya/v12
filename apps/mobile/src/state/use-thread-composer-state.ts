@@ -9,9 +9,9 @@ import {
   type ProviderInteractionMode,
   type RuntimeMode,
   type ThreadId,
-} from "@v12/contracts";
-import { safeErrorLogAttributes } from "@v12/client-runtime/errors";
-import { deriveActiveWorkStartedAt } from "@v12/shared/orchestrationTiming";
+} from "@v12code/contracts";
+import { safeErrorLogAttributes } from "@v12code/client-runtime/errors";
+import { deriveActiveWorkStartedAt } from "@v12code/shared/orchestrationTiming";
 
 import { makeQueuedMessageMetadata } from "../lib/commandMetadata";
 import {

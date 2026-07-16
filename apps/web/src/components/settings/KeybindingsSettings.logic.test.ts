@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vite-plus/test";
-import type { ResolvedKeybindingsConfig } from "@v12/contracts";
+import type { ResolvedKeybindingsConfig } from "@v12code/contracts";
 
 import {
   buildKeybindingRows,

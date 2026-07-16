@@ -1,6 +1,6 @@
-import { PRIMARY_LOCAL_ENVIRONMENT_ID } from "@v12/contracts";
-import { makeLocalFileTracer, makeTraceSink } from "@v12/shared/observability";
-import { parsePersistedServerObservabilitySettings } from "@v12/shared/serverSettings";
+import { PRIMARY_LOCAL_ENVIRONMENT_ID } from "@v12code/contracts";
+import { makeLocalFileTracer, makeTraceSink } from "@v12code/shared/observability";
+import { parsePersistedServerObservabilitySettings } from "@v12code/shared/serverSettings";
 import * as Context from "effect/Context";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
@@ -56,7 +56,7 @@ export class DesktopBackendOutputLogFactory extends Context.Service<
   {
     readonly forInstance: (id: string) => Effect.Effect<DesktopBackendOutputLogShape>;
   }
->()("@v12/desktop/app/DesktopObservability/DesktopBackendOutputLogFactory") {}
+>()("@v12code/desktop/app/DesktopObservability/DesktopBackendOutputLogFactory") {}
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();

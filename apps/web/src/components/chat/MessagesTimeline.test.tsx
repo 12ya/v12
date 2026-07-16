@@ -1,4 +1,4 @@
-import { EnvironmentId, MessageId, ThreadId } from "@v12/contracts";
+import { EnvironmentId, MessageId, ThreadId } from "@v12code/contracts";
 import { createRef, type ReactNode, type Ref } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeAll, describe, expect, it, vi } from "vite-plus/test";
@@ -586,16 +586,16 @@ describe("MessagesTimeline", () => {
               createdAt: "2026-03-17T19:12:28.000Z",
               label: "Updated files",
               tone: "tool",
-              changedFiles: ["C:/Users/mike/dev-stuff/v12/apps/web/src/session-logic.ts"],
+              changedFiles: ["C:/Users/mike/dev-stuff/v12code/apps/web/src/session-logic.ts"],
             },
           },
         ]}
-        workspaceRoot="C:/Users/mike/dev-stuff/v12"
+        workspaceRoot="C:/Users/mike/dev-stuff/v12code"
       />,
     );
 
-    expect(markup).toContain("v12/apps/web/src/session-logic.ts");
-    expect(markup).not.toContain("C:/Users/mike/dev-stuff/v12/apps/web/src/session-logic.ts");
+    expect(markup).toContain("v12code/apps/web/src/session-logic.ts");
+    expect(markup).not.toContain("C:/Users/mike/dev-stuff/v12code/apps/web/src/session-logic.ts");
   });
 
   it("renders compact command rows with status, duration, and exit metadata", async () => {
@@ -615,7 +615,7 @@ describe("MessagesTimeline", () => {
               tone: "tool",
               itemType: "command_execution",
               command: "vp run typecheck",
-              cwd: "/workspace/v12",
+              cwd: "/workspace/v12code",
               durationMs: 1_250,
               exitCode: 0,
               toolLifecycleStatus: "completed",

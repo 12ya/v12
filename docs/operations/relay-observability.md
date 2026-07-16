@@ -2,12 +2,12 @@
 
 The relay Alchemy stack owns a focused Axiom trace setup:
 
-- `v12-relay-traces-prod`, an OpenTelemetry trace dataset for Worker requests
-- `v12-relay-otel-ingest-prod`, a dataset-scoped ingest token bound to the Worker
-- `v12-relay-recent-spans-prod`, a view of recent request and endpoint spans
+- `v12code-relay-traces-prod`, an OpenTelemetry trace dataset for Worker requests
+- `v12code-relay-otel-ingest-prod`, a dataset-scoped ingest token bound to the Worker
+- `v12code-relay-recent-spans-prod`, a view of recent request and endpoint spans
 
 Alchemy stages append their sanitized stage name to isolate resources, for example
-`v12-relay-traces-dev-julius` for a personal stage.
+`v12code-relay-traces-dev-julius` for a personal stage.
 
 Deploy from `infra/relay` with the normal Alchemy workflow:
 
@@ -23,7 +23,7 @@ Effect's OpenTelemetry exporter stores semantic HTTP attributes below the `attri
 For example:
 
 ```apl
-['v12-relay-traces-prod']
+['v12code-relay-traces-prod']
 | where name startswith 'http.server'
 | project _time, name, trace_id, duration,
     ['attributes.http.request.method'],

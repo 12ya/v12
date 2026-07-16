@@ -9,7 +9,7 @@ import {
   ThreadId,
   TurnId,
   ProviderDriverKind,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import * as Effect from "effect/Effect";
 import * as Crypto from "effect/Crypto";
 import * as Queue from "effect/Queue";

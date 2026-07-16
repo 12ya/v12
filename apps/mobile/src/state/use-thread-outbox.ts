@@ -1,6 +1,6 @@
 import { useAtomValue } from "@effect/atom-react";
-import type { EnvironmentShellStatus } from "@v12/client-runtime/state/shell";
-import type { EnvironmentId, MessageId } from "@v12/contracts";
+import type { EnvironmentShellStatus } from "@v12code/client-runtime/state/shell";
+import type { EnvironmentId, MessageId } from "@v12code/contracts";
 import { Atom } from "effect/unstable/reactivity";
 
 import { appAtomRegistry } from "./atom-registry";

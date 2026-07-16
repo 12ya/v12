@@ -78,7 +78,7 @@ export class EnvironmentCredentials extends Context.Service<
       readonly environmentPublicKey: string;
     }) => Effect.Effect<boolean, EnvironmentCredentialRevokePersistenceError>;
   }
->()("v12-relay/environments/EnvironmentCredentials") {}
+>()("v12code-relay/environments/EnvironmentCredentials") {}
 
 const make = Effect.gen(function* () {
   const db = yield* RelayDb.RelayDb;
@@ -96,7 +96,7 @@ const make = Effect.gen(function* () {
     const secret = yield* randomTokenPart(3);
     return {
       credentialId,
-      token: `v12env_${credentialId}_${secret}`,
+      token: `v12codeenv_${credentialId}_${secret}`,
     };
   });
 

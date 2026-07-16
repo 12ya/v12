@@ -1,4 +1,4 @@
-import { DesktopWslStateSchema, type DesktopWslState } from "@v12/contracts";
+import { DesktopWslStateSchema, type DesktopWslState } from "@v12code/contracts";
 import * as Effect from "effect/Effect";
 import * as Option from "effect/Option";
 import * as Schema from "effect/Schema";

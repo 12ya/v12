@@ -4,8 +4,11 @@ import {
   ManagedRelay,
   managedRelaySessionAtom,
   readManagedRelaySnapshotState,
-} from "@v12/client-runtime/relay";
-import type { RelayClientDeviceRecord, RelayClientEnvironmentRecord } from "@v12/contracts/relay";
+} from "@v12code/client-runtime/relay";
+import type {
+  RelayClientDeviceRecord,
+  RelayClientEnvironmentRecord,
+} from "@v12code/contracts/relay";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
@@ -44,7 +47,7 @@ export function useManagedRelayEnvironments() {
   const snapshot = readManagedRelaySnapshotState(result);
   useEffect(() => {
     if (snapshot.error) {
-      console.error("[v12-cloud] Relay environment listing failed", {
+      console.error("[v12code-cloud] Relay environment listing failed", {
         message: snapshot.error,
         traceId: snapshot.errorTraceId,
       });
@@ -71,7 +74,7 @@ export function useManagedRelayDevices() {
   const snapshot = readManagedRelaySnapshotState(result);
   useEffect(() => {
     if (snapshot.error) {
-      console.error("[v12-cloud] Relay device listing failed", {
+      console.error("[v12code-cloud] Relay device listing failed", {
         message: snapshot.error,
         traceId: snapshot.errorTraceId,
       });

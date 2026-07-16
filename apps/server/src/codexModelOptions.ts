@@ -1,8 +1,8 @@
-import type { ModelSelection } from "@v12/contracts";
+import type { ModelSelection } from "@v12code/contracts";
 import {
   getModelSelectionBooleanOptionValue,
   getModelSelectionStringOptionValue,
-} from "@v12/shared/model";
+} from "@v12code/shared/model";
 
 export function getCodexServiceTierOptionValue(
   modelSelection: ModelSelection | null | undefined,

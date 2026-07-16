@@ -1,5 +1,5 @@
-import { isTransportConnectionErrorMessage } from "@v12/client-runtime/errors";
-import type { EnvironmentShellStatus } from "@v12/client-runtime/state/shell";
+import { isTransportConnectionErrorMessage } from "@v12code/client-runtime/errors";
+import type { EnvironmentShellStatus } from "@v12code/client-runtime/state/shell";
 import {
   CommandId,
   EnvironmentId,
@@ -14,7 +14,7 @@ import {
   type ProjectId as ProjectIdType,
   type ProviderInteractionMode as ProviderInteractionModeType,
   type RuntimeMode as RuntimeModeType,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import * as Schema from "effect/Schema";
 
 import { DraftComposerImageAttachmentSchema } from "../lib/composer-image-schema";

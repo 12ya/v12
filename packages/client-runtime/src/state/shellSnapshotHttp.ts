@@ -1,4 +1,4 @@
-import type { OrchestrationShellSnapshot } from "@v12/contracts";
+import type { OrchestrationShellSnapshot } from "@v12code/contracts";
 import * as Cause from "effect/Cause";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
@@ -60,7 +60,7 @@ export class ShellSnapshotLoader extends Context.Service<
       prepared: PreparedConnection,
     ) => Effect.Effect<Option.Option<OrchestrationShellSnapshot>>;
   }
->()("@v12/client-runtime/state/shellSnapshotHttp/ShellSnapshotLoader") {}
+>()("@v12code/client-runtime/state/shellSnapshotHttp/ShellSnapshotLoader") {}
 
 export const shellSnapshotLoaderLayer: Layer.Layer<
   ShellSnapshotLoader,

@@ -16,7 +16,7 @@ const TestLayer = Layer.empty.pipe(
 const makeTempDir = Effect.fn("makeTempDir")(function* () {
   const fileSystem = yield* FileSystem.FileSystem;
   return yield* fileSystem.makeTempDirectoryScoped({
-    prefix: "v12-project-paths-",
+    prefix: "v12code-project-paths-",
   });
 });
 

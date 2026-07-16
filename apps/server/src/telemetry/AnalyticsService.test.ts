@@ -40,16 +40,16 @@ it.layer(NodeServices.layer)("AnalyticsService test", (it) => {
     Effect.gen(function* () {
       const capturedRequests: Array<RecordedBatchRequest> = [];
       const serverConfigLayer = ServerConfig.ServerConfig.layerTest(process.cwd(), {
-        prefix: "v12-telemetry-base-",
+        prefix: "v12code-telemetry-base-",
       });
 
       const telemetryLayer = AnalyticsService.layer.pipe(Layer.provideMerge(serverConfigLayer));
       const configLayer = ConfigProvider.layer(
         ConfigProvider.fromUnknown({
-          V12_TELEMETRY_ENABLED: true,
-          V12_POSTHOG_KEY: "phc_test_key",
-          V12_POSTHOG_HOST: "",
-          V12_TELEMETRY_FLUSH_BATCH_SIZE: 20,
+          V12CODE_TELEMETRY_ENABLED: true,
+          V12CODE_POSTHOG_KEY: "phc_test_key",
+          V12CODE_POSTHOG_HOST: "",
+          V12CODE_TELEMETRY_FLUSH_BATCH_SIZE: 20,
         }),
       );
       const batchServerLayer = HttpServer.serve(

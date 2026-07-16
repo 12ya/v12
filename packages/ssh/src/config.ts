@@ -1,4 +1,4 @@
-import type { DesktopDiscoveredSshHost } from "@v12/contracts";
+import type { DesktopDiscoveredSshHost } from "@v12code/contracts";
 
 import * as Config from "effect/Config";
 import * as Effect from "effect/Effect";

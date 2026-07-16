@@ -1,4 +1,4 @@
-import type { VcsStatusRemoteResult, VcsStatusResult } from "@v12/contracts";
+import type { VcsStatusRemoteResult, VcsStatusResult } from "@v12code/contracts";
 import { describe, expect, it } from "vite-plus/test";
 
 import {
@@ -12,17 +12,23 @@ import {
 
 describe("normalizeGitRemoteUrl", () => {
   it("canonicalizes equivalent GitHub remotes across protocol variants", () => {
-    expect(normalizeGitRemoteUrl("git@github.com:V12/V12.git")).toBe("github.com/v12/v12");
-    expect(normalizeGitRemoteUrl("https://github.com/V12/V12.git")).toBe("github.com/v12/v12");
-    expect(normalizeGitRemoteUrl("ssh://git@github.com/V12/V12")).toBe("github.com/v12/v12");
+    expect(normalizeGitRemoteUrl("git@github.com:V12Code/V12Code.git")).toBe(
+      "github.com/v12code/v12code",
+    );
+    expect(normalizeGitRemoteUrl("https://github.com/V12Code/V12Code.git")).toBe(
+      "github.com/v12code/v12code",
+    );
+    expect(normalizeGitRemoteUrl("ssh://git@github.com/V12Code/V12Code")).toBe(
+      "github.com/v12code/v12code",
+    );
   });
 
   it("preserves nested group paths for providers like GitLab", () => {
-    expect(normalizeGitRemoteUrl("git@gitlab.com:V12/platform/V12.git")).toBe(
-      "gitlab.com/v12/platform/v12",
+    expect(normalizeGitRemoteUrl("git@gitlab.com:V12Code/platform/V12Code.git")).toBe(
+      "gitlab.com/v12code/platform/v12code",
     );
-    expect(normalizeGitRemoteUrl("https://gitlab.com/V12/platform/V12.git")).toBe(
-      "gitlab.com/v12/platform/v12",
+    expect(normalizeGitRemoteUrl("https://gitlab.com/V12Code/platform/V12Code.git")).toBe(
+      "gitlab.com/v12code/platform/v12code",
     );
   });
 
@@ -38,12 +44,12 @@ describe("normalizeGitRemoteUrl", () => {
 
 describe("parseGitHubRepositoryNameWithOwnerFromRemoteUrl", () => {
   it("extracts the owner and repository from common GitHub remote shapes", () => {
-    expect(parseGitHubRepositoryNameWithOwnerFromRemoteUrl("git@github.com:V12/V12.git")).toBe(
-      "V12/V12",
-    );
-    expect(parseGitHubRepositoryNameWithOwnerFromRemoteUrl("https://github.com/V12/V12.git")).toBe(
-      "V12/V12",
-    );
+    expect(
+      parseGitHubRepositoryNameWithOwnerFromRemoteUrl("git@github.com:V12Code/V12Code.git"),
+    ).toBe("V12Code/V12Code");
+    expect(
+      parseGitHubRepositoryNameWithOwnerFromRemoteUrl("https://github.com/V12Code/V12Code.git"),
+    ).toBe("V12Code/V12Code");
   });
 });
 

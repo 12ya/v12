@@ -2,10 +2,10 @@ import type {
   DesktopDiscoveredSshHost,
   DesktopSshEnvironmentBootstrap,
   DesktopSshEnvironmentTarget,
-} from "@v12/contracts";
-import * as NetService from "@v12/shared/Net";
-import * as SshAuth from "@v12/ssh/auth";
-import { discoverSshHosts } from "@v12/ssh/config";
+} from "@v12code/contracts";
+import * as NetService from "@v12code/shared/Net";
+import * as SshAuth from "@v12code/ssh/auth";
+import { discoverSshHosts } from "@v12code/ssh/config";
 import {
   SshCommandError,
   SshHostDiscoveryError,
@@ -14,8 +14,8 @@ import {
   SshPairingError,
   SshPasswordPromptError,
   SshReadinessError,
-} from "@v12/ssh/errors";
-import * as SshTunnel from "@v12/ssh/tunnel";
+} from "@v12code/ssh/errors";
+import * as SshTunnel from "@v12code/ssh/tunnel";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
@@ -62,11 +62,11 @@ export class DesktopSshEnvironment extends Context.Service<
       target: DesktopSshEnvironmentTarget,
     ) => Effect.Effect<void, DesktopSshEnvironmentOperationError>;
   }
->()("@v12/desktop/ssh/DesktopSshEnvironment") {}
+>()("@v12code/desktop/ssh/DesktopSshEnvironment") {}
 
 export interface DesktopSshEnvironmentLayerOptions {
   readonly resolveCliPackageSpec?: () => string;
-  readonly resolveCliRunner?: Effect.Effect<SshTunnel.RemoteV12RunnerOptions>;
+  readonly resolveCliRunner?: Effect.Effect<SshTunnel.RemoteV12CodeRunnerOptions>;
 }
 
 function discoverDesktopSshHostsEffect(input?: { readonly homeDir?: string }) {
@@ -96,7 +96,7 @@ export function toSshPasswordPromptError(
       break;
     case "DesktopSshPromptWindowUnavailableError":
     case "DesktopSshPromptPresentationError":
-      message = "V12 window is not available for SSH authentication.";
+      message = "V12Code window is not available for SSH authentication.";
       break;
     case "DesktopSshPromptTimedOutError":
       message = `SSH authentication timed out for ${cause.destination}.`;

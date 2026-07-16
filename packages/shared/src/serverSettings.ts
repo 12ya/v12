@@ -1,4 +1,4 @@
-import { ServerSettings, type ServerSettingsPatch } from "@v12/contracts";
+import { ServerSettings, type ServerSettingsPatch } from "@v12code/contracts";
 import * as Option from "effect/Option";
 import * as Schema from "effect/Schema";
 import { deepMerge } from "./Struct.ts";

@@ -1,4 +1,4 @@
-import { type ServerConfig, WS_METHODS } from "@v12/contracts";
+import { type ServerConfig, WS_METHODS } from "@v12code/contracts";
 import * as Context from "effect/Context";
 import * as Deferred from "effect/Deferred";
 import * as Effect from "effect/Effect";
@@ -37,7 +37,7 @@ export class RpcSessionFactory extends Context.Service<
       connection: PreparedConnection,
     ) => Effect.Effect<RpcSession, ConnectionAttemptError, Scope.Scope>;
   }
->()("@v12/client-runtime/rpc/session/RpcSessionFactory") {}
+>()("@v12code/client-runtime/rpc/session/RpcSessionFactory") {}
 
 type InitialConfigError = Effect.Error<
   ReturnType<WsRpcProtocolClient[typeof WS_METHODS.serverGetConfig]>

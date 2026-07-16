@@ -1,5 +1,5 @@
-import { bootstrapRemoteBearerSession } from "@v12/client-runtime/authorization";
-import { PRIMARY_LOCAL_ENVIRONMENT_ID } from "@v12/contracts";
+import { bootstrapRemoteBearerSession } from "@v12code/client-runtime/authorization";
+import { PRIMARY_LOCAL_ENVIRONMENT_ID } from "@v12code/contracts";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
@@ -40,7 +40,7 @@ export class DesktopLocalEnvironmentAuth extends Context.Service<
   {
     readonly getBearerToken: Effect.Effect<string, DesktopLocalEnvironmentAuthError>;
   }
->()("@v12/desktop/backend/DesktopLocalEnvironmentAuth") {}
+>()("@v12code/desktop/backend/DesktopLocalEnvironmentAuth") {}
 
 export const make = Effect.gen(function* () {
   const pool = yield* DesktopBackendPool.DesktopBackendPool;
@@ -71,7 +71,7 @@ export const make = Effect.gen(function* () {
           httpBaseUrl: config.httpBaseUrl.href,
           credential,
           clientMetadata: {
-            label: "V12 Desktop",
+            label: "V12Code Desktop",
             deviceType: "desktop",
           },
         }).pipe(

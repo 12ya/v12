@@ -1,6 +1,6 @@
-import { EnvironmentId, type DesktopSshEnvironmentTarget } from "@v12/contracts";
-import { RelayEnvironmentConnectScope } from "@v12/contracts/relay";
-import { RelayClientTracer } from "@v12/shared/relayTracing";
+import { EnvironmentId, type DesktopSshEnvironmentTarget } from "@v12code/contracts";
+import { RelayEnvironmentConnectScope } from "@v12code/contracts/relay";
+import { RelayClientTracer } from "@v12code/shared/relayTracing";
 import { describe, expect, it } from "@effect/vitest";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";

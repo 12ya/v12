@@ -1,4 +1,4 @@
-import { ThreadId } from "@v12/contracts";
+import { ThreadId } from "@v12code/contracts";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vite-plus/test";
 

@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve V12. Bug fixes, reliability improvements, performance work, documentation, and focused features are welcome.
+Thanks for helping improve V12Code. Bug fixes, reliability improvements, performance work, documentation, and focused features are welcome.
 
 ## Before You Start
 

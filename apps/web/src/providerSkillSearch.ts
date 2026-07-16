@@ -1,9 +1,9 @@
-import type { ServerProviderSkill } from "@v12/contracts";
+import type { ServerProviderSkill } from "@v12code/contracts";
 import {
   insertRankedSearchResult,
   normalizeSearchQuery,
   scoreQueryMatch,
-} from "@v12/shared/searchRanking";
+} from "@v12code/shared/searchRanking";
 
 import { formatProviderSkillDisplayName } from "./providerSkillPresentation";
 

@@ -1,5 +1,9 @@
-import type { GitRunStackedActionResult, GitStackedAction, VcsStatusResult } from "@v12/contracts";
-import { isTemporaryWorktreeBranch } from "@v12/shared/git";
+import type {
+  GitRunStackedActionResult,
+  GitStackedAction,
+  VcsStatusResult,
+} from "@v12code/contracts";
+import { isTemporaryWorktreeBranch } from "@v12code/shared/git";
 import {
   DEFAULT_CHANGE_REQUEST_TERMINOLOGY,
   getChangeRequestTerminology,
@@ -410,4 +414,4 @@ export function resolveLiveThreadBranchUpdate(input: {
 }
 
 // Re-export from shared for backwards compatibility in this module's exports
-export { resolveAutoFeatureBranchName } from "@v12/shared/git";
+export { resolveAutoFeatureBranchName } from "@v12code/shared/git";

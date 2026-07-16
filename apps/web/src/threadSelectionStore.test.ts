@@ -1,4 +1,4 @@
-import { ThreadId } from "@v12/contracts";
+import { ThreadId } from "@v12code/contracts";
 import { beforeEach, describe, expect, it } from "vite-plus/test";
 
 import { useThreadSelectionStore } from "./threadSelectionStore";

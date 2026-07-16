@@ -161,7 +161,7 @@ const FallbackTerminalSurface = memo(function FallbackTerminalSurface(props: Ter
           })}
           onPress={() => props.onInput("\u0003")}
         >
-          <Text className="text-2xs font-v12-bold" style={{ color: theme.foreground }}>
+          <Text className="text-2xs font-v12code-bold" style={{ color: theme.foreground }}>
             Ctrl-C
           </Text>
         </Pressable>

@@ -4,8 +4,8 @@ import {
   AuthEnvironmentBootstrapTokenType,
   AuthTokenExchangeGrantType,
   type AuthEnvironmentScope,
-} from "@v12/contracts";
-import { encodeOAuthScope } from "@v12/shared/oauthScope";
+} from "@v12code/contracts";
+import { encodeOAuthScope } from "@v12code/shared/oauthScope";
 import * as Effect from "effect/Effect";
 import { environmentEndpointUrl } from "../environment/endpoint.ts";
 import {

@@ -6,12 +6,12 @@ import {
 import {
   type EnvironmentProject,
   type EnvironmentThreadShell,
-} from "@v12/client-runtime/state/shell";
+} from "@v12code/client-runtime/state/shell";
 import type {
   EnvironmentId,
   SidebarProjectGroupingMode,
   SidebarThreadSortOrder,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { useCallback, useMemo, useRef, useState } from "react";

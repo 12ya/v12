@@ -6,8 +6,8 @@ import type {
   SourceControlDiscoveryResult,
   SourceControlProviderKind,
   SourceControlRepositoryInfo,
-} from "@v12/contracts";
-import { DEFAULT_MODEL, ProviderInstanceId } from "@v12/contracts";
+} from "@v12code/contracts";
+import { DEFAULT_MODEL, ProviderInstanceId } from "@v12code/contracts";
 import * as Arr from "effect/Array";
 import * as Option from "effect/Option";
 import * as Order from "effect/Order";

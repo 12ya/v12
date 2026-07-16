@@ -6,36 +6,36 @@ describe("formatWorkspaceRelativePath", () => {
   it("formats absolute workspace paths from the workspace root", () => {
     expect(
       formatWorkspaceRelativePath(
-        "C:/Users/mike/dev-stuff/v12/apps/web/src/session-logic.ts:501",
-        "C:/Users/mike/dev-stuff/v12",
+        "C:/Users/mike/dev-stuff/v12code/apps/web/src/session-logic.ts:501",
+        "C:/Users/mike/dev-stuff/v12code",
       ),
-    ).toBe("v12/apps/web/src/session-logic.ts:501");
+    ).toBe("v12code/apps/web/src/session-logic.ts:501");
   });
 
   it("prefixes relative paths with the workspace root label", () => {
     expect(
       formatWorkspaceRelativePath(
         "apps/web/src/session-logic.ts:501",
-        "C:/Users/mike/dev-stuff/v12",
+        "C:/Users/mike/dev-stuff/v12code",
       ),
-    ).toBe("v12/apps/web/src/session-logic.ts:501");
+    ).toBe("v12code/apps/web/src/session-logic.ts:501");
   });
 
   it("keeps paths already rooted at the workspace label stable", () => {
     expect(
       formatWorkspaceRelativePath(
-        "v12/apps/web/src/session-logic.ts:501",
-        "C:/Users/mike/dev-stuff/v12",
+        "v12code/apps/web/src/session-logic.ts:501",
+        "C:/Users/mike/dev-stuff/v12code",
       ),
-    ).toBe("v12/apps/web/src/session-logic.ts:501");
+    ).toBe("v12code/apps/web/src/session-logic.ts:501");
   });
 
   it("preserves columns when present", () => {
     expect(
       formatWorkspaceRelativePath(
-        "/C:/Users/mike/dev-stuff/v12/apps/web/src/session-logic.ts:501:9",
-        "C:/Users/mike/dev-stuff/v12",
+        "/C:/Users/mike/dev-stuff/v12code/apps/web/src/session-logic.ts:501:9",
+        "C:/Users/mike/dev-stuff/v12code",
       ),
-    ).toBe("v12/apps/web/src/session-logic.ts:501:9");
+    ).toBe("v12code/apps/web/src/session-logic.ts:501:9");
   });
 });

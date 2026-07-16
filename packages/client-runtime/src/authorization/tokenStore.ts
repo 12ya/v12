@@ -1,5 +1,5 @@
-import { EnvironmentId } from "@v12/contracts";
-import { RelayManagedEndpoint } from "@v12/contracts/relay";
+import { EnvironmentId } from "@v12code/contracts";
+import { RelayManagedEndpoint } from "@v12code/contracts/relay";
 import * as Context from "effect/Context";
 import type * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
@@ -9,7 +9,7 @@ import * as Schema from "effect/Schema";
 import type { ConnectionAttemptError } from "../connection/model.ts";
 
 export class RemoteDpopAccessToken extends Schema.Class<RemoteDpopAccessToken>(
-  "@v12/client-runtime/authorization/RemoteDpopAccessToken",
+  "@v12code/client-runtime/authorization/RemoteDpopAccessToken",
 )({
   environmentId: EnvironmentId,
   label: Schema.String,
@@ -28,7 +28,7 @@ export class RemoteDpopAccessTokenStore extends Context.Service<
     readonly put: (token: RemoteDpopAccessToken) => Effect.Effect<void, ConnectionAttemptError>;
     readonly remove: (environmentId: EnvironmentId) => Effect.Effect<void, ConnectionAttemptError>;
   }
->()("@v12/client-runtime/authorization/tokenStore/RemoteDpopAccessTokenStore") {}
+>()("@v12code/client-runtime/authorization/tokenStore/RemoteDpopAccessTokenStore") {}
 
 export const make = (service: RemoteDpopAccessTokenStore["Service"]) =>
   RemoteDpopAccessTokenStore.of(service);

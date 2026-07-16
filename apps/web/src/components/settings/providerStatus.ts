@@ -1,4 +1,4 @@
-import type { ServerProvider, ServerProviderVersionAdvisory } from "@v12/contracts";
+import type { ServerProvider, ServerProviderVersionAdvisory } from "@v12code/contracts";
 
 /**
  * Visual treatment for each server-reported provider status. Centralized so
@@ -39,7 +39,7 @@ export function getProviderSummary(provider: ServerProvider | undefined) {
     return {
       headline: "Disabled",
       detail:
-        provider.message ?? "This provider is installed but disabled for new sessions in V12.",
+        provider.message ?? "This provider is installed but disabled for new sessions in V12Code.",
     };
   }
   if (!provider.installed) {

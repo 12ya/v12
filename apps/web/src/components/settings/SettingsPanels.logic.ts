@@ -4,8 +4,8 @@ import type {
   ProviderInstanceId,
   ServerSettings,
   UnifiedSettings,
-} from "@v12/contracts";
-import { DEFAULT_UNIFIED_SETTINGS } from "@v12/contracts/settings";
+} from "@v12code/contracts";
+import { DEFAULT_UNIFIED_SETTINGS } from "@v12code/contracts/settings";
 
 function collapseOtelSignalsUrl(input: {
   readonly tracesUrl: string;

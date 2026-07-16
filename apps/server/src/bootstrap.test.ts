@@ -11,7 +11,7 @@ import * as Effect from "effect/Effect";
 import * as Fiber from "effect/Fiber";
 import * as TestClock from "effect/testing/TestClock";
 import { vi } from "vite-plus/test";
-import { HostProcessPlatform } from "@v12/shared/hostProcess";
+import { HostProcessPlatform } from "@v12code/shared/hostProcess";
 
 import {
   BootstrapEnvelopeDecodeError,
@@ -63,7 +63,7 @@ it.layer(NodeServices.layer)("readBootstrapEnvelope", (it) => {
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
       const filePath = yield* fs.makeTempFileScoped({
-        prefix: "v12-bootstrap-",
+        prefix: "v12code-bootstrap-",
         suffix: ".ndjson",
       });
 
@@ -88,7 +88,7 @@ it.layer(NodeServices.layer)("readBootstrapEnvelope", (it) => {
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
       const filePath = yield* fs.makeTempFileScoped({
-        prefix: "v12-bootstrap-",
+        prefix: "v12code-bootstrap-",
         suffix: ".ndjson",
       });
 
@@ -121,7 +121,7 @@ it.layer(NodeServices.layer)("readBootstrapEnvelope", (it) => {
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
       const filePath = yield* fs.makeTempFileScoped({
-        prefix: "v12-bootstrap-",
+        prefix: "v12code-bootstrap-",
         suffix: ".ndjson",
       });
       const fd = yield* Effect.acquireRelease(
@@ -190,7 +190,7 @@ it.layer(NodeServices.layer)("readBootstrapEnvelope", (it) => {
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
       const filePath = yield* fs.makeTempFileScoped({
-        prefix: "v12-bootstrap-",
+        prefix: "v12code-bootstrap-",
         suffix: ".ndjson",
       });
       yield* fs.writeFileString(filePath, '{"mode":42}\n');
@@ -216,7 +216,7 @@ it.layer(NodeServices.layer)("readBootstrapEnvelope", (it) => {
   it.effect("returns none when the bootstrap read times out before any value arrives", () =>
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
-      const tempDir = yield* fs.makeTempDirectoryScoped({ prefix: "v12-bootstrap-" });
+      const tempDir = yield* fs.makeTempDirectoryScoped({ prefix: "v12code-bootstrap-" });
       const fifoPath = NodePath.join(tempDir, "bootstrap.pipe");
 
       yield* Effect.sync(() => NodeChildProcess.execFileSync("mkfifo", [fifoPath]));

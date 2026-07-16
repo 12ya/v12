@@ -1,5 +1,5 @@
 {
-  "name": "V12 Dev",
+  "name": "V12Code Dev",
   "image": "debian:bookworm",
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},

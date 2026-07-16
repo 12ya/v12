@@ -1,9 +1,9 @@
-import type { EnvironmentId, VcsRef, ProjectId } from "@v12/contracts";
+import type { EnvironmentId, VcsRef, ProjectId } from "@v12code/contracts";
 import * as Schema from "effect/Schema";
 export {
   dedupeRemoteBranchesWithLocalMatches,
   deriveLocalBranchNameFromRemoteRef,
-} from "@v12/shared/git";
+} from "@v12code/shared/git";
 
 export interface EnvironmentOption {
   environmentId: EnvironmentId;

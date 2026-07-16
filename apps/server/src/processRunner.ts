@@ -9,8 +9,8 @@ import * as Scope from "effect/Scope";
 import * as Stream from "effect/Stream";
 import * as ChildProcess from "effect/unstable/process/ChildProcess";
 import * as ChildProcessSpawner from "effect/unstable/process/ChildProcessSpawner";
-import { HostProcessPlatform } from "@v12/shared/hostProcess";
-import { resolveSpawnCommand } from "@v12/shared/shell";
+import { HostProcessPlatform } from "@v12code/shared/hostProcess";
+import { resolveSpawnCommand } from "@v12code/shared/shell";
 import {
   collectUint8StreamText,
   type CollectedUint8StreamText,
@@ -142,7 +142,7 @@ export class ProcessRunner extends Context.Service<
   {
     readonly run: (input: ProcessRunInput) => Effect.Effect<ProcessRunOutput, ProcessRunError>;
   }
->()("v12/processRunner") {}
+>()("v12code/processRunner") {}
 
 const DEFAULT_TIMEOUT = "60 seconds";
 const DEFAULT_MAX_OUTPUT_BYTES = 8 * 1024 * 1024;

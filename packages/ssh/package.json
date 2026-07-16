@@ -1,5 +1,5 @@
 {
-  "name": "@v12/ssh",
+  "name": "@v12code/ssh",
   "private": true,
   "type": "module",
   "exports": {
@@ -29,8 +29,8 @@
     "test": "vp test run"
   },
   "dependencies": {
-    "@v12/contracts": "workspace:*",
-    "@v12/shared": "workspace:*",
+    "@v12code/contracts": "workspace:*",
+    "@v12code/shared": "workspace:*",
     "effect": "catalog:"
   },
   "devDependencies": {

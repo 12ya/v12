@@ -1,4 +1,4 @@
-import { type TurnId } from "@v12/contracts";
+import { type TurnId } from "@v12code/contracts";
 import { memo, useCallback, useMemo, useState } from "react";
 import { type TurnDiffFileChange } from "../../types";
 import {

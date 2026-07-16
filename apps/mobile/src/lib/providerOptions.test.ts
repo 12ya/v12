@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test";
 
-import type { ModelCapabilities } from "@v12/contracts";
+import type { ModelCapabilities } from "@v12code/contracts";
 
 import {
   applyProviderOptionMenuEvent,

@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { useParams } from "@tanstack/react-router";
-import { type ScopedThreadRef, type ThreadId } from "@v12/contracts";
+import { type ScopedThreadRef, type ThreadId } from "@v12code/contracts";
 import {
   CheckIcon,
   ChevronDownIcon,

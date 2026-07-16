@@ -4,7 +4,7 @@ import {
   type ProviderOptionDescriptor,
   type ProviderOptionSelection,
   type ServerProviderModel,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import {
   getComposerPromptInjectionState,
   getComposerProviderState,

@@ -1,6 +1,6 @@
 import * as NodeURL from "node:url";
 
-import type { ChatAttachment, ProviderApprovalDecision, RuntimeMode } from "@v12/contracts";
+import type { ChatAttachment, ProviderApprovalDecision, RuntimeMode } from "@v12code/contracts";
 import {
   createOpencodeClient,
   type Agent,
@@ -30,9 +30,9 @@ import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process";
 
 import { isWindowsCommandNotFound } from "../processRunner.ts";
 import { collectStreamAsString } from "./providerSnapshot.ts";
-import * as NetService from "@v12/shared/Net";
-import { HostProcessPlatform } from "@v12/shared/hostProcess";
-import { resolveSpawnCommand } from "@v12/shared/shell";
+import * as NetService from "@v12code/shared/Net";
+import { HostProcessPlatform } from "@v12code/shared/hostProcess";
+import { resolveSpawnCommand } from "@v12code/shared/shell";
 const encodeUnknownJsonStringExit = Schema.encodeUnknownExit(Schema.UnknownFromJsonString);
 const OPENCODE_EMPTY_CONFIG_CONTENT = "{}";
 
@@ -552,7 +552,7 @@ const makeOpenCodeRuntime = Effect.gen(function* () {
 });
 
 export class OpenCodeRuntime extends Context.Service<OpenCodeRuntime, OpenCodeRuntimeShape>()(
-  "v12/provider/opencodeRuntime",
+  "v12code/provider/opencodeRuntime",
 ) {}
 
 export const OpenCodeRuntimeLive = Layer.effect(OpenCodeRuntime, makeOpenCodeRuntime).pipe(

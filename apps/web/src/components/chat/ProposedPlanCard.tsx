@@ -2,8 +2,8 @@ import { memo, useState, useId } from "react";
 import {
   isAtomCommandInterrupted,
   squashAtomCommandFailure,
-} from "@v12/client-runtime/state/runtime";
-import type { EnvironmentId, ScopedThreadRef } from "@v12/contracts";
+} from "@v12code/client-runtime/state/runtime";
+import type { EnvironmentId, ScopedThreadRef } from "@v12code/contracts";
 import {
   buildCollapsedProposedPlanPreviewMarkdown,
   buildProposedPlanMarkdownFilename,

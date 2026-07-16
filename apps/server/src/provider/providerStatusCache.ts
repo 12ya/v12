@@ -3,8 +3,8 @@ import {
   type ProviderInstanceId,
   type ServerProvider,
   ServerProvider as ServerProviderSchema,
-} from "@v12/contracts";
-import { causeErrorTag } from "@v12/shared/observability";
+} from "@v12code/contracts";
+import { causeErrorTag } from "@v12code/shared/observability";
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
 import * as Path from "effect/Path";

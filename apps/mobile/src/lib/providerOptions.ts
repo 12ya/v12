@@ -2,14 +2,14 @@ import type {
   ModelCapabilities,
   ProviderOptionDescriptor,
   ProviderOptionSelection,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import type { MenuAction } from "@react-native-menu/menu";
 import {
   buildProviderOptionSelectionsFromDescriptors,
   getProviderOptionCurrentLabel,
   getProviderOptionCurrentValue,
   getProviderOptionDescriptors,
-} from "@v12/shared/model";
+} from "@v12code/shared/model";
 
 const PROVIDER_OPTION_EVENT_PREFIX = "provider-option:";
 

@@ -5,7 +5,7 @@ import {
   isWindowsDrivePath,
   normalizeProjectPathForComparison,
   normalizeProjectPathForDispatch,
-} from "@v12/shared/path";
+} from "@v12code/shared/path";
 
 export { normalizeProjectPathForComparison, normalizeProjectPathForDispatch };
 

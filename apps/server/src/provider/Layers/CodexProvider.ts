@@ -21,11 +21,11 @@ import type {
   ProviderOptionDescriptor,
   ServerProviderModel,
   ServerProviderSkill,
-} from "@v12/contracts";
-import { ServerSettingsError } from "@v12/contracts";
+} from "@v12code/contracts";
+import { ServerSettingsError } from "@v12code/contracts";
 
-import { createModelCapabilities } from "@v12/shared/model";
-import { resolveSpawnCommand } from "@v12/shared/shell";
+import { createModelCapabilities } from "@v12code/shared/model";
+import { resolveSpawnCommand } from "@v12code/shared/shell";
 import {
   AUTH_PROBE_TIMEOUT_MS,
   buildServerProvider,
@@ -276,8 +276,8 @@ const requestAllCodexModels = Effect.fn("requestAllCodexModels")(function* (
 export function buildCodexInitializeParams(): CodexSchema.V1InitializeParams {
   return {
     clientInfo: {
-      name: "v12_desktop",
-      title: "V12 Desktop",
+      name: "v12code_desktop",
+      title: "V12Code Desktop",
       version: packageJson.version,
     },
     capabilities: {
@@ -333,8 +333,8 @@ const probeCodexAppServerProvider = Effect.fn("probeCodexAppServerProvider")(fun
 
   const initialize = yield* client.request("initialize", {
     clientInfo: {
-      name: "v12_desktop",
-      title: "V12 Desktop",
+      name: "v12code_desktop",
+      title: "V12Code Desktop",
       version: "0.1.0",
     },
     capabilities: {
@@ -410,7 +410,7 @@ const makePendingCodexProvider = (
           version: null,
           status: "warning",
           auth: { status: "unknown" },
-          message: "Codex is disabled in V12 settings.",
+          message: "Codex is disabled in V12Code settings.",
         },
       });
     }
@@ -495,7 +495,7 @@ export const checkCodexProviderStatus = Effect.fn("checkCodexProviderStatus")(fu
         version: null,
         status: "warning",
         auth: { status: "unknown" },
-        message: "Codex is disabled in V12 settings.",
+        message: "Codex is disabled in V12Code settings.",
       },
     });
   }

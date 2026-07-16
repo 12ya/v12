@@ -9,7 +9,7 @@ import {
   TurnId,
   type OrchestrationThread,
   type OrchestrationThreadActivity,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 
 import {
   buildThreadFeed,

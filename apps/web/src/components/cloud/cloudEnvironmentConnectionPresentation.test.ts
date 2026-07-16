@@ -1,4 +1,4 @@
-import type { EnvironmentConnectionPresentation } from "@v12/client-runtime/connection";
+import type { EnvironmentConnectionPresentation } from "@v12code/client-runtime/connection";
 import { describe, expect, it } from "vite-plus/test";
 
 import { presentSavedCloudEnvironmentConnection } from "./cloudEnvironmentConnectionPresentation";

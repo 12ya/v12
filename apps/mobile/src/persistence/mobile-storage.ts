@@ -1,4 +1,4 @@
-import { EnvironmentId } from "@v12/contracts";
+import { EnvironmentId } from "@v12code/contracts";
 import * as Arr from "effect/Array";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
@@ -13,10 +13,10 @@ import {
 } from "../lib/connection";
 import * as MobileSecureStorage from "./mobile-secure-storage";
 
-const CONNECTIONS_KEY = "v12.connections";
-const AGENT_AWARENESS_DEVICE_ID_KEY = "v12.agent-awareness.device-id";
-const AGENT_AWARENESS_REGISTRATION_KEY = "v12.agent-awareness.registration";
-const RECENT_THREAD_SHORTCUTS_KEY = "v12.recent-thread-shortcuts";
+const CONNECTIONS_KEY = "v12code.connections";
+const AGENT_AWARENESS_DEVICE_ID_KEY = "v12code.agent-awareness.device-id";
+const AGENT_AWARENESS_REGISTRATION_KEY = "v12code.agent-awareness.registration";
+const RECENT_THREAD_SHORTCUTS_KEY = "v12code.recent-thread-shortcuts";
 
 export class MobileStorageDecodeError extends Schema.TaggedErrorClass<MobileStorageDecodeError>()(
   "MobileStorageDecodeError",
@@ -115,7 +115,7 @@ export class MobileStorage extends Context.Service<
       MobileSecureStorage.MobileSecureStorageError | MobileStorageEncodeError
     >;
   }
->()("@v12/mobile/persistence/MobileStorage") {}
+>()("@v12code/mobile/persistence/MobileStorage") {}
 
 export const make = Effect.fn("MobileStorage.make")(function* () {
   const secureStorage = yield* MobileSecureStorage.MobileSecureStorage;

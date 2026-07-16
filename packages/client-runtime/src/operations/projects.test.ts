@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vite-plus/test";
-import { EnvironmentId, ProjectId, CommandId, SourceControlDiscoveryResult } from "@v12/contracts";
+import {
+  EnvironmentId,
+  ProjectId,
+  CommandId,
+  SourceControlDiscoveryResult,
+} from "@v12code/contracts";
 import * as Option from "effect/Option";
 
 import {

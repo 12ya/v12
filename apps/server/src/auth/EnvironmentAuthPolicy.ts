@@ -1,4 +1,4 @@
-import type { ServerAuthDescriptor } from "@v12/contracts";
+import type { ServerAuthDescriptor } from "@v12code/contracts";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
@@ -12,7 +12,7 @@ export class EnvironmentAuthPolicy extends Context.Service<
   {
     readonly getDescriptor: () => Effect.Effect<ServerAuthDescriptor>;
   }
->()("v12/auth/EnvironmentAuthPolicy") {}
+>()("v12code/auth/EnvironmentAuthPolicy") {}
 
 export const make = Effect.gen(function* () {
   const config = yield* ServerConfig.ServerConfig;

@@ -1,4 +1,4 @@
-import { ApprovalRequestId, isToolLifecycleItemType } from "@v12/contracts";
+import { ApprovalRequestId, isToolLifecycleItemType } from "@v12code/contracts";
 import type {
   OrchestrationLatestTurn,
   OrchestrationThread,
@@ -6,8 +6,8 @@ import type {
   ToolLifecycleItemType,
   TurnId,
   UserInputQuestion,
-} from "@v12/contracts";
-import { formatDuration } from "@v12/shared/orchestrationTiming";
+} from "@v12code/contracts";
+import { formatDuration } from "@v12code/shared/orchestrationTiming";
 
 import * as Arr from "effect/Array";
 import * as Order from "effect/Order";

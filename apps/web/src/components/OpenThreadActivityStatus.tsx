@@ -2,7 +2,7 @@ import type {
   OrchestrationLatestTurn,
   OrchestrationSession,
   OrchestrationThreadActivity,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import {
   CheckCircle2Icon,
   CircleAlertIcon,

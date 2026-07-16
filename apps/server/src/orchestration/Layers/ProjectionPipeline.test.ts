@@ -8,7 +8,7 @@ import {
   ThreadId,
   TurnId,
   ProviderInstanceId,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import { assert, it } from "@effect/vitest";
 import * as Effect from "effect/Effect";
@@ -50,7 +50,7 @@ const exists = (filePath: string) =>
     return fileInfo._tag === "Success";
   });
 
-const BaseTestLayer = makeProjectionPipelinePrefixedTestLayer("v12-projection-pipeline-test-");
+const BaseTestLayer = makeProjectionPipelinePrefixedTestLayer("v12code-projection-pipeline-test-");
 
 it.layer(BaseTestLayer)("OrchestrationProjectionPipeline", (it) => {
   it.effect("bootstraps all projection states and writes projection rows", () =>
@@ -175,7 +175,7 @@ it.layer(BaseTestLayer)("OrchestrationProjectionPipeline", (it) => {
   );
 });
 
-it.layer(Layer.fresh(makeProjectionPipelinePrefixedTestLayer("v12-base-")))(
+it.layer(Layer.fresh(makeProjectionPipelinePrefixedTestLayer("v12code-base-")))(
   "OrchestrationProjectionPipeline",
   (it) => {
     it.effect("stores message attachment references without mutating payloads", () =>
@@ -242,86 +242,85 @@ it.layer(Layer.fresh(makeProjectionPipelinePrefixedTestLayer("v12-base-")))(
   },
 );
 
-it.layer(Layer.fresh(makeProjectionPipelinePrefixedTestLayer("v12-projection-attachments-safe-")))(
-  "OrchestrationProjectionPipeline",
-  (it) => {
-    it.effect("preserves mixed image attachment metadata as-is", () =>
-      Effect.gen(function* () {
-        const projectionPipeline = yield* OrchestrationProjectionPipeline;
-        const eventStore = yield* OrchestrationEventStore;
-        const sql = yield* SqlClient.SqlClient;
-        const now = "2026-01-01T00:00:00.000Z";
+it.layer(
+  Layer.fresh(makeProjectionPipelinePrefixedTestLayer("v12code-projection-attachments-safe-")),
+)("OrchestrationProjectionPipeline", (it) => {
+  it.effect("preserves mixed image attachment metadata as-is", () =>
+    Effect.gen(function* () {
+      const projectionPipeline = yield* OrchestrationProjectionPipeline;
+      const eventStore = yield* OrchestrationEventStore;
+      const sql = yield* SqlClient.SqlClient;
+      const now = "2026-01-01T00:00:00.000Z";
 
-        yield* eventStore.append({
-          type: "thread.message-sent",
-          eventId: EventId.make("evt-attachments-safe"),
-          aggregateKind: "thread",
-          aggregateId: ThreadId.make("thread-attachments-safe"),
-          occurredAt: now,
-          commandId: CommandId.make("cmd-attachments-safe"),
-          causationEventId: null,
-          correlationId: CommandId.make("cmd-attachments-safe"),
-          metadata: {},
-          payload: {
-            threadId: ThreadId.make("thread-attachments-safe"),
-            messageId: MessageId.make("message-attachments-safe"),
-            role: "user",
-            text: "Inspect this",
-            attachments: [
-              {
-                type: "image",
-                id: "thread-attachments-safe-att-1",
-                name: "untrusted.exe",
-                mimeType: "image/x-unknown",
-                sizeBytes: 5,
-              },
-              {
-                type: "image",
-                id: "thread-attachments-safe-att-2",
-                name: "not-image.png",
-                mimeType: "image/png",
-                sizeBytes: 5,
-              },
-            ],
-            turnId: null,
-            streaming: false,
-            createdAt: now,
-            updatedAt: now,
-          },
-        });
+      yield* eventStore.append({
+        type: "thread.message-sent",
+        eventId: EventId.make("evt-attachments-safe"),
+        aggregateKind: "thread",
+        aggregateId: ThreadId.make("thread-attachments-safe"),
+        occurredAt: now,
+        commandId: CommandId.make("cmd-attachments-safe"),
+        causationEventId: null,
+        correlationId: CommandId.make("cmd-attachments-safe"),
+        metadata: {},
+        payload: {
+          threadId: ThreadId.make("thread-attachments-safe"),
+          messageId: MessageId.make("message-attachments-safe"),
+          role: "user",
+          text: "Inspect this",
+          attachments: [
+            {
+              type: "image",
+              id: "thread-attachments-safe-att-1",
+              name: "untrusted.exe",
+              mimeType: "image/x-unknown",
+              sizeBytes: 5,
+            },
+            {
+              type: "image",
+              id: "thread-attachments-safe-att-2",
+              name: "not-image.png",
+              mimeType: "image/png",
+              sizeBytes: 5,
+            },
+          ],
+          turnId: null,
+          streaming: false,
+          createdAt: now,
+          updatedAt: now,
+        },
+      });
 
-        yield* projectionPipeline.bootstrap;
+      yield* projectionPipeline.bootstrap;
 
-        const rows = yield* sql<{
-          readonly attachmentsJson: string | null;
-        }>`
+      const rows = yield* sql<{
+        readonly attachmentsJson: string | null;
+      }>`
             SELECT
               attachments_json AS "attachmentsJson"
             FROM projection_thread_messages
             WHERE message_id = 'message-attachments-safe'
           `;
-        assert.equal(rows.length, 1);
-        // @effect-diagnostics-next-line preferSchemaOverJson:off
-        assert.deepEqual(JSON.parse(rows[0]?.attachmentsJson ?? "null"), [
-          {
-            type: "image",
-            id: "thread-attachments-safe-att-1",
-            name: "untrusted.exe",
-            mimeType: "image/x-unknown",
-            sizeBytes: 5,
-          },
-          {
-            type: "image",
-            id: "thread-attachments-safe-att-2",
-            name: "not-image.png",
-            mimeType: "image/png",
-            sizeBytes: 5,
-          },
-        ]);
-      }),
-    );
-  },
-);
+      assert.equal(rows.length, 1);
+      // @effect-diagnostics-next-line preferSchemaOverJson:off
+      assert.deepEqual(JSON.parse(rows[0]?.attachmentsJson ?? "null"), [
+        {
+          type: "image",
+          id: "thread-attachments-safe-att-1",
+          name: "untrusted.exe",
+          mimeType: "image/x-unknown",
+          sizeBytes: 5,
+        },
+        {
+          type: "image",
+          id: "thread-attachments-safe-att-2",
+          name: "not-image.png",
+          mimeType: "image/png",
+          sizeBytes: 5,
+        },
+      ]);
+    }),
+  );
+});
 
 it.layer(BaseTestLayer)("OrchestrationProjectionPipeline", (it) => {
   it.effect(
@@ -453,7 +452,7 @@ it.layer(BaseTestLayer)("OrchestrationProjectionPipeline", (it) => {
 });
 
 it.layer(
-  Layer.fresh(makeProjectionPipelinePrefixedTestLayer("v12-projection-attachments-overwrite-")),
+  Layer.fresh(makeProjectionPipelinePrefixedTestLayer("v12code-projection-attachments-overwrite-")),
 )("OrchestrationProjectionPipeline", (it) => {
   it.effect("overwrites stored attachment references when a message updates attachments", () =>
     Effect.gen(function* () {
@@ -597,7 +596,7 @@ it.layer(
 });
 
 it.layer(
-  Layer.fresh(makeProjectionPipelinePrefixedTestLayer("v12-projection-attachments-rollback-")),
+  Layer.fresh(makeProjectionPipelinePrefixedTestLayer("v12code-projection-attachments-rollback-")),
 )("OrchestrationProjectionPipeline", (it) => {
   it.effect("does not persist attachment files when projector transaction rolls back", () =>
     Effect.gen(function* () {
@@ -720,7 +719,7 @@ it.layer(
 });
 
 it.layer(
-  Layer.fresh(makeProjectionPipelinePrefixedTestLayer("v12-projection-attachments-overwrite-")),
+  Layer.fresh(makeProjectionPipelinePrefixedTestLayer("v12code-projection-attachments-overwrite-")),
 )("OrchestrationProjectionPipeline", (it) => {
   it.effect("removes unreferenced attachment files when a thread is reverted", () =>
     Effect.gen(function* () {
@@ -802,7 +801,7 @@ it.layer(
           threadId,
           turnId: TurnId.make("turn-keep"),
           checkpointTurnCount: 1,
-          checkpointRef: CheckpointRef.make("refs/v12/checkpoints/thread-revert-files/turn/1"),
+          checkpointRef: CheckpointRef.make("refs/v12code/checkpoints/thread-revert-files/turn/1"),
           status: "ready",
           files: [],
           assistantMessageId: MessageId.make("message-keep"),
@@ -855,7 +854,7 @@ it.layer(
           threadId,
           turnId: TurnId.make("turn-remove"),
           checkpointTurnCount: 2,
-          checkpointRef: CheckpointRef.make("refs/v12/checkpoints/thread-revert-files/turn/2"),
+          checkpointRef: CheckpointRef.make("refs/v12code/checkpoints/thread-revert-files/turn/2"),
           status: "ready",
           files: [],
           assistantMessageId: MessageId.make("message-remove"),
@@ -929,7 +928,7 @@ it.layer(
 });
 
 it.layer(
-  Layer.fresh(makeProjectionPipelinePrefixedTestLayer("v12-projection-attachments-revert-")),
+  Layer.fresh(makeProjectionPipelinePrefixedTestLayer("v12code-projection-attachments-revert-")),
 )("OrchestrationProjectionPipeline", (it) => {
   it.effect("removes thread attachment directory when thread is deleted", () =>
     Effect.gen(function* () {
@@ -1058,7 +1057,7 @@ it.layer(
 });
 
 it.layer(
-  Layer.fresh(makeProjectionPipelinePrefixedTestLayer("v12-projection-attachments-delete-")),
+  Layer.fresh(makeProjectionPipelinePrefixedTestLayer("v12code-projection-attachments-delete-")),
 )("OrchestrationProjectionPipeline", (it) => {
   it.effect("ignores unsafe thread ids for attachment cleanup paths", () =>
     Effect.gen(function* () {
@@ -1695,7 +1694,7 @@ it.layer(BaseTestLayer)("OrchestrationProjectionPipeline", (it) => {
             threadId: ThreadId.make("thread-conflict"),
             turnId: TurnId.make("turn-completed"),
             checkpointTurnCount: 1,
-            checkpointRef: CheckpointRef.make("refs/v12/checkpoints/thread-conflict/turn/1"),
+            checkpointRef: CheckpointRef.make("refs/v12code/checkpoints/thread-conflict/turn/1"),
             status: "ready",
             files: [],
             assistantMessageId: MessageId.make("assistant-conflict"),
@@ -2259,7 +2258,7 @@ it.layer(BaseTestLayer)("OrchestrationProjectionPipeline", (it) => {
           threadId: ThreadId.make("thread-revert"),
           turnId: TurnId.make("turn-1"),
           checkpointTurnCount: 1,
-          checkpointRef: CheckpointRef.make("refs/v12/checkpoints/thread-revert/turn/1"),
+          checkpointRef: CheckpointRef.make("refs/v12code/checkpoints/thread-revert/turn/1"),
           status: "ready",
           files: [],
           assistantMessageId: MessageId.make("assistant-keep"),
@@ -2303,7 +2302,7 @@ it.layer(BaseTestLayer)("OrchestrationProjectionPipeline", (it) => {
           threadId: ThreadId.make("thread-revert"),
           turnId: TurnId.make("turn-2"),
           checkpointTurnCount: 2,
-          checkpointRef: CheckpointRef.make("refs/v12/checkpoints/thread-revert/turn/2"),
+          checkpointRef: CheckpointRef.make("refs/v12code/checkpoints/thread-revert/turn/2"),
           status: "ready",
           files: [],
           assistantMessageId: MessageId.make("assistant-remove"),
@@ -2516,7 +2515,7 @@ it.effect("restores pending turn-start metadata across projection pipeline resta
     Effect.provide(
       Layer.provideMerge(
         ServerConfig.layerTest(process.cwd(), {
-          prefix: "v12-projection-pipeline-restart-",
+          prefix: "v12code-projection-pipeline-restart-",
         }),
         NodeServices.layer,
       ),
@@ -2534,7 +2533,7 @@ const engineLayer = it.layer(
     Layer.provideMerge(SqlitePersistenceMemory),
     Layer.provideMerge(
       ServerConfig.layerTest(process.cwd(), {
-        prefix: "v12-projection-pipeline-engine-dispatch-",
+        prefix: "v12code-projection-pipeline-engine-dispatch-",
       }),
     ),
     Layer.provideMerge(NodeServices.layer),

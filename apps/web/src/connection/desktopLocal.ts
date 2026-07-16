@@ -1,9 +1,9 @@
-import type { ConnectionTarget } from "@v12/client-runtime/connection";
+import type { ConnectionTarget } from "@v12code/client-runtime/connection";
 import {
   PRIMARY_LOCAL_ENVIRONMENT_ID,
   type DesktopBridge,
   type DesktopEnvironmentBootstrap,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 
 /**
  * Desktop-local secondary backends (e.g. a parallel WSL backend) are registered

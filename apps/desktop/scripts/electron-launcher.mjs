@@ -1,4 +1,4 @@
-// This file mostly exists because we want dev mode to say "V12 (Dev)" instead of "electron"
+// This file mostly exists because we want dev mode to say "V12Code (Dev)" instead of "electron"
 
 import * as NodeChildProcess from "node:child_process";
 import * as NodeFS from "node:fs";
@@ -15,11 +15,11 @@ const repoRoot = NodePath.resolve(desktopDir, "..", "..");
 const devBundleIdSuffix = NodePath.basename(repoRoot)
   .toLowerCase()
   .replaceAll(/[^a-z0-9]+/g, "");
-export const APP_DISPLAY_NAME = isDevelopment ? "V12 (Dev)" : "V12 (Alpha)";
+export const APP_DISPLAY_NAME = isDevelopment ? "V12Code (Dev)" : "V12Code (Alpha)";
 export const APP_BUNDLE_ID = isDevelopment
-  ? `com.v12.v12.dev.${devBundleIdSuffix || "local"}`
-  : "com.v12.v12";
-const APP_PROTOCOL_SCHEMES = isDevelopment ? ["v12-dev"] : ["v12"];
+  ? `com.v12code.v12code.dev.${devBundleIdSuffix || "local"}`
+  : "com.v12code.v12code";
+const APP_PROTOCOL_SCHEMES = isDevelopment ? ["v12code-dev"] : ["v12code"];
 const LAUNCHER_VERSION = 12;
 const defaultIconPath = NodePath.join(desktopDir, "resources", "icon.icns");
 const developmentMacIconPngPath = NodePath.join(
@@ -28,7 +28,7 @@ const developmentMacIconPngPath = NodePath.join(
   "dev",
   "blueprint-macos-1024.png",
 );
-// oxlint-disable-next-line v12/no-global-process-runtime -- Standalone launcher script has no Effect runtime.
+// oxlint-disable-next-line v12code/no-global-process-runtime -- Standalone launcher script has no Effect runtime.
 const hostPlatform = NodeOS.platform();
 
 function setPlistString(plistPath, key, value) {
@@ -108,12 +108,12 @@ export function makeDevelopmentLauncherScript({
 }) {
   const envEntries = [
     ["VITE_DEV_SERVER_URL", environment.VITE_DEV_SERVER_URL],
-    ["V12_PORT", environment.V12_PORT],
-    ["V12_HOME", environment.V12_HOME],
-    ["V12_COMMIT_HASH", environment.V12_COMMIT_HASH],
-    ["V12_OTLP_TRACES_URL", environment.V12_OTLP_TRACES_URL],
-    ["V12_OTLP_EXPORT_INTERVAL_MS", environment.V12_OTLP_EXPORT_INTERVAL_MS],
-    ["V12_DESKTOP_APP_USER_MODEL_ID", APP_BUNDLE_ID],
+    ["V12CODE_PORT", environment.V12CODE_PORT],
+    ["V12CODE_HOME", environment.V12CODE_HOME],
+    ["V12CODE_COMMIT_HASH", environment.V12CODE_COMMIT_HASH],
+    ["V12CODE_OTLP_TRACES_URL", environment.V12CODE_OTLP_TRACES_URL],
+    ["V12CODE_OTLP_EXPORT_INTERVAL_MS", environment.V12CODE_OTLP_EXPORT_INTERVAL_MS],
+    ["V12CODE_DESKTOP_APP_USER_MODEL_ID", APP_BUNDLE_ID],
   ].filter((entry) => typeof entry[1] === "string" && entry[1].trim().length > 0);
   return [
     "#!/bin/sh",
@@ -121,7 +121,7 @@ export function makeDevelopmentLauncherScript({
       ([name, value]) =>
         `if [ -z "\${${name}:-}" ]; then export ${name}=${shellSingleQuote(value)}; fi`,
     ),
-    `exec ${shellSingleQuote(electronBinaryPath)} --v12-dev-root=${shellSingleQuote(desktopRoot)} ${shellSingleQuote(mainEntryPath)} "$@"`,
+    `exec ${shellSingleQuote(electronBinaryPath)} --v12code-dev-root=${shellSingleQuote(desktopRoot)} ${shellSingleQuote(mainEntryPath)} "$@"`,
     "",
   ].join("\n");
 }

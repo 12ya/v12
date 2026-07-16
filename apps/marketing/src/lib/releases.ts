@@ -1,9 +1,9 @@
-const REPO = "12ya/v12";
+const REPO = "12ya/v12code";
 
 export const RELEASES_URL = `https://github.com/${REPO}/releases`;
 
 const API_URL = `https://api.github.com/repos/${REPO}/releases/latest`;
-const CACHE_KEY = "v12-latest-release";
+const CACHE_KEY = "v12code-latest-release";
 
 export interface ReleaseAsset {
   name: string;

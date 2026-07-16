@@ -1,0 +1,17 @@
+{
+  "name": "@v12code/mobile-review-diff-native",
+  "version": "0.0.0",
+  "private": true,
+  "expo-module": {
+    "ios": {
+      "modules": [
+        "V12CodeReviewDiffModule"
+      ]
+    },
+    "android": {
+      "modules": [
+        "expo.modules.v12codereviewdiff.V12CodeReviewDiffModule"
+      ]
+    }
+  }
+}

@@ -480,7 +480,7 @@
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
-      "default": "'V12 Environment'",
+      "default": "'V12Code Environment'",
       "generated": null,
       "identity": null,
       "name": "environment_label",

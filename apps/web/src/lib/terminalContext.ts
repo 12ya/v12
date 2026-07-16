@@ -1,4 +1,4 @@
-import { type ThreadId } from "@v12/contracts";
+import { type ThreadId } from "@v12code/contracts";
 
 import { extractTrailingElementContexts, type ParsedElementContextEntry } from "./elementContext";
 

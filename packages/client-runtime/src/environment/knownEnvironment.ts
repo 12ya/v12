@@ -1,4 +1,4 @@
-import type { EnvironmentId, ExecutionEnvironmentDescriptor } from "@v12/contracts";
+import type { EnvironmentId, ExecutionEnvironmentDescriptor } from "@v12code/contracts";
 
 export interface KnownEnvironmentConnectionTarget {
   readonly httpBaseUrl: string;

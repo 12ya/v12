@@ -17,7 +17,7 @@
         const DARK_BACKGROUND = "#161616";
         const themeColorMeta = document.querySelector('meta[name="theme-color"]');
         try {
-          const storedTheme = window.localStorage.getItem("v12:theme");
+          const storedTheme = window.localStorage.getItem("v12code:theme");
           const theme =
             storedTheme === "light" || storedTheme === "dark" || storedTheme === "system"
               ? storedTheme
@@ -84,13 +84,13 @@
         object-fit: contain;
       }
     </style>
-    <title>V12 (Alpha)</title>
+    <title>V12Code (Alpha)</title>
   </head>
   <body>
     <div id="root">
       <div id="boot-shell">
-        <div id="boot-shell-card" aria-label="V12 splash screen">
-          <img id="boot-shell-logo" src="/apple-touch-icon.png" alt="V12" />
+        <div id="boot-shell-card" aria-label="V12Code splash screen">
+          <img id="boot-shell-logo" src="/apple-touch-icon.png" alt="V12Code" />
         </div>
       </div>
     </div>

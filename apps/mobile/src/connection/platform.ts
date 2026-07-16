@@ -6,15 +6,15 @@ import {
   PrimaryEnvironmentAuth,
   RelayDeviceIdentity,
   SshEnvironmentGateway,
-} from "@v12/client-runtime/platform";
+} from "@v12code/client-runtime/platform";
 import {
   ConnectionBlockedError,
   ConnectionTransientError,
   Connectivity,
   Wakeups,
-} from "@v12/client-runtime/connection";
-import { managedRelayAccountChanges, managedRelaySessionAtom } from "@v12/client-runtime/relay";
-import { AuthStandardClientScopes } from "@v12/contracts";
+} from "@v12code/client-runtime/connection";
+import { managedRelayAccountChanges, managedRelaySessionAtom } from "@v12code/client-runtime/relay";
+import { AuthStandardClientScopes } from "@v12code/contracts";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
@@ -95,7 +95,7 @@ const capabilitiesLayer = Layer.effectContext(
           if (session === null) {
             return yield* new ConnectionBlockedError({
               reason: "authentication",
-              detail: "Sign in to V12 Connect to connect this environment.",
+              detail: "Sign in to V12Code Connect to connect this environment.",
             });
           }
           const token = yield* session.readClerkToken().pipe(
@@ -110,7 +110,7 @@ const capabilitiesLayer = Layer.effectContext(
           if (token === null) {
             return yield* new ConnectionBlockedError({
               reason: "authentication",
-              detail: "The V12 Connect session is unavailable.",
+              detail: "The V12Code Connect session is unavailable.",
             });
           }
           return token;

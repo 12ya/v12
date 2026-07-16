@@ -1,4 +1,4 @@
-import { EnvironmentHttpApi } from "@v12/contracts";
+import { EnvironmentHttpApi } from "@v12code/contracts";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import { FetchHttpClient, HttpRouter, HttpServer } from "effect/unstable/http";
@@ -89,12 +89,12 @@ import {
   persistServerRuntimeState,
 } from "./serverRuntimeState.ts";
 import { orchestrationHttpApiLayer } from "./orchestration/http.ts";
-import * as NetService from "@v12/shared/Net";
-import * as RelayClient from "@v12/shared/relayClient";
-import { disableTailscaleServe, ensureTailscaleServe } from "@v12/tailscale";
+import * as NetService from "@v12code/shared/Net";
+import * as RelayClient from "@v12code/shared/relayClient";
+import { disableTailscaleServe, ensureTailscaleServe } from "@v12code/tailscale";
 
 // Effect's default preemptive shutdown waits 20s before finalizing request scopes.
-// V12's primary transport is long-lived WebSocket RPC, whose Effect scope finalizer
+// V12Code's primary transport is long-lived WebSocket RPC, whose Effect scope finalizer
 // already closes the websocket gracefully. Do not add an artificial drain before
 // those finalizers get a chance to run.
 const HTTP_PREEMPTIVE_SHUTDOWN_GRACE_MS = 0;
@@ -456,9 +456,9 @@ export const makeServerLayer = Layer.unwrap(
           Effect.sleep("250 millis").pipe(
             Effect.andThen(reconcileDesiredCloudLink(`http://127.0.0.1:${address.port}`)),
             Effect.retry({ times: 4 }),
-            Effect.tap(() => Effect.logInfo("V12 Connect desired link reconciled on startup")),
+            Effect.tap(() => Effect.logInfo("V12Code Connect desired link reconciled on startup")),
             Effect.catch((cause) =>
-              Effect.logWarning("Failed to reconcile V12 Connect desired link on startup", {
+              Effect.logWarning("Failed to reconcile V12Code Connect desired link on startup", {
                 cause,
               }),
             ),

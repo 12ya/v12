@@ -1,5 +1,9 @@
-import { DEFAULT_SERVER_SETTINGS, ProviderDriverKind, ProviderInstanceId } from "@v12/contracts";
-import { DEFAULT_CLIENT_SETTINGS } from "@v12/contracts/settings";
+import {
+  DEFAULT_SERVER_SETTINGS,
+  ProviderDriverKind,
+  ProviderInstanceId,
+} from "@v12code/contracts";
+import { DEFAULT_CLIENT_SETTINGS } from "@v12code/contracts/settings";
 import { describe, expect, it } from "vite-plus/test";
 
 import { mergeEnvironmentSettings } from "./useSettings";

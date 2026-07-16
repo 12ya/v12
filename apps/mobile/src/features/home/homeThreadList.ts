@@ -1,15 +1,18 @@
 import {
   deriveLogicalProjectKey,
   deriveProjectGroupLabel,
-} from "@v12/client-runtime/state/project-grouping";
-import type { EnvironmentProject, EnvironmentThreadShell } from "@v12/client-runtime/state/shell";
-import { getThreadSortTimestamp, sortThreads } from "@v12/client-runtime/state/thread-sort";
+} from "@v12code/client-runtime/state/project-grouping";
+import type {
+  EnvironmentProject,
+  EnvironmentThreadShell,
+} from "@v12code/client-runtime/state/shell";
+import { getThreadSortTimestamp, sortThreads } from "@v12code/client-runtime/state/thread-sort";
 import type {
   EnvironmentId,
   SidebarProjectGroupingMode,
   SidebarProjectSortOrder,
   SidebarThreadSortOrder,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import * as Arr from "effect/Array";
 import * as Option from "effect/Option";
 import * as Order from "effect/Order";

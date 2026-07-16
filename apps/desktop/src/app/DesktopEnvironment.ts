@@ -3,7 +3,7 @@ import type {
   DesktopAppStageLabel,
   DesktopRuntimeArch,
   DesktopRuntimeInfo,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import * as Config from "effect/Config";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
@@ -56,7 +56,7 @@ export class DesktopEnvironment extends Context.Service<
     readonly preloadPath: string;
     readonly appUpdateYmlPath: string;
     readonly devServerUrl: Option.Option<URL>;
-    readonly devRemoteV12ServerEntryPath: Option.Option<string>;
+    readonly devRemoteV12CodeServerEntryPath: Option.Option<string>;
     readonly configuredBackendPort: Option.Option<number>;
     readonly commitHashOverride: Option.Option<string>;
     readonly otlpTracesUrl: Option.Option<string>;
@@ -74,9 +74,9 @@ export class DesktopEnvironment extends Context.Service<
     readonly resolveResourcePathCandidates: (fileName: string) => readonly string[];
     readonly developmentDockIconPath: string;
   }
->()("@v12/desktop/app/DesktopEnvironment") {}
+>()("@v12code/desktop/app/DesktopEnvironment") {}
 
-const APP_BASE_NAME = "V12";
+const APP_BASE_NAME = "V12Code";
 
 function resolveDesktopAppStageLabel(input: {
   readonly isDevelopment: boolean;
@@ -147,7 +147,7 @@ const make = Effect.fn("desktop.environment.make")(function* (
       : input.platform === "darwin"
         ? path.join(homeDirectory, "Library", "Application Support")
         : Option.getOrElse(config.xdgConfigHome, () => path.join(homeDirectory, ".config"));
-  const baseDir = Option.getOrElse(config.v12Home, () => path.join(homeDirectory, ".v12"));
+  const baseDir = Option.getOrElse(config.v12codeHome, () => path.join(homeDirectory, ".v12code"));
   const rootDir = path.resolve(input.dirname, "../../..");
   const appRoot = input.isPackaged ? input.appPath : rootDir;
   const branding = resolveDesktopAppBranding({
@@ -156,8 +156,8 @@ const make = Effect.fn("desktop.environment.make")(function* (
   });
   const displayName = branding.displayName;
   const stateDir = path.join(baseDir, isDevelopment ? "dev" : "userdata");
-  const userDataDirName = isDevelopment ? "v12-dev" : "v12";
-  const legacyUserDataDirName = isDevelopment ? "V12 (Dev)" : "V12 (Alpha)";
+  const userDataDirName = isDevelopment ? "v12code-dev" : "v12code";
+  const legacyUserDataDirName = isDevelopment ? "V12Code (Dev)" : "V12Code (Alpha)";
   const resourcesPath = input.resourcesPath;
 
   return DesktopEnvironment.of({
@@ -189,7 +189,7 @@ const make = Effect.fn("desktop.environment.make")(function* (
       ? path.join(resourcesPath, "app-update.yml")
       : path.join(input.appPath, "dev-app-update.yml"),
     devServerUrl,
-    devRemoteV12ServerEntryPath: config.devRemoteV12ServerEntryPath,
+    devRemoteV12CodeServerEntryPath: config.devRemoteV12CodeServerEntryPath,
     configuredBackendPort: config.configuredBackendPort,
     commitHashOverride: config.commitHashOverride,
     otlpTracesUrl: config.otlpTracesUrl,
@@ -197,10 +197,10 @@ const make = Effect.fn("desktop.environment.make")(function* (
     branding,
     displayName,
     appUserModelId: Option.getOrElse(config.appUserModelIdOverride, () =>
-      isDevelopment ? "com.v12.v12.dev" : "com.v12.v12",
+      isDevelopment ? "com.v12code.v12code.dev" : "com.v12code.v12code",
     ),
-    linuxDesktopEntryName: isDevelopment ? "v12-dev.desktop" : "v12.desktop",
-    linuxWmClass: isDevelopment ? "v12-dev" : "v12",
+    linuxDesktopEntryName: isDevelopment ? "v12code-dev.desktop" : "v12code.desktop",
+    linuxWmClass: isDevelopment ? "v12code-dev" : "v12code",
     userDataDirName,
     legacyUserDataDirName,
     defaultDesktopSettings: DesktopAppSettings.resolveDefaultDesktopSettings(input.appVersion),

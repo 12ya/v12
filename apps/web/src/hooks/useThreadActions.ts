@@ -2,9 +2,9 @@ import {
   parseScopedThreadKey,
   scopeProjectRef,
   scopeThreadRef,
-} from "@v12/client-runtime/environment";
-import { settlePromise, squashAtomCommandFailure } from "@v12/client-runtime/state/runtime";
-import { EnvironmentId, type ScopedThreadRef, ThreadId } from "@v12/contracts";
+} from "@v12code/client-runtime/environment";
+import { settlePromise, squashAtomCommandFailure } from "@v12code/client-runtime/state/runtime";
+import { EnvironmentId, type ScopedThreadRef, ThreadId } from "@v12code/contracts";
 import * as Cause from "effect/Cause";
 import * as Schema from "effect/Schema";
 import { AsyncResult } from "effect/unstable/reactivity";

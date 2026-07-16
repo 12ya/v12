@@ -7,8 +7,8 @@ import {
   type TerminalMetadataStreamEvent,
   type TerminalOpenInput,
   type TerminalRestartInput,
-} from "@v12/contracts";
-import { HostProcessPlatform } from "@v12/shared/hostProcess";
+} from "@v12code/contracts";
+import { HostProcessPlatform } from "@v12code/shared/hostProcess";
 import * as Data from "effect/Data";
 import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
@@ -234,7 +234,7 @@ const createManager = (
   Effect.flatMap(Effect.service(FileSystem.FileSystem), (fs) =>
     Effect.gen(function* () {
       const { join } = yield* Path.Path;
-      const baseDir = yield* fs.makeTempDirectoryScoped({ prefix: "v12-terminal-" });
+      const baseDir = yield* fs.makeTempDirectoryScoped({ prefix: "v12code-terminal-" });
       const logsDir = join(baseDir, "userdata", "logs", "terminals");
       const ptyAdapter = options.ptyAdapter ?? new FakePtyAdapter();
 
@@ -367,7 +367,7 @@ it.layer(
       const unsubscribe = yield* manager.attachStream(
         openInput({
           env: {
-            V12_WORKTREE_PATH: "/tmp/should-not-restart",
+            V12CODE_WORKTREE_PATH: "/tmp/should-not-restart",
           },
           worktreePath: "/tmp/should-not-restart",
         }),
@@ -405,7 +405,7 @@ it.layer(
         {
           ...openInput({
             env: {
-              V12_WORKTREE_PATH: "/tmp/restart-requested",
+              V12CODE_WORKTREE_PATH: "/tmp/restart-requested",
             },
             worktreePath: "/tmp/restart-requested",
           }),
@@ -1315,7 +1315,7 @@ it.layer(
       const { manager, ptyAdapter } = yield* createManager(5, {
         env: {
           PORT: "5173",
-          V12_PORT: "3773",
+          V12CODE_PORT: "3773",
           VITE_DEV_SERVER_URL: "http://localhost:5173",
           TEST_TERMINAL_KEEP: "keep-me",
         },
@@ -1326,7 +1326,7 @@ it.layer(
       if (!spawnInput) return;
 
       expect(spawnInput.env.PORT).toBeUndefined();
-      expect(spawnInput.env.V12_PORT).toBeUndefined();
+      expect(spawnInput.env.V12CODE_PORT).toBeUndefined();
       expect(spawnInput.env.VITE_DEV_SERVER_URL).toBeUndefined();
       // Arbitrary host env vars must pass through — terminals inherit the
       // user's environment apart from the explicit blocklist.
@@ -1340,8 +1340,8 @@ it.layer(
       yield* manager.open(
         openInput({
           env: {
-            V12_PROJECT_ROOT: "/repo",
-            V12_WORKTREE_PATH: "/repo/worktree-a",
+            V12CODE_PROJECT_ROOT: "/repo",
+            V12CODE_WORKTREE_PATH: "/repo/worktree-a",
             CUSTOM_FLAG: "1",
           },
         }),
@@ -1350,8 +1350,8 @@ it.layer(
       expect(spawnInput).toBeDefined();
       if (!spawnInput) return;
 
-      assert.equal(spawnInput.env.V12_PROJECT_ROOT, "/repo");
-      assert.equal(spawnInput.env.V12_WORKTREE_PATH, "/repo/worktree-a");
+      assert.equal(spawnInput.env.V12CODE_PROJECT_ROOT, "/repo");
+      assert.equal(spawnInput.env.V12CODE_WORKTREE_PATH, "/repo/worktree-a");
       assert.equal(spawnInput.env.CUSTOM_FLAG, "1");
     }),
   );

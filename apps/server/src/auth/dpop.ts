@@ -1,4 +1,4 @@
-import { verifyDpopProof } from "@v12/shared/dpop";
+import { verifyDpopProof } from "@v12code/shared/dpop";
 import * as Crypto from "effect/Crypto";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";

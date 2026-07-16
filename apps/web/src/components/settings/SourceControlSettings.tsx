@@ -9,8 +9,8 @@ import type {
   SourceControlProviderDiscoveryItem,
   VcsDriverKind,
   VcsDiscoveryItem,
-} from "@v12/contracts";
-import { DEFAULT_UNIFIED_SETTINGS } from "@v12/contracts/settings";
+} from "@v12code/contracts";
+import { DEFAULT_UNIFIED_SETTINGS } from "@v12code/contracts/settings";
 
 import { usePrimarySettings, useUpdatePrimarySettings } from "../../hooks/useSettings";
 import { cn } from "../../lib/utils";

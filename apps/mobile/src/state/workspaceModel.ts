@@ -1,7 +1,7 @@
-import { type EnvironmentShellSummary } from "@v12/client-runtime/state/shell";
-import { type NetworkStatus } from "@v12/client-runtime/connection";
-import { type EnvironmentConnectionPhase } from "@v12/client-runtime/connection";
-import type { EnvironmentId, ServerConfig } from "@v12/contracts";
+import { type EnvironmentShellSummary } from "@v12code/client-runtime/state/shell";
+import { type NetworkStatus } from "@v12code/client-runtime/connection";
+import { type EnvironmentConnectionPhase } from "@v12code/client-runtime/connection";
+import type { EnvironmentId, ServerConfig } from "@v12code/contracts";
 
 import type { EnvironmentPresentation } from "./environments";
 

@@ -7,7 +7,7 @@ import {
   type WorkLogEntry,
 } from "../../session-logic";
 import { type ChatMessage, type ProposedPlan, type TurnDiffSummary } from "../../types";
-import { type MessageId, type OrchestrationLatestTurn, type TurnId } from "@v12/contracts";
+import { type MessageId, type OrchestrationLatestTurn, type TurnId } from "@v12code/contracts";
 
 export const MAX_VISIBLE_WORK_LOG_ENTRIES = 1;
 

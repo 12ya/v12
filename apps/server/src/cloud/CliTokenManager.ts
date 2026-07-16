@@ -51,7 +51,7 @@ export class CloudCliCredentialRemovalError extends Schema.TaggedErrorClass<Clou
   { cause: Schema.Defect() },
 ) {
   override get message(): string {
-    return "Could not remove the stored V12 Connect CLI credential.";
+    return "Could not remove the stored V12Code Connect CLI credential.";
   }
 }
 
@@ -60,7 +60,7 @@ export class CloudCliCredentialRefreshError extends Schema.TaggedErrorClass<Clou
   { cause: Schema.Defect() },
 ) {
   override get message(): string {
-    return "Could not refresh the V12 Connect CLI credential.";
+    return "Could not refresh the V12Code Connect CLI credential.";
   }
 }
 
@@ -69,7 +69,7 @@ export class CloudCliCredentialReadError extends Schema.TaggedErrorClass<CloudCl
   { cause: Schema.Defect() },
 ) {
   override get message(): string {
-    return "Could not read the stored V12 Connect CLI credential.";
+    return "Could not read the stored V12Code Connect CLI credential.";
   }
 }
 
@@ -78,7 +78,7 @@ export class CloudCliAuthorizationError extends Schema.TaggedErrorClass<CloudCli
   { cause: Schema.Defect() },
 ) {
   override get message(): string {
-    return "Could not authorize the V12 Connect CLI.";
+    return "Could not authorize the V12Code Connect CLI.";
   }
 }
 
@@ -87,7 +87,7 @@ export class CloudCliAuthorizationTimeoutError extends Schema.TaggedErrorClass<C
   { cause: Schema.Defect() },
 ) {
   override get message(): string {
-    return "Timed out waiting for V12 Connect authorization.";
+    return "Timed out waiting for V12Code Connect authorization.";
   }
 }
 
@@ -108,7 +108,7 @@ export class CloudCliTokenManager extends Context.Service<
     readonly hasCredential: Effect.Effect<boolean, CloudCliTokenManagerError>;
     readonly clear: Effect.Effect<void, CloudCliTokenManagerError>;
   }
->()("v12/cloud/CliTokenManager/CloudCliTokenManager") {}
+>()("v12code/cloud/CliTokenManager/CloudCliTokenManager") {}
 
 const wrapError =
   <WrappedError extends CloudCliTokenManagerError>(makeError: (cause: unknown) => WrappedError) =>
@@ -186,7 +186,7 @@ export const make = Effect.gen(function* () {
         const url = new URL(request.originalUrl, metadata.redirectUri);
         const code = url.searchParams.get("code");
         if (url.searchParams.get("state") !== state || !code) {
-          return HttpServerResponse.text("Invalid V12 Connect authorization callback.", {
+          return HttpServerResponse.text("Invalid V12Code Connect authorization callback.", {
             status: 400,
           });
         }
@@ -194,7 +194,7 @@ export const make = Effect.gen(function* () {
         return yield* HttpServerResponse.html`
 <html>
   <body style="font-family: sans-serif; text-align: center; margin-top: 50px;">
-    <h1>V12 Connect authorization complete</h1>
+    <h1>V12Code Connect authorization complete</h1>
     <p>You can close this window and return to your terminal.</p>
   </body>
 </html>
@@ -222,7 +222,9 @@ export const make = Effect.gen(function* () {
     authorizationUrl.searchParams.set("state", state);
     authorizationUrl.searchParams.set("code_challenge", challenge);
     authorizationUrl.searchParams.set("code_challenge_method", "S256");
-    yield* Console.log(`Open this URL to authorize V12 Connect:\n${authorizationUrl.toString()}\n`);
+    yield* Console.log(
+      `Open this URL to authorize V12Code Connect:\n${authorizationUrl.toString()}\n`,
+    );
     const code = yield* Deferred.await(callback).pipe(
       Effect.timeout(CLOUD_CLI_OAUTH_CALLBACK_TIMEOUT),
       Effect.catchTag("TimeoutError", (cause) =>

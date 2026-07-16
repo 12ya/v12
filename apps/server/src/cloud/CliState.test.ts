@@ -31,7 +31,7 @@ const makeTestLayer = () =>
   ServerSecretStore.layer.pipe(
     Layer.provide(
       ServerConfig.layerTest(process.cwd(), {
-        prefix: "v12-cloud-cli-state-test-",
+        prefix: "v12code-cloud-cli-state-test-",
       }),
     ),
   );

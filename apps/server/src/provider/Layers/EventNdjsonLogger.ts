@@ -9,9 +9,9 @@
 import * as NodeFS from "node:fs";
 import * as NodePath from "node:path";
 
-import type { ThreadId } from "@v12/contracts";
-import { RotatingFileSink } from "@v12/shared/logging";
-import { errorTag } from "@v12/shared/observability";
+import type { ThreadId } from "@v12code/contracts";
+import { RotatingFileSink } from "@v12code/shared/logging";
+import { errorTag } from "@v12code/shared/observability";
 import * as Effect from "effect/Effect";
 import * as Exit from "effect/Exit";
 import * as Logger from "effect/Logger";

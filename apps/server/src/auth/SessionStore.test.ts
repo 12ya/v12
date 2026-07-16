@@ -25,7 +25,7 @@ const makeServerConfigLayer = (
       } satisfies ServerConfig.ServerConfig["Service"];
     }),
   ).pipe(
-    Layer.provide(ServerConfig.layerTest(process.cwd(), { prefix: "v12-auth-session-test-" })),
+    Layer.provide(ServerConfig.layerTest(process.cwd(), { prefix: "v12code-auth-session-test-" })),
   );
 
 const makeSessionStoreLayer = (

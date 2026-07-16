@@ -1,4 +1,4 @@
-import * as RelayClient from "@v12/shared/relayClient";
+import * as RelayClient from "@v12code/shared/relayClient";
 import { assert, it } from "@effect/vitest";
 import * as Cause from "effect/Cause";
 import * as Console from "effect/Console";

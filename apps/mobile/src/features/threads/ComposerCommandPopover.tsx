@@ -1,6 +1,6 @@
 import { isLiquidGlassSupported, LiquidGlassView } from "@callstack/liquid-glass";
-import type { ComposerTriggerKind } from "@v12/shared/composerTrigger";
-import type { ServerProviderSkill, ServerProviderSlashCommand } from "@v12/contracts";
+import type { ComposerTriggerKind } from "@v12code/shared/composerTrigger";
+import type { ServerProviderSkill, ServerProviderSlashCommand } from "@v12code/contracts";
 import { SymbolView } from "../../components/AppSymbol";
 import { memo } from "react";
 import { Pressable, ScrollView, useColorScheme, View, type ViewStyle } from "react-native";
@@ -154,7 +154,7 @@ const CommandRow = memo(function CommandRow(props: {
       ) : iconName ? (
         <SymbolView name={iconName} size={14} tintColor={iconColor} type="monochrome" />
       ) : null}
-      <Text className="shrink-0 text-base font-v12-medium text-foreground" numberOfLines={1}>
+      <Text className="shrink-0 text-base font-v12code-medium text-foreground" numberOfLines={1}>
         {props.item.label}
       </Text>
       {props.item.description ? (
@@ -176,7 +176,7 @@ export const ComposerCommandPopover = memo(function ComposerCommandPopover(
     <PopoverSurface isDarkMode={isDarkMode}>
       {label ? (
         <View className="px-3.5 pt-2.5 pb-1">
-          <Text className="text-3xs font-v12-bold tracking-[0.8px] uppercase text-foreground-muted">
+          <Text className="text-3xs font-v12code-bold tracking-[0.8px] uppercase text-foreground-muted">
             {label}
           </Text>
         </View>

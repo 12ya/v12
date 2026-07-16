@@ -1,4 +1,4 @@
-import { createPreviewEnvironmentAtoms } from "@v12/client-runtime/state/preview";
+import { createPreviewEnvironmentAtoms } from "@v12code/client-runtime/state/preview";
 
 import { connectionAtomRuntime } from "../connection/runtime";
 

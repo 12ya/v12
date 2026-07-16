@@ -1,12 +1,12 @@
-import { scopedThreadKey } from "@v12/client-runtime/environment";
-import type { MessageId, ScopedThreadRef, ThreadId } from "@v12/contracts";
+import { scopedThreadKey } from "@v12code/client-runtime/environment";
+import type { MessageId, ScopedThreadRef, ThreadId } from "@v12code/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 import { resolveStorage } from "./lib/storage";
 import type { ActivePlanState } from "./session-logic";
 
-const TASK_HUD_STORAGE_KEY = "v12:task-hud-state:v1";
+const TASK_HUD_STORAGE_KEY = "v12code:task-hud-state:v1";
 const MAX_PERSISTED_PLAN_OVERRIDES = 100;
 const MAX_PERSISTED_CONTEXT_TASKS = 200;
 const TRAILING_TASK_ANNOTATIONS_PATTERN =

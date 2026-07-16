@@ -20,26 +20,26 @@ import {
   ProviderDriverKind,
   RuntimeMode,
   TerminalOpenInput,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import {
   connectionStatusText,
   type EnvironmentConnectionPresentation,
-} from "@v12/client-runtime/connection";
+} from "@v12code/client-runtime/connection";
 import {
   parseScopedThreadKey,
   scopedThreadKey,
   scopeProjectRef,
   scopeThreadRef,
-} from "@v12/client-runtime/environment";
+} from "@v12code/client-runtime/environment";
 import {
   applyClaudePromptEffortPrefix,
   createModelSelection,
   resolvePromptInjectedEffort,
-} from "@v12/shared/model";
-import { CHAT_LIST_ANCHOR_OFFSET } from "@v12/shared/chatList";
-import { projectScriptCwd, projectScriptRuntimeEnv } from "@v12/shared/projectScripts";
-import { truncate } from "@v12/shared/String";
-import { nextTerminalId, resolveTerminalSessionLabel } from "@v12/shared/terminalLabels";
+} from "@v12code/shared/model";
+import { CHAT_LIST_ANCHOR_OFFSET } from "@v12code/shared/chatList";
+import { projectScriptCwd, projectScriptRuntimeEnv } from "@v12code/shared/projectScripts";
+import { truncate } from "@v12code/shared/String";
+import { nextTerminalId, resolveTerminalSessionLabel } from "@v12code/shared/terminalLabels";
 import { Debouncer } from "@tanstack/react-pacer";
 import { useAtomValue } from "@effect/atom-react";
 import {
@@ -61,7 +61,7 @@ import {
   settlePromise,
   squashAtomCommandFailure,
   type AtomCommandResult,
-} from "@v12/client-runtime/state/runtime";
+} from "@v12code/client-runtime/state/runtime";
 import * as Cause from "effect/Cause";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { isElectron } from "../env";
@@ -111,7 +111,7 @@ import {
 import { useTheme } from "../hooks/useTheme";
 import { useTurnDiffSummaries } from "../hooks/useTurnDiffSummaries";
 import { isCommandPaletteOpen } from "../commandPaletteContext";
-import { buildTemporaryWorktreeBranchName } from "@v12/shared/git";
+import { buildTemporaryWorktreeBranchName } from "@v12code/shared/git";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { RIGHT_PANEL_INLINE_LAYOUT_MEDIA_QUERY } from "../rightPanelLayout";
 import {

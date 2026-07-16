@@ -1,8 +1,8 @@
-import { ClientSettingsSchema, type ClientSettings } from "@v12/contracts";
+import { ClientSettingsSchema, type ClientSettings } from "@v12code/contracts";
 
 import { getLocalStorageItem, setLocalStorageItem } from "./hooks/useLocalStorage";
 
-export const CLIENT_SETTINGS_STORAGE_KEY = "v12:client-settings:v1";
+export const CLIENT_SETTINGS_STORAGE_KEY = "v12code:client-settings:v1";
 
 function hasWindow(): boolean {
   return typeof window !== "undefined";

@@ -3,7 +3,7 @@ import {
   ORCHESTRATION_WS_METHODS,
   type ClientOrchestrationCommand,
   type ThreadId,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import * as Crypto from "effect/Crypto";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";

@@ -16,9 +16,9 @@ import {
   ExternalLauncherUnsupportedEditorError,
   type EditorId,
   type LaunchEditorInput,
-} from "@v12/contracts";
-import { HostProcessPlatform } from "@v12/shared/hostProcess";
-import { isCommandAvailable, resolveSpawnCommand } from "@v12/shared/shell";
+} from "@v12code/contracts";
+import { HostProcessPlatform } from "@v12code/shared/hostProcess";
+import { isCommandAvailable, resolveSpawnCommand } from "@v12code/shared/shell";
 import * as Config from "effect/Config";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
@@ -42,7 +42,7 @@ export {
   ExternalLauncherUnknownEditorError,
   ExternalLauncherUnsupportedEditorError,
   isExternalLauncherError,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 export type { LaunchEditorInput };
 interface EditorLaunch {
   readonly editor: EditorId;
@@ -314,7 +314,7 @@ export class ExternalLauncher extends Context.Service<
      */
     readonly launchEditor: (input: LaunchEditorInput) => Effect.Effect<void, ExternalLauncherError>;
   }
->()("v12/process/externalLauncher") {}
+>()("v12code/process/externalLauncher") {}
 
 // ==============================
 // Implementations

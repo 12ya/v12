@@ -1,4 +1,4 @@
-import { type TerminalSummary, WS_METHODS } from "@v12/contracts";
+import { type TerminalSummary, WS_METHODS } from "@v12code/contracts";
 import * as Stream from "effect/Stream";
 import { Atom } from "effect/unstable/reactivity";
 

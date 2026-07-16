@@ -14,4 +14,4 @@ export {
   normalizeProjectPathForComparison,
   normalizeProjectPathForDispatch,
   resolveProjectPathForDispatch,
-} from "@v12/client-runtime/state/projects";
+} from "@v12code/client-runtime/state/projects";

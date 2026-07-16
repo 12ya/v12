@@ -1,5 +1,5 @@
 import Constants from "expo-constants";
-import { makeRelayClientTracingLayer } from "@v12/shared/relayTracing";
+import { makeRelayClientTracingLayer } from "@v12code/shared/relayTracing";
 
 import { hasTracingPublicConfig, resolveCloudPublicConfig } from "../cloud/publicConfig";
 
@@ -25,7 +25,7 @@ export function resolveTracingConfig(): TracingConfig | null {
 
 export function makeTracingLayer(config: TracingConfig | null, resource: TracingResource) {
   return makeRelayClientTracingLayer(config, {
-    serviceName: "v12-mobile-relay-client",
+    serviceName: "v12code-mobile-relay-client",
     serviceVersion: resource.serviceVersion,
     runtime: "react-native",
     client: `mobile-${resource.appVariant}`,

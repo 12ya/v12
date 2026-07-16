@@ -1,5 +1,8 @@
 import { isLiquidGlassSupported, LiquidGlassView } from "@callstack/liquid-glass";
-import type { EnvironmentProject, EnvironmentThreadShell } from "@v12/client-runtime/state/shell";
+import type {
+  EnvironmentProject,
+  EnvironmentThreadShell,
+} from "@v12code/client-runtime/state/shell";
 import { LegendList } from "@legendapp/list/react-native";
 import type { MenuAction } from "@react-native-menu/menu";
 import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
@@ -685,7 +688,7 @@ function ThreadNavigationSidebarPane(
           </Svg>
         </View>
         <View className="h-[50px] flex-row items-end gap-0.5 pr-2 pl-5">
-          <Text className="flex-1 text-[34px] font-v12-bold text-foreground" numberOfLines={1}>
+          <Text className="flex-1 text-[34px] font-v12code-bold text-foreground" numberOfLines={1}>
             Threads
           </Text>
           <SidebarHeaderButtonGroup colorScheme={colorScheme}>

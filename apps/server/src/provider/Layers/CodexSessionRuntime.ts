@@ -15,9 +15,9 @@ import {
   RuntimeMode,
   ThreadId,
   TurnId,
-} from "@v12/contracts";
-import { resolveSpawnCommand } from "@v12/shared/shell";
-import { normalizeModelSlug } from "@v12/shared/model";
+} from "@v12code/contracts";
+import { resolveSpawnCommand } from "@v12code/shared/shell";
+import { normalizeModelSlug } from "@v12code/shared/model";
 import * as Crypto from "effect/Crypto";
 import * as DateTime from "effect/DateTime";
 import * as Deferred from "effect/Deferred";

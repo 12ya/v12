@@ -10,8 +10,8 @@ describe("electron development launcher", () => {
       desktopRoot: "/repo/apps/desktop",
       environment: {
         VITE_DEV_SERVER_URL: "http://127.0.0.1:8526",
-        V12_PORT: "16566",
-        V12_HOME: "/tmp/v12",
+        V12CODE_PORT: "16566",
+        V12CODE_HOME: "/tmp/v12code",
       },
     });
 
@@ -22,7 +22,7 @@ describe("electron development launcher", () => {
     assert.notInclude(script, "\nexport VITE_DEV_SERVER_URL=");
     assert.include(
       script,
-      "exec '/repo/node_modules/electron/Electron' --v12-dev-root='/repo/apps/desktop' '/repo/apps/desktop/dist-electron/main.cjs' \"$@\"",
+      "exec '/repo/node_modules/electron/Electron' --v12code-dev-root='/repo/apps/desktop' '/repo/apps/desktop/dist-electron/main.cjs' \"$@\"",
     );
   });
 

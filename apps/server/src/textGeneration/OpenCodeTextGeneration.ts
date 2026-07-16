@@ -11,10 +11,10 @@ import {
   type ChatAttachment,
   type ModelSelection,
   type OpenCodeSettings,
-} from "@v12/contracts";
-import { sanitizeBranchFragment, sanitizeFeatureBranchName } from "@v12/shared/git";
-import { getModelSelectionStringOptionValue } from "@v12/shared/model";
-import { extractJsonObject } from "@v12/shared/schemaJson";
+} from "@v12code/contracts";
+import { sanitizeBranchFragment, sanitizeFeatureBranchName } from "@v12code/shared/git";
+import { getModelSelectionStringOptionValue } from "@v12code/shared/model";
+import { extractJsonObject } from "@v12code/shared/schemaJson";
 
 import * as ServerConfig from "../config.ts";
 import { resolveAttachmentPath } from "../attachmentStore.ts";
@@ -392,7 +392,7 @@ export const makeOpenCodeTextGeneration = Effect.fn("makeOpenCodeTextGeneration"
         const session = yield* Effect.tryPromise({
           try: () =>
             client.session.create({
-              title: `V12 ${input.operation}`,
+              title: `V12Code ${input.operation}`,
               permission: [{ permission: "*", pattern: "*", action: "deny" }],
             }),
           catch: (cause) =>

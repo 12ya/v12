@@ -16,14 +16,14 @@ import {
   type EnvironmentId,
   ServerSettings,
   type ServerSettingsPatch,
-} from "@v12/contracts";
+} from "@v12code/contracts";
 import {
   type ClientSettingsPatch,
   type ClientSettings,
   DEFAULT_CLIENT_SETTINGS,
   type UnifiedSettings,
-} from "@v12/contracts/settings";
-import { safeErrorLogAttributes } from "@v12/client-runtime/errors";
+} from "@v12code/contracts/settings";
+import { safeErrorLogAttributes } from "@v12code/client-runtime/errors";
 import { ensureLocalApi } from "~/localApi";
 import * as Struct from "effect/Struct";
 import { primaryServerSettingsAtom, serverEnvironment } from "~/state/server";

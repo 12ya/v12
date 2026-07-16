@@ -1,4 +1,4 @@
-import { ProviderInstanceId, ThreadId } from "@v12/contracts";
+import { ProviderInstanceId, ThreadId } from "@v12code/contracts";
 import * as Clock from "effect/Clock";
 import * as Context from "effect/Context";
 import * as Crypto from "effect/Crypto";
@@ -34,7 +34,7 @@ export interface McpSessionRegistryShape {
 export class McpSessionRegistry extends Context.Service<
   McpSessionRegistry,
   McpSessionRegistryShape
->()("v12/mcp/McpSessionRegistry") {}
+>()("v12code/mcp/McpSessionRegistry") {}
 
 interface CredentialRecord {
   readonly tokenHash: string;

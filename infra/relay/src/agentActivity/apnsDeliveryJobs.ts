@@ -4,8 +4,8 @@ import {
   RelayAgentActivityAggregateState,
   RelayAgentAwarenessPhase,
   type RelayDeliveryKind,
-} from "@v12/contracts/relay";
-import { stableStringify } from "@v12/shared/relaySigning";
+} from "@v12code/contracts/relay";
+import { stableStringify } from "@v12code/shared/relaySigning";
 import * as DateTime from "effect/DateTime";
 import * as Option from "effect/Option";
 import * as Redacted from "effect/Redacted";

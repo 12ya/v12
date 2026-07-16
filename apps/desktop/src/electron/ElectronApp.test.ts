@@ -54,7 +54,7 @@ vi.mock("electron", () => ({
     getVersion: getVersionMock,
     isDefaultProtocolClient: isDefaultProtocolClientMock,
     isPackaged: true,
-    name: "V12",
+    name: "V12Code",
     on: onMock,
     quit: quitMock,
     relaunch: relaunchMock,

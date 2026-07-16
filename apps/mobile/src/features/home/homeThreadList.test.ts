@@ -1,5 +1,8 @@
-import type { EnvironmentProject, EnvironmentThreadShell } from "@v12/client-runtime/state/shell";
-import { EnvironmentId, ProjectId, ProviderInstanceId, ThreadId } from "@v12/contracts";
+import type {
+  EnvironmentProject,
+  EnvironmentThreadShell,
+} from "@v12code/client-runtime/state/shell";
+import { EnvironmentId, ProjectId, ProviderInstanceId, ThreadId } from "@v12code/contracts";
 import { describe, expect, it } from "vite-plus/test";
 
 import { buildHomeThreadGroups } from "./homeThreadList";
@@ -67,7 +70,7 @@ describe("buildHomeThreadGroups", () => {
     const project = makeProject({
       environmentId,
       id: ProjectId.make("project-1"),
-      title: "V12",
+      title: "V12Code",
     });
     const threads = [
       makeThread({
@@ -177,31 +180,31 @@ describe("buildHomeThreadGroups", () => {
   it("matches web repository, repository-path, and separate grouping modes", () => {
     const environmentId = EnvironmentId.make("environment-1");
     const repositoryIdentity = {
-      canonicalKey: "github.com/v12/v12",
+      canonicalKey: "github.com/v12code/v12code",
       locator: {
         source: "git-remote" as const,
         remoteName: "origin",
-        remoteUrl: "git@github.com:v12/v12.git",
+        remoteUrl: "git@github.com:v12code/v12code.git",
       },
       provider: "github",
-      owner: "v12",
-      name: "v12",
-      displayName: "V12",
-      rootPath: "/workspaces/v12",
+      owner: "v12code",
+      name: "v12code",
+      displayName: "V12Code",
+      rootPath: "/workspaces/v12code",
     };
     const projects = [
       makeProject({
         environmentId,
         id: ProjectId.make("project-web"),
         title: "Web",
-        workspaceRoot: "/workspaces/v12/apps/web",
+        workspaceRoot: "/workspaces/v12code/apps/web",
         repositoryIdentity,
       }),
       makeProject({
         environmentId,
         id: ProjectId.make("project-mobile"),
         title: "Mobile",
-        workspaceRoot: "/workspaces/v12/apps/mobile",
+        workspaceRoot: "/workspaces/v12code/apps/mobile",
         repositoryIdentity,
       }),
     ];
@@ -226,7 +229,7 @@ describe("buildHomeThreadGroups", () => {
     const project = makeProject({
       environmentId,
       id: ProjectId.make("project-1"),
-      title: "V12",
+      title: "V12Code",
     });
     const threads = [
       makeThread({
@@ -264,7 +267,7 @@ describe("buildHomeThreadGroups", () => {
     const project = makeProject({
       environmentId,
       id: ProjectId.make("project-1"),
-      title: "V12",
+      title: "V12Code",
     });
     const threads = ["2026-06-01", "2026-06-02", "2026-06-03", "2026-06-04", "2026-06-05"].map(
       (day, index) =>
@@ -291,7 +294,7 @@ describe("buildHomeThreadGroups", () => {
     const project = makeProject({
       environmentId,
       id: ProjectId.make("project-1"),
-      title: "V12",
+      title: "V12Code",
     });
     const threads = ["2026-06-01", "2026-06-02", "2026-06-03", "2026-06-04", "2026-06-05"].map(
       (day, index) =>
@@ -304,7 +307,7 @@ describe("buildHomeThreadGroups", () => {
         }),
     );
 
-    const group = buildGroups([project], threads, { searchQuery: "V12" })[0];
+    const group = buildGroups([project], threads, { searchQuery: "V12Code" })[0];
     // Search reaches the full history rather than the 3-thread fallback.
     expect(group?.recentThreads).toHaveLength(5);
     expect(group?.recentThreads.map((thread) => thread.id)).toEqual(
@@ -316,23 +319,23 @@ describe("buildHomeThreadGroups", () => {
     const laptopEnv = EnvironmentId.make("environment-laptop");
     const desktopEnv = EnvironmentId.make("environment-desktop");
     const repositoryIdentity = {
-      canonicalKey: "github.com/12ya/V12",
+      canonicalKey: "github.com/12ya/V12Code",
       locator: {
         source: "git-remote" as const,
         remoteName: "origin",
-        remoteUrl: "git@github.com:12ya/V12.git",
+        remoteUrl: "git@github.com:12ya/V12Code.git",
       },
     };
     const laptopProject = makeProject({
       environmentId: laptopEnv,
       id: ProjectId.make("project-laptop"),
-      title: "v12",
+      title: "v12code",
       repositoryIdentity,
     });
     const desktopProject = makeProject({
       environmentId: desktopEnv,
       id: ProjectId.make("project-desktop"),
-      title: "v12",
+      title: "v12code",
       repositoryIdentity,
     });
     const threads = [

@@ -1,4 +1,4 @@
-import { type ProviderInstanceId } from "@v12/contracts";
+import { type ProviderInstanceId } from "@v12code/contracts";
 import { memo, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { SparklesIcon, StarIcon } from "lucide-react";
 import { ProviderInstanceIcon } from "./ProviderInstanceIcon";

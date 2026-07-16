@@ -1,4 +1,4 @@
-import type { PreviewAnnotationPayload } from "@v12/contracts";
+import type { PreviewAnnotationPayload } from "@v12code/contracts";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vite-plus/test";
 

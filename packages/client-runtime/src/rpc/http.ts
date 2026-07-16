@@ -7,8 +7,8 @@ import {
   type EnvironmentRequestInvalidError,
   type EnvironmentResourceNotFoundError,
   type EnvironmentScopeRequiredError,
-} from "@v12/contracts";
-import { httpHeaderRedactionLayer } from "@v12/shared/httpObservability";
+} from "@v12code/contracts";
+import { httpHeaderRedactionLayer } from "@v12code/shared/httpObservability";
 import * as Data from "effect/Data";
 import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";

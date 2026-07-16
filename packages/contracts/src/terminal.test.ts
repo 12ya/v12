@@ -80,19 +80,19 @@ describe("TerminalOpenInput", () => {
       threadId: "thread-1",
       terminalId: DEFAULT_TERMINAL_ID,
       cwd: "/tmp/project",
-      worktreePath: "/tmp/project/.v12/worktrees/feature-a",
+      worktreePath: "/tmp/project/.v12code/worktrees/feature-a",
       cols: 100,
       rows: 24,
       env: {
-        V12_PROJECT_ROOT: "/tmp/project",
+        V12CODE_PROJECT_ROOT: "/tmp/project",
         CUSTOM_FLAG: "1",
       },
     });
     expect(parsed.env).toMatchObject({
-      V12_PROJECT_ROOT: "/tmp/project",
+      V12CODE_PROJECT_ROOT: "/tmp/project",
       CUSTOM_FLAG: "1",
     });
-    expect(parsed.worktreePath).toBe("/tmp/project/.v12/worktrees/feature-a");
+    expect(parsed.worktreePath).toBe("/tmp/project/.v12code/worktrees/feature-a");
   });
 
   it("rejects invalid env keys", () => {
@@ -288,8 +288,8 @@ describe("TerminalEvent", () => {
         snapshot: {
           threadId: "thread-1",
           terminalId: DEFAULT_TERMINAL_ID,
-          cwd: "/tmp/project/.v12/worktrees/feature-a",
-          worktreePath: "/tmp/project/.v12/worktrees/feature-a",
+          cwd: "/tmp/project/.v12code/worktrees/feature-a",
+          worktreePath: "/tmp/project/.v12code/worktrees/feature-a",
           status: "running",
           pid: 1234,
           history: "",
