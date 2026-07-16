@@ -7,6 +7,7 @@ import { memo, useCallback, useMemo } from "react";
 import type { ActivePlanState, LatestProposedPlanState } from "../session-logic";
 import {
   applyTaskHudOverrides,
+  filterPendingContextTasks,
   taskHudPlanKey,
   useTaskHudStore,
   type ContextualTask,
@@ -48,8 +49,12 @@ export const TaskHud = memo(function TaskHud({
   onOpenTaskSource,
 }: TaskHudProps) {
   const threadKey = scopedThreadKey(threadRef);
-  const contextTasks = useTaskHudStore(
+  const storedContextTasks = useTaskHudStore(
     (state) => state.contextTasksByThreadKey[threadKey] ?? EMPTY_CONTEXT_TASKS,
+  );
+  const contextTasks = useMemo(
+    () => filterPendingContextTasks(storedContextTasks),
+    [storedContextTasks],
   );
   const planKey = activePlan ? taskHudPlanKey(threadRef, activePlan) : null;
   const overrides = useTaskHudStore((state) =>

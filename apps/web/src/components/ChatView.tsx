@@ -219,6 +219,7 @@ import { TaskHud } from "./TaskHud";
 import {
   appendContextTasksToPrompt,
   buildForkMessageIdMap,
+  filterPendingContextTasks,
   useTaskHudStore,
   type ContextualTask,
 } from "../taskHudState";
@@ -264,6 +265,11 @@ import {
 } from "../versionSkew";
 import { useAssetUrls } from "../assets/assetUrls";
 import { useMaterializeDraftThread } from "../hooks/useMaterializeDraftThread";
+import {
+  shouldEnqueueChatSubmission,
+  type QueuedChatSubmission,
+  useChatQueueStore,
+} from "../chatQueueStore";
 
 const IMAGE_ONLY_BOOTSTRAP_PROMPT =
   "[User attached one or more images without additional text. Respond using the conversation context and the attached image(s).]";
@@ -271,6 +277,7 @@ const EMPTY_ACTIVITIES: OrchestrationThreadActivity[] = [];
 const EMPTY_PROVIDERS: ServerProvider[] = [];
 const EMPTY_PROVIDER_SKILLS: ServerProvider["skills"] = [];
 const EMPTY_PENDING_USER_INPUT_ANSWERS: Record<string, PendingUserInputDraftAnswer> = {};
+const EMPTY_QUEUED_CHAT_SUBMISSIONS: readonly QueuedChatSubmission[] = [];
 const PreviewPanel = lazy(() =>
   import("./preview/PreviewPanel").then((module) => ({ default: module.PreviewPanel })),
 );
@@ -1204,6 +1211,11 @@ function ChatViewContent(props: ChatViewProps) {
   const attachmentPreviewHandoffByMessageIdRef = useRef<Record<string, string[]>>({});
   const attachmentPreviewPromotionInFlightByMessageIdRef = useRef<Record<string, true>>({});
   const sendInFlightRef = useRef(false);
+  const queueDispatchingIdRef = useRef<string | null>(null);
+  const queueBlockedIdRef = useRef<string | null>(null);
+  const queueDeliveryRef = useRef<((submission: QueuedChatSubmission) => Promise<boolean>) | null>(
+    null,
+  );
   const terminalUiOpenByThreadRef = useRef<Record<string, boolean>>({});
 
   useLayoutEffect(() => {
@@ -1337,6 +1349,11 @@ function ChatViewContent(props: ChatViewProps) {
     [activeThread],
   );
   const activeThreadKey = activeThreadRef ? scopedThreadKey(activeThreadRef) : null;
+  const queuedChatSubmissions = useChatQueueStore((state) =>
+    activeThreadKey
+      ? (state.queuesByThreadKey[activeThreadKey] ?? EMPTY_QUEUED_CHAT_SUBMISSIONS)
+      : EMPTY_QUEUED_CHAT_SUBMISSIONS,
+  );
   const pendingTaskSourceRef = useRef<{
     readonly threadKey: string;
     readonly messageId: MessageId;
@@ -4096,22 +4113,30 @@ function ChatViewContent(props: ChatViewProps) {
     ],
   );
 
-  const onSend = async (e?: { preventDefault: () => void }) => {
+  const onSend = async (
+    e?: { preventDefault: () => void },
+    queuedSubmission?: QueuedChatSubmission,
+  ): Promise<boolean> => {
     e?.preventDefault();
     if (
       !activeThread ||
-      isSendBusy ||
       isConnecting ||
       activeEnvironmentUnavailable ||
-      sendInFlightRef.current
+      (queuedSubmission !== undefined &&
+        (queuedSubmission.threadKey !== activeThreadKey ||
+          queuedSubmission.environmentId !== activeThread.environmentId ||
+          queuedSubmission.threadId !== activeThread.id ||
+          phase === "running" ||
+          isSendBusy ||
+          sendInFlightRef.current))
     )
-      return;
-    if (activePendingProgress) {
+      return false;
+    if (activePendingProgress && queuedSubmission === undefined) {
       onAdvanceActivePendingUserInput();
-      return;
+      return false;
     }
-    const sendCtx = composerRef.current?.getSendContext();
-    if (!sendCtx) return;
+    const sendCtx = queuedSubmission ?? composerRef.current?.getSendContext();
+    if (!sendCtx) return false;
     const {
       images: composerImages,
       terminalContexts: composerTerminalContexts,
@@ -4124,13 +4149,17 @@ function ChatViewContent(props: ChatViewProps) {
       selectedPromptEffort: ctxSelectedPromptEffort,
       selectedModelSelection: ctxSelectedModelSelection,
     } = sendCtx;
-    const promptForSend = promptRef.current;
+    const runtimeModeForSend = queuedSubmission?.runtimeMode ?? runtimeMode;
+    const interactionModeForSend = queuedSubmission?.interactionMode ?? interactionMode;
+    const promptForSend = queuedSubmission?.prompt ?? promptRef.current;
     const activeThreadKeyForSend = scopedThreadKey(
       scopeThreadRef(activeThread.environmentId, activeThread.id),
     );
-    const pendingContextTasks = (
-      useTaskHudStore.getState().contextTasksByThreadKey[activeThreadKeyForSend] ?? []
-    ).filter((task) => task.pendingSend);
+    const pendingContextTasks = queuedSubmission
+      ? [...queuedSubmission.contextTasks]
+      : filterPendingContextTasks(
+          useTaskHudStore.getState().contextTasksByThreadKey[activeThreadKeyForSend] ?? [],
+        );
     const {
       trimmedPrompt: trimmed,
       sendableTerminalContexts: sendableComposerTerminalContexts,
@@ -4146,7 +4175,7 @@ function ChatViewContent(props: ChatViewProps) {
         composerReviewComments.length,
       contextTaskCount: pendingContextTasks.length,
     });
-    if (showPlanFollowUpPrompt && activeProposedPlan) {
+    if (queuedSubmission === undefined && showPlanFollowUpPrompt && activeProposedPlan) {
       const followUp = resolvePlanFollowUpSubmission({
         draftText: trimmed,
         planMarkdown: activeProposedPlan.planMarkdown,
@@ -4158,7 +4187,7 @@ function ChatViewContent(props: ChatViewProps) {
         text: followUp.text,
         interactionMode: followUp.interactionMode,
       });
-      return;
+      return true;
     }
     const standaloneSlashCommand =
       composerImages.length === 0 &&
@@ -4174,7 +4203,7 @@ function ChatViewContent(props: ChatViewProps) {
       promptRef.current = "";
       clearComposerDraftContent(composerDraftTarget);
       composerRef.current?.resetCursorState();
-      return;
+      return true;
     }
     if (!hasSendableContent) {
       if (expiredTerminalContextCount > 0) {
@@ -4190,9 +4219,49 @@ function ChatViewContent(props: ChatViewProps) {
           }),
         );
       }
-      return;
+      return false;
     }
-    if (!activeProject) return;
+    if (!activeProject) return false;
+
+    if (
+      shouldEnqueueChatSubmission({
+        isQueuedDelivery: queuedSubmission !== undefined,
+        hasActiveTurn: phase === "running",
+        hasPendingDispatch: isSendBusy || sendInFlightRef.current,
+        hasQueuedSubmissions: queuedChatSubmissions.length > 0,
+      })
+    ) {
+      useChatQueueStore.getState().enqueue({
+        id: newMessageId(),
+        threadKey: activeThreadKeyForSend,
+        environmentId: activeThread.environmentId,
+        threadId: activeThread.id,
+        createdAt: new Date().toISOString(),
+        prompt: promptForSend,
+        images: [...composerImages],
+        terminalContexts: [...sendableComposerTerminalContexts],
+        elementContexts: [...composerElementContexts],
+        previewAnnotations: [...composerPreviewAnnotations],
+        reviewComments: [...composerReviewComments],
+        contextTasks: [...pendingContextTasks],
+        selectedProvider: ctxSelectedProvider,
+        selectedModel: ctxSelectedModel,
+        selectedProviderModels: [...ctxSelectedProviderModels],
+        selectedPromptEffort: ctxSelectedPromptEffort,
+        selectedModelSelection: ctxSelectedModelSelection,
+        runtimeMode: runtimeModeForSend,
+        interactionMode: interactionModeForSend,
+      });
+      useTaskHudStore.getState().consumeContextTasks(
+        activeThreadKeyForSend,
+        pendingContextTasks.map((task) => task.id),
+      );
+      promptRef.current = "";
+      clearComposerDraftContent(composerDraftTarget);
+      composerRef.current?.resetCursorState();
+      scheduleComposerFocus();
+      return true;
+    }
     const threadIdForSend = activeThread.id;
     const isFirstMessage = !isServerThread || activeThread.messages.length === 0;
     const baseBranchForWorktree =
@@ -4206,7 +4275,7 @@ function ChatViewContent(props: ChatViewProps) {
       isFirstMessage && sendEnvMode === "worktree" && !activeThread.worktreePath;
     if (shouldCreateWorktree && !activeThreadBranch) {
       setThreadError(threadIdForSend, "Select a base branch before sending in New worktree mode.");
-      return;
+      return false;
     }
 
     sendInFlightRef.current = true;
@@ -4232,8 +4301,8 @@ function ChatViewContent(props: ChatViewProps) {
       ),
       pendingContextTasks,
     );
-    const messageIdForSend = newMessageId();
-    const messageCreatedAt = new Date().toISOString();
+    const messageIdForSend = queuedSubmission?.id ?? newMessageId();
+    const messageCreatedAt = queuedSubmission?.createdAt ?? new Date().toISOString();
     const outgoingMessageText = formatOutgoingPrompt({
       provider: ctxSelectedProvider,
       model: ctxSelectedModel,
@@ -4299,9 +4368,11 @@ function ChatViewContent(props: ChatViewProps) {
         }),
       );
     }
-    promptRef.current = "";
-    clearComposerDraftContent(composerDraftTarget);
-    composerRef.current?.resetCursorState();
+    if (queuedSubmission === undefined) {
+      promptRef.current = "";
+      clearComposerDraftContent(composerDraftTarget);
+      composerRef.current?.resetCursorState();
+    }
 
     let firstComposerImageName: string | null = null;
     if (composerImagesSnapshot.length > 0) {
@@ -4351,8 +4422,8 @@ function ChatViewContent(props: ChatViewProps) {
         threadId: threadIdForSend,
         createdAt: messageCreatedAt,
         ...(ctxSelectedModel ? { modelSelection: ctxSelectedModelSelection } : {}),
-        runtimeMode,
-        interactionMode,
+        runtimeMode: runtimeModeForSend,
+        interactionMode: interactionModeForSend,
       });
       if (settingsResult._tag === "Failure") {
         failure = settingsResult;
@@ -4375,8 +4446,8 @@ function ChatViewContent(props: ChatViewProps) {
                       projectId: activeProject.id,
                       title,
                       modelSelection: threadCreateModelSelection,
-                      runtimeMode,
-                      interactionMode,
+                      runtimeMode: runtimeModeForSend,
+                      interactionMode: interactionModeForSend,
                       branch: activeThreadBranch,
                       worktreePath: activeThread.worktreePath,
                       createdAt: activeThread.createdAt,
@@ -4409,8 +4480,8 @@ function ChatViewContent(props: ChatViewProps) {
           },
           modelSelection: ctxSelectedModelSelection,
           titleSeed: title,
-          runtimeMode,
-          interactionMode,
+          runtimeMode: runtimeModeForSend,
+          interactionMode: interactionModeForSend,
           ...(bootstrap ? { bootstrap } : {}),
           createdAt: messageCreatedAt,
         },
@@ -4419,7 +4490,7 @@ function ChatViewContent(props: ChatViewProps) {
         failure = startResult;
       } else {
         turnStartSucceeded = true;
-        useTaskHudStore.getState().markContextTasksSent(
+        useTaskHudStore.getState().consumeContextTasks(
           activeThreadKeyForSend,
           pendingContextTasks.map((task) => task.id),
         );
@@ -4428,6 +4499,7 @@ function ChatViewContent(props: ChatViewProps) {
 
     if (failure !== null) {
       if (
+        queuedSubmission === undefined &&
         promptRef.current.length === 0 &&
         composerImagesRef.current.length === 0 &&
         composerTerminalContextsRef.current.length === 0 &&
@@ -4474,7 +4546,65 @@ function ChatViewContent(props: ChatViewProps) {
     if (!turnStartSucceeded) {
       resetLocalDispatch();
     }
+    return turnStartSucceeded;
   };
+
+  queueDeliveryRef.current = (submission) => onSend(undefined, submission);
+
+  const nextQueuedChatSubmission = queuedChatSubmissions[0] ?? null;
+  useEffect(() => {
+    if (
+      !nextQueuedChatSubmission ||
+      !activeThreadKey ||
+      phase === "running" ||
+      isSendBusy ||
+      isConnecting ||
+      activeEnvironmentUnavailable ||
+      activePendingApproval !== null ||
+      activePendingUserInput !== null ||
+      sendInFlightRef.current ||
+      queueDispatchingIdRef.current !== null ||
+      queueBlockedIdRef.current === nextQueuedChatSubmission.id
+    ) {
+      return;
+    }
+
+    const deliver = queueDeliveryRef.current;
+    if (!deliver) return;
+    queueDispatchingIdRef.current = nextQueuedChatSubmission.id;
+    void deliver(nextQueuedChatSubmission)
+      .then((sent) => {
+        if (sent) {
+          useChatQueueStore
+            .getState()
+            .remove(nextQueuedChatSubmission.threadKey, nextQueuedChatSubmission.id);
+          queueBlockedIdRef.current = null;
+          return;
+        }
+        // Keep a failed delivery queued instead of silently dropping it or
+        // hammering the server in a retry loop. A later connection/turn state
+        // transition releases it for another attempt.
+        queueBlockedIdRef.current = nextQueuedChatSubmission.id;
+      })
+      .finally(() => {
+        if (queueDispatchingIdRef.current === nextQueuedChatSubmission.id) {
+          queueDispatchingIdRef.current = null;
+        }
+      });
+  }, [
+    activeEnvironmentUnavailable,
+    activePendingApproval,
+    activePendingUserInput,
+    activeThreadKey,
+    isConnecting,
+    isSendBusy,
+    nextQueuedChatSubmission,
+    phase,
+  ]);
+
+  useEffect(() => {
+    queueBlockedIdRef.current = null;
+  }, [activeThreadKey, isConnecting, phase]);
 
   const onInterrupt = async () => {
     if (!activeThread) return;
@@ -5232,8 +5362,9 @@ function ChatViewContent(props: ChatViewProps) {
         completed: false,
         pendingSend: true,
       });
+      scheduleComposerFocus();
     },
-    [activeThread, activeThreadKey],
+    [activeThread, activeThreadKey, scheduleComposerFocus],
   );
   const onShowTasks = useCallback(() => setPlanSidebarOpen(true), []);
   const onOpenTaskSource = useCallback(
@@ -5529,6 +5660,7 @@ function ChatViewContent(props: ChatViewProps) {
                       isConnecting={isConnecting}
                       isSendBusy={isSendBusy}
                       isPreparingWorktree={isPreparingWorktree}
+                      queuedMessageCount={queuedChatSubmissions.length}
                       environmentUnavailable={activeEnvironmentUnavailableState}
                       activePendingApproval={activePendingApproval}
                       pendingApprovals={pendingApprovals}

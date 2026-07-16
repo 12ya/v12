@@ -6,6 +6,8 @@ import {
   appendContextTasksToPrompt,
   applyTaskHudOverrides,
   buildForkMessageIdMap,
+  extractTrailingTaskAnnotations,
+  filterPendingContextTasks,
   identifyTaskHudSteps,
   taskHudPlanKey,
   useTaskHudStore,
@@ -23,19 +25,33 @@ beforeEach(() => {
 
 describe("task HUD state", () => {
   it("turns pending tasks into a sendable prompt without requiring comment text", () => {
-    expect(
-      appendContextTasksToPrompt("", [
-        { instruction: "No longer animates width", quote: "No longer animates width" },
-      ]),
-    ).toBe("1. No longer animates width");
-    expect(
-      appendContextTasksToPrompt("Please verify", [
-        { instruction: "Check this claim", quote: "The selected claim" },
-      ]),
-    ).toContain("Please verify\n\n1. Check this claim");
+    const annotationOnlyPrompt = appendContextTasksToPrompt("", [
+      { instruction: "No longer animates width", quote: "No longer animates width" },
+    ]);
+    expect(annotationOnlyPrompt).toBe(
+      '<task_annotations count="1">\n1. No longer animates width\n</task_annotations>',
+    );
+
+    const promptWithAnnotation = appendContextTasksToPrompt("Please verify", [
+      { instruction: "Check this claim", quote: "The selected claim" },
+    ]);
+    expect(promptWithAnnotation).toContain(
+      'Please verify\n\n<task_annotations count="1">\n1. Check this claim',
+    );
+    expect(extractTrailingTaskAnnotations(promptWithAnnotation)).toEqual({
+      promptText: "Please verify",
+      annotationCount: 1,
+    });
   });
 
-  it("keeps sent tasks in the HUD but clears their pending-send state", () => {
+  it("leaves ordinary sent prompts unchanged when they have no task annotations", () => {
+    expect(extractTrailingTaskAnnotations("Please verify")).toEqual({
+      promptText: "Please verify",
+      annotationCount: 0,
+    });
+  });
+
+  it("removes sent tasks from the annotation UI", () => {
     const store = useTaskHudStore.getState();
     const task = {
       id: "pending-task",
@@ -49,11 +65,19 @@ describe("task HUD state", () => {
       pendingSend: true,
     };
     store.addContextTask("env-1:thread-1", task);
-    store.markContextTasksSent("env-1:thread-1", [task.id]);
+    store.consumeContextTasks("env-1:thread-1", [task.id]);
 
-    expect(useTaskHudStore.getState().contextTasksByThreadKey["env-1:thread-1"]).toEqual([
-      { ...task, pendingSend: false },
-    ]);
+    expect(useTaskHudStore.getState().contextTasksByThreadKey["env-1:thread-1"]).toEqual([]);
+  });
+
+  it("hides sent annotations left in persisted state", () => {
+    expect(
+      filterPendingContextTasks([
+        { pendingSend: true } as never,
+        { pendingSend: false } as never,
+        {} as never,
+      ]),
+    ).toEqual([{ pendingSend: true }]);
   });
 
   it("builds a thread and turn scoped persistence key", () => {

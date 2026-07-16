@@ -9,6 +9,8 @@ import type { ActivePlanState } from "./session-logic";
 const TASK_HUD_STORAGE_KEY = "v12:task-hud-state:v1";
 const MAX_PERSISTED_PLAN_OVERRIDES = 100;
 const MAX_PERSISTED_CONTEXT_TASKS = 200;
+const TRAILING_TASK_ANNOTATIONS_PATTERN =
+  /\n*<task_annotations count="(\d+)">\n[\s\S]*\n<\/task_annotations>\s*$/;
 
 export type TaskHudSourceStep = ActivePlanState["steps"][number];
 
@@ -34,6 +36,12 @@ export interface ContextualTask {
   readonly pendingSend?: boolean;
 }
 
+export function filterPendingContextTasks(
+  tasks: readonly ContextualTask[],
+): readonly ContextualTask[] {
+  return tasks.filter((task) => task.pendingSend === true);
+}
+
 const EMPTY_OVERRIDES: TaskHudPlanOverrides = Object.freeze({
   order: Object.freeze([]),
   removed: Object.freeze([]),
@@ -49,7 +57,7 @@ interface TaskHudStoreState {
   readonly addContextTask: (threadKey: string, task: ContextualTask) => void;
   readonly setContextTaskCompleted: (threadKey: string, taskId: string, completed: boolean) => void;
   readonly removeContextTask: (threadKey: string, taskId: string) => void;
-  readonly markContextTasksSent: (threadKey: string, taskIds: readonly string[]) => void;
+  readonly consumeContextTasks: (threadKey: string, taskIds: readonly string[]) => void;
   readonly copyContextTasksToFork: (input: {
     readonly sourceThreadKey: string;
     readonly targetThreadKey: string;
@@ -99,8 +107,22 @@ export function appendContextTasksToPrompt(
     return `${index + 1}. ${task.instruction}${selectedContext}`;
   });
   const taskBlock = tasks.length === 1 ? taskLines[0]! : `Tasks:\n${taskLines.join("\n")}`;
+  const annotations = `<task_annotations count="${tasks.length}">\n${taskBlock}\n</task_annotations>`;
   const trimmedPrompt = prompt.trim();
-  return trimmedPrompt ? `${trimmedPrompt}\n\n${taskBlock}` : taskBlock;
+  return trimmedPrompt ? `${trimmedPrompt}\n\n${annotations}` : annotations;
+}
+
+export function extractTrailingTaskAnnotations(prompt: string): {
+  readonly promptText: string;
+  readonly annotationCount: number;
+} {
+  const match = TRAILING_TASK_ANNOTATIONS_PATTERN.exec(prompt);
+  if (!match) return { promptText: prompt, annotationCount: 0 };
+  const parsedCount = Number.parseInt(match[1] ?? "", 10);
+  return {
+    promptText: prompt.slice(0, match.index).replace(/\n+$/, ""),
+    annotationCount: Number.isSafeInteger(parsedCount) && parsedCount > 0 ? parsedCount : 0,
+  };
 }
 
 export function identifyTaskHudSteps(steps: readonly TaskHudSourceStep[]): TaskHudStep[] {
@@ -216,14 +238,14 @@ export const useTaskHudStore = create<TaskHudStoreState>()(
             ),
           },
         })),
-      markContextTasksSent: (threadKey, taskIds) => {
+      consumeContextTasks: (threadKey, taskIds) => {
         if (taskIds.length === 0) return;
         const sentIds = new Set(taskIds);
         set((state) => ({
           contextTasksByThreadKey: {
             ...state.contextTasksByThreadKey,
-            [threadKey]: (state.contextTasksByThreadKey[threadKey] ?? []).map((task) =>
-              sentIds.has(task.id) ? { ...task, pendingSend: false } : task,
+            [threadKey]: (state.contextTasksByThreadKey[threadKey] ?? []).filter(
+              (task) => !sentIds.has(task.id),
             ),
           },
         }));

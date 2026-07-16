@@ -51,6 +51,7 @@ import {
   GlobeIcon,
   HammerIcon,
   MessageCircleIcon,
+  MessageSquareIcon,
   MousePointerClickIcon,
   PaintbrushIcon,
   MinusIcon,
@@ -97,7 +98,12 @@ import { cn } from "~/lib/utils";
 import { useUiStateStore } from "~/uiStateStore";
 import { type TimestampFormat } from "@v12/contracts/settings";
 import { formatChatTimestampTooltip, formatShortTimestamp } from "../../timestampFormat";
-import { type ContextualTask, useTaskHudStore } from "../../taskHudState";
+import {
+  extractTrailingTaskAnnotations,
+  filterPendingContextTasks,
+  type ContextualTask,
+  useTaskHudStore,
+} from "../../taskHudState";
 
 import {
   buildInlineTerminalContextText,
@@ -234,8 +240,12 @@ export const MessagesTimeline = memo(function MessagesTimeline({
   contentInsetEndAdjustment,
   onIsAtEndChange,
 }: MessagesTimelineProps) {
-  const contextTasks = useTaskHudStore(
+  const storedContextTasks = useTaskHudStore(
     (state) => state.contextTasksByThreadKey[routeThreadKey] ?? EMPTY_CONTEXT_TASKS,
+  );
+  const contextTasks = useMemo(
+    () => filterPendingContextTasks(storedContextTasks),
+    [storedContextTasks],
   );
   const contextTasksBySourceMessageId = useMemo(
     () => groupContextTasksBySourceMessageId(contextTasks),
@@ -779,7 +789,8 @@ function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" 
     captureSelection,
   } = useMessageTaskSelection();
   const userImages = row.message.attachments ?? [];
-  const displayedUserMessage = deriveDisplayedUserMessageState(row.message.text);
+  const taskAnnotations = extractTrailingTaskAnnotations(row.message.text);
+  const displayedUserMessage = deriveDisplayedUserMessageState(taskAnnotations.promptText);
   const terminalContexts = displayedUserMessage.contexts;
   const previewAnnotations: ParsedPreviewAnnotation[] = [];
   let visibleText = displayedUserMessage.visibleText;
@@ -797,78 +808,96 @@ function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" 
   const previewImages = userImages.filter((image) => image.name.startsWith("preview-annotation-"));
   const regularImages = userImages.filter((image) => !image.name.startsWith("preview-annotation-"));
   const canRevertAgentWork = typeof row.revertTurnCount === "number";
+  const isAnnotationOnlyMessage =
+    taskAnnotations.annotationCount > 0 &&
+    regularImages.length === 0 &&
+    previewAnnotations.length === 0 &&
+    elementContexts.length === 0 &&
+    terminalContexts.length === 0 &&
+    elementContextState.promptText.trim().length === 0;
 
   return (
     <div className="group flex flex-col items-end gap-1">
-      <div className="max-w-[80%]">
-        <div
-          ref={selectionContainerRef}
-          className="relative min-w-0 rounded-2xl border border-border bg-secondary p-3"
-          onPointerUp={captureSelection}
-          onKeyUp={captureSelection}
-        >
-          {regularImages.length > 0 && (
-            <div className="mb-2 grid max-w-[420px] grid-cols-2 gap-2">
-              {regularImages.map((image: NonNullable<TimelineMessage["attachments"]>[number]) => (
-                <div
-                  key={image.id}
-                  className="overflow-hidden rounded-lg border border-border/80 bg-background/70"
-                >
-                  {image.previewUrl ? (
-                    <button
-                      type="button"
-                      className="h-full w-full cursor-zoom-in"
-                      aria-label={`Preview ${image.name}`}
-                      onClick={() => {
-                        const preview = buildExpandedImagePreview(regularImages, image.id);
-                        if (!preview) return;
-                        ctx.onImageExpand(preview);
-                      }}
-                    >
-                      <img
-                        src={image.previewUrl}
-                        alt={image.name}
-                        className="block h-auto max-h-[220px] w-full object-cover"
-                      />
-                    </button>
-                  ) : (
-                    <div className="flex min-h-[72px] items-center justify-center px-2 py-3 text-center text-[11px] text-muted-foreground/70">
-                      {image.name}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-          {previewAnnotations.map((annotation, index) => (
-            <UserMessagePreviewAnnotationCard
-              key={annotation.id}
-              annotation={annotation}
-              image={previewImages[index] ?? null}
+      <div className="flex max-w-[80%] flex-col items-end gap-1.5">
+        {taskAnnotations.annotationCount > 0 ? (
+          <div className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-secondary px-2.5 text-xs font-medium text-foreground">
+            <MessageSquareIcon className="size-3 text-muted-foreground" />
+            <span>
+              {taskAnnotations.annotationCount}{" "}
+              {taskAnnotations.annotationCount === 1 ? "annotation" : "annotations"}
+            </span>
+          </div>
+        ) : null}
+        {!isAnnotationOnlyMessage ? (
+          <div
+            ref={selectionContainerRef}
+            className="relative min-w-0 rounded-2xl border border-border bg-secondary p-3"
+            onPointerUp={captureSelection}
+            onKeyUp={captureSelection}
+          >
+            {regularImages.length > 0 && (
+              <div className="mb-2 grid max-w-[420px] grid-cols-2 gap-2">
+                {regularImages.map((image: NonNullable<TimelineMessage["attachments"]>[number]) => (
+                  <div
+                    key={image.id}
+                    className="overflow-hidden rounded-lg border border-border/80 bg-background/70"
+                  >
+                    {image.previewUrl ? (
+                      <button
+                        type="button"
+                        className="h-full w-full cursor-zoom-in"
+                        aria-label={`Preview ${image.name}`}
+                        onClick={() => {
+                          const preview = buildExpandedImagePreview(regularImages, image.id);
+                          if (!preview) return;
+                          ctx.onImageExpand(preview);
+                        }}
+                      >
+                        <img
+                          src={image.previewUrl}
+                          alt={image.name}
+                          className="block h-auto max-h-[220px] w-full object-cover"
+                        />
+                      </button>
+                    ) : (
+                      <div className="flex min-h-[72px] items-center justify-center px-2 py-3 text-center text-[11px] text-muted-foreground/70">
+                        {image.name}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            {previewAnnotations.map((annotation, index) => (
+              <UserMessagePreviewAnnotationCard
+                key={annotation.id}
+                annotation={annotation}
+                image={previewImages[index] ?? null}
+              />
+            ))}
+            {elementContexts.length > 0 ? (
+              <div className="mb-2 flex flex-wrap gap-1.5">
+                {elementContexts.map((context) => (
+                  <UserMessageElementContextChip
+                    key={`${context.header}:${context.body}`}
+                    context={context}
+                  />
+                ))}
+              </div>
+            ) : null}
+            <CollapsibleUserMessageBody
+              text={elementContextState.promptText}
+              terminalContexts={terminalContexts}
+              skills={ctx.skills}
+              markdownCwd={ctx.markdownCwd}
             />
-          ))}
-          {elementContexts.length > 0 ? (
-            <div className="mb-2 flex flex-wrap gap-1.5">
-              {elementContexts.map((context) => (
-                <UserMessageElementContextChip
-                  key={`${context.header}:${context.body}`}
-                  context={context}
-                />
-              ))}
-            </div>
-          ) : null}
-          <CollapsibleUserMessageBody
-            text={elementContextState.promptText}
-            terminalContexts={terminalContexts}
-            skills={ctx.skills}
-            markdownCwd={ctx.markdownCwd}
-          />
-          <TaskSourceMarkersOverlay
-            messageId={row.message.id}
-            containerRef={selectionContainerRef}
-            contentKey={elementContextState.promptText}
-          />
-        </div>
+            <TaskSourceMarkersOverlay
+              messageId={row.message.id}
+              containerRef={selectionContainerRef}
+              contentKey={elementContextState.promptText}
+            />
+          </div>
+        ) : null}
       </div>
       <div className="flex w-full max-w-[80%] items-center justify-end pe-1 text-xs tabular-nums opacity-0 transition-opacity duration-200 focus-within:opacity-100 group-hover:opacity-100 max-sm:opacity-100">
         <div className="flex shrink-0 items-center gap-2">
@@ -1142,10 +1171,16 @@ function SelectionActionBar(props: {
 }) {
   const [instruction, setInstruction] = useState("");
   const [editingContext, setEditingContext] = useState(false);
+  const instructionRef = useRef<HTMLTextAreaElement>(null);
   const virtualAnchor = useMemo(
     () => ({ getBoundingClientRect: () => props.anchorRect }),
     [props.anchorRect],
   );
+  useEffect(() => {
+    if (!editingContext) return;
+    const frame = requestAnimationFrame(() => instructionRef.current?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, [editingContext]);
   return (
     <Popover open onOpenChange={(open) => !open && props.onCancel()}>
       <PopoverPopup
@@ -1168,6 +1203,7 @@ function SelectionActionBar(props: {
               </span>
               <textarea
                 autoFocus
+                ref={instructionRef}
                 value={instruction}
                 onChange={(event) => setInstruction(event.target.value)}
                 onKeyDown={(event) => {
