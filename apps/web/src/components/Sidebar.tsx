@@ -748,6 +748,7 @@ export const SidebarThreadRow = memo(function SidebarThreadRow(props: SidebarThr
         className={`${resolveThreadRowClassName({
           isActive,
           isSelected,
+          isDraft,
         })} relative isolate`}
         onClick={handleRowClick}
         onDoubleClick={handleRowDoubleClick}
