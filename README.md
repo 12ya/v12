@@ -9,7 +9,9 @@ V12 is a minimal web GUI for coding agents (currently Codex, Claude, Cursor, and
 V12 brings the best coding-agent workflows into one fast, open-source app:
 
 - **Cursor-like chat drafts:** Start a chat, switch away, and come back without losing what you wrote.
+- **Message queuing:** Send follow-up messages while an agent is working and keep the next instructions ready to go.
 - **Codex-like tasks:** Follow agent work as clear tasks instead of digging through a wall of output.
+- **Annotations and tasks:** Select text from a response, turn it into a tracked task, and send it back to the agent with its original context.
 - **Richer tool-call details:** See commands, file changes, results, and failures in useful, readable cards.
 - **Chat pinning:** Keep important chats at the top of the sidebar so they stay easy to find.
 
