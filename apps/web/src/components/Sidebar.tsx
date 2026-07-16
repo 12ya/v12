@@ -1583,12 +1583,15 @@ const SidebarProjectItem = memo(function SidebarProjectItem(props: SidebarProjec
         },
       });
     };
+    const pinnedThreadKeySet = new Set(pinnedThreadKeys);
     const threadPreview = getVisibleThreadsForProject({
       threads: visibleProjectThreads,
       activeThreadId: activeRouteThreadKey ?? undefined,
       isThreadListExpanded,
       previewLimit: sidebarThreadPreviewCount,
       getThreadId: (thread) => scopedThreadKey(scopeThreadRef(thread.environmentId, thread.id)),
+      isThreadAlwaysVisible: (thread) =>
+        pinnedThreadKeySet.has(scopedThreadKey(scopeThreadRef(thread.environmentId, thread.id))),
     });
     const hasOverflowingThreads = threadPreview.hasHiddenThreads;
     const previewThreads = threadPreview.visibleThreads;
@@ -1623,6 +1626,7 @@ const SidebarProjectItem = memo(function SidebarProjectItem(props: SidebarProjec
     activeRouteThreadKey,
     isThreadListExpanded,
     pinnedCollapsedThread,
+    pinnedThreadKeys,
     projectExpanded,
     projectThreads,
     sidebarThreadPreviewCount,
@@ -3713,12 +3717,17 @@ export default function Sidebar() {
           return [];
         }
         const isThreadListExpanded = expandedThreadListsByProject.has(project.projectKey);
+        const pinnedThreadKeySet = new Set(pinnedThreadKeysByProject[project.projectKey] ?? []);
         const threadPreview = getVisibleThreadsForProject({
           threads: projectThreads,
           activeThreadId: activeThreadKey,
           isThreadListExpanded,
           previewLimit: sidebarThreadPreviewCount,
           getThreadId: (thread) => scopedThreadKey(scopeThreadRef(thread.environmentId, thread.id)),
+          isThreadAlwaysVisible: (thread) =>
+            pinnedThreadKeySet.has(
+              scopedThreadKey(scopeThreadRef(thread.environmentId, thread.id)),
+            ),
         });
         const previewThreads = threadPreview.visibleThreads;
         const renderedThreads = pinnedCollapsedThread ? [pinnedCollapsedThread] : previewThreads;

@@ -500,12 +500,14 @@ export function getVisibleThreadsForProject<T extends Pick<Thread, "id">>(input:
   isThreadListExpanded: boolean;
   previewLimit: number;
   getThreadId?: (thread: T) => string;
+  isThreadAlwaysVisible?: (thread: T) => boolean;
 }): {
   hasHiddenThreads: boolean;
   visibleThreads: T[];
   hiddenThreads: T[];
 } {
-  const { activeThreadId, isThreadListExpanded, previewLimit, threads } = input;
+  const { activeThreadId, isThreadAlwaysVisible, isThreadListExpanded, previewLimit, threads } =
+    input;
   const getThreadId = input.getThreadId ?? ((thread: T) => thread.id);
   const exceedsPreviewLimit = threads.length > previewLimit;
 
@@ -518,26 +520,15 @@ export function getVisibleThreadsForProject<T extends Pick<Thread, "id">>(input:
   }
 
   const previewThreads = threads.slice(0, previewLimit);
-  if (!activeThreadId || previewThreads.some((thread) => getThreadId(thread) === activeThreadId)) {
-    return {
-      hasHiddenThreads: true,
-      hiddenThreads: threads.slice(previewLimit),
-      visibleThreads: previewThreads,
-    };
+  const visibleThreadIds = new Set(previewThreads.map((thread) => getThreadId(thread)));
+  for (const thread of threads) {
+    if (
+      (activeThreadId !== undefined && getThreadId(thread) === activeThreadId) ||
+      isThreadAlwaysVisible?.(thread)
+    ) {
+      visibleThreadIds.add(getThreadId(thread));
+    }
   }
-
-  const activeThread = threads.find((thread) => getThreadId(thread) === activeThreadId);
-  if (!activeThread) {
-    return {
-      hasHiddenThreads: true,
-      hiddenThreads: threads.slice(previewLimit),
-      visibleThreads: previewThreads,
-    };
-  }
-
-  const visibleThreadIds = new Set(
-    [...previewThreads, activeThread].map((thread) => getThreadId(thread)),
-  );
 
   const hiddenThreads = threads.filter((thread) => !visibleThreadIds.has(getThreadId(thread)));
   return {

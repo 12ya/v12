@@ -908,6 +908,37 @@ describe("getVisibleThreadsForProject", () => {
     expect(result.hiddenThreads).toEqual([]);
   });
 
+  it("includes every always-visible thread beyond the folded preview limit", () => {
+    const threads = Array.from({ length: 9 }, (_, index) =>
+      makeThread({
+        id: ThreadId.make(`thread-${index + 1}`),
+      }),
+    );
+
+    const result = getVisibleThreadsForProject({
+      threads,
+      activeThreadId: undefined,
+      isThreadListExpanded: false,
+      previewLimit: 3,
+      isThreadAlwaysVisible: (thread) => Number(thread.id.split("-")[1]) <= 5,
+    });
+
+    expect(result.hasHiddenThreads).toBe(true);
+    expect(result.visibleThreads.map((thread) => thread.id)).toEqual([
+      ThreadId.make("thread-1"),
+      ThreadId.make("thread-2"),
+      ThreadId.make("thread-3"),
+      ThreadId.make("thread-4"),
+      ThreadId.make("thread-5"),
+    ]);
+    expect(result.hiddenThreads.map((thread) => thread.id)).toEqual([
+      ThreadId.make("thread-6"),
+      ThreadId.make("thread-7"),
+      ThreadId.make("thread-8"),
+      ThreadId.make("thread-9"),
+    ]);
+  });
+
   it("supports scoped identities for grouped projects", () => {
     const threads = [
       { id: ThreadId.make("shared"), scopedKey: "env-a:shared" },
