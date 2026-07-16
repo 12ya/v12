@@ -1,5 +1,5 @@
-import type { ProjectId } from "@t3tools/contracts";
-import type { SidebarProjectSortOrder, SidebarThreadSortOrder } from "@t3tools/contracts/settings";
+import type { ProjectId } from "@v12/contracts";
+import type { SidebarProjectSortOrder, SidebarThreadSortOrder } from "@v12/contracts/settings";
 import * as Arr from "effect/Array";
 import * as Order from "effect/Order";
 

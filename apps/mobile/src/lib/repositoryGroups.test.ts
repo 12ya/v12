@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vite-plus/test";
 
-import { EnvironmentId, ProjectId, ProviderInstanceId, ThreadId } from "@t3tools/contracts";
+import { EnvironmentId, ProjectId, ProviderInstanceId, ThreadId } from "@v12/contracts";
 
 import { groupProjectsByRepository } from "./repositoryGroups";
-import { EnvironmentProject, EnvironmentThreadShell } from "@t3tools/client-runtime/state/shell";
+import { EnvironmentProject, EnvironmentThreadShell } from "@v12/client-runtime/state/shell";
 
 function makeProject(
   input: Partial<EnvironmentProject> & Pick<EnvironmentProject, "environmentId" | "id" | "title">,
@@ -44,15 +44,15 @@ function makeThread(
 describe("groupProjectsByRepository", () => {
   it("groups projects across environments by repository identity", () => {
     const repoIdentity = {
-      canonicalKey: "github.com/t3tools/t3code",
+      canonicalKey: "github.com/v12/v12",
       locator: {
         source: "git-remote" as const,
         remoteName: "origin",
-        remoteUrl: "git@github.com:t3tools/t3code.git",
+        remoteUrl: "git@github.com:v12/v12.git",
       },
       provider: "github",
-      owner: "t3tools",
-      name: "t3code",
+      owner: "v12",
+      name: "v12",
       displayName: "V12",
     };
 
@@ -94,9 +94,9 @@ describe("groupProjectsByRepository", () => {
 
     expect(groups).toHaveLength(1);
     expect(groups[0]).toMatchObject({
-      key: "github.com/t3tools/t3code",
+      key: "github.com/v12/v12",
       title: "V12",
-      subtitle: "t3tools/t3code",
+      subtitle: "v12/v12",
       projectCount: 2,
       threadCount: 2,
     });

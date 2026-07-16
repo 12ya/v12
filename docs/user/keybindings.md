@@ -2,7 +2,7 @@
 
 V12 reads keybindings from:
 
-- `~/.t3/keybindings.json`
+- `~/.v12/keybindings.json`
 
 The file must be a JSON array of rules:
 

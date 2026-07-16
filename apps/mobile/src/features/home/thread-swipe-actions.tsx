@@ -411,7 +411,7 @@ function SwipeActionButton(props: {
           </Animated.View>
         </View>
         <Animated.View style={[{ paddingTop: 2 }, labelStyle]}>
-          <Text className="text-3xs font-t3-medium text-foreground-muted" numberOfLines={1}>
+          <Text className="text-3xs font-v12-medium text-foreground-muted" numberOfLines={1}>
             {props.label}
           </Text>
         </Animated.View>

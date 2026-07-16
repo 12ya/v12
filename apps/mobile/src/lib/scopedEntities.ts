@@ -1,4 +1,4 @@
-import { ApprovalRequestId, EnvironmentId, ProjectId, ThreadId } from "@t3tools/contracts";
+import { ApprovalRequestId, EnvironmentId, ProjectId, ThreadId } from "@v12/contracts";
 
 export function scopedProjectKey(environmentId: EnvironmentId, projectId: ProjectId): string {
   return `${environmentId}:${projectId}`;

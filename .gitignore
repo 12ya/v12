@@ -14,7 +14,7 @@ build/
 .logs/
 release/
 release-mock/
-.t3
+.v12
 .idea/
 apps/web/.playwright
 apps/web/playwright-report
@@ -29,6 +29,7 @@ dist-electron/
 .electron-runtime/
 node_modules/
 .alchemy/
+.pnpm-store/
 *.log
 .env*
 !.env.example

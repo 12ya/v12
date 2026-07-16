@@ -1,8 +1,9 @@
-import { EnvironmentId, MessageId } from "@t3tools/contracts";
+import { EnvironmentId, MessageId, ThreadId } from "@v12/contracts";
 import { createRef, type ReactNode, type Ref } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeAll, describe, expect, it, vi } from "vite-plus/test";
 import type { LegendListRef } from "@legendapp/list/react";
+import type { ContextualTask } from "../../taskHudState";
 
 vi.mock("@legendapp/list/react", async () => {
   const legendListTestId = "legend-list";
@@ -192,7 +193,6 @@ function buildProps() {
     onAnchorSizeChanged: () => {},
     contentInsetEndAdjustment: 0,
     onIsAtEndChange: () => {},
-    onManualNavigation: () => {},
   };
 }
 
@@ -221,7 +221,11 @@ function buildUserTimelineEntry(text: string) {
 
 describe("MessagesTimeline", () => {
   it("allows selected text to be saved as a task without optional context", async () => {
-    const { resolveSelectionTaskInstruction } = await import("./MessagesTimeline");
+    const {
+      groupContextTasksBySourceMessageId,
+      resolveSelectionTaskInstruction,
+      shouldSaveSelectionTaskContextOnKeyDown,
+    } = await import("./MessagesTimeline");
 
     expect(resolveSelectionTaskInstruction("Selected requirement", "")).toBe(
       "Selected requirement",
@@ -229,43 +233,127 @@ describe("MessagesTimeline", () => {
     expect(
       resolveSelectionTaskInstruction("Selected requirement", "  Verify this behavior  "),
     ).toBe("Verify this behavior");
+    expect(
+      shouldSaveSelectionTaskContextOnKeyDown({
+        key: "Enter",
+        shiftKey: false,
+        isComposing: false,
+      }),
+    ).toBe(true);
+    expect(
+      shouldSaveSelectionTaskContextOnKeyDown({
+        key: "Enter",
+        shiftKey: true,
+        isComposing: false,
+      }),
+    ).toBe(false);
+    expect(
+      shouldSaveSelectionTaskContextOnKeyDown({
+        key: "Enter",
+        shiftKey: false,
+        isComposing: true,
+      }),
+    ).toBe(false);
+
+    const firstMessageId = MessageId.make("message-1");
+    const secondMessageId = MessageId.make("message-2");
+    const sourceThreadId = ThreadId.make("thread-1");
+    const tasks: ContextualTask[] = [
+      {
+        id: "task-1",
+        instruction: "First task",
+        quote: "First quote",
+        sourceThreadId,
+        sourceMessageId: firstMessageId,
+        sourceAuthor: "assistant",
+        sourceCreatedAt: MESSAGE_CREATED_AT,
+        completed: false,
+      },
+      {
+        id: "task-2",
+        instruction: "Second task",
+        quote: "Second quote",
+        sourceThreadId,
+        sourceMessageId: firstMessageId,
+        sourceAuthor: "assistant",
+        sourceCreatedAt: MESSAGE_CREATED_AT,
+        completed: false,
+      },
+      {
+        id: "task-3",
+        instruction: "Third task",
+        quote: "Third quote",
+        sourceThreadId,
+        sourceMessageId: secondMessageId,
+        sourceAuthor: "user",
+        sourceCreatedAt: MESSAGE_CREATED_AT,
+        completed: false,
+      },
+    ];
+    const groupedTasks = groupContextTasksBySourceMessageId(tasks);
+    expect(groupedTasks.get(firstMessageId)).toEqual(tasks.slice(0, 2));
+    expect(groupedTasks.get(secondMessageId)).toEqual(tasks.slice(2));
   });
 
   it("uses LegendList isNearEnd when deciding whether the live edge is visible", async () => {
-    const {
-      resolveTimelineIsAtEnd,
-      resolveTimelineMinimapHasPersistentGutter,
-      resolveTimelineMinimapHeightStyle,
-      resolveTimelineMinimapIndexFromPointer,
-      resolveTimelineMinimapTopPercent,
-    } = await import("./MessagesTimeline.logic");
+    const { resolveTimelineIsAtEnd, resolveTimelineScrollThumb } =
+      await import("./MessagesTimeline.logic");
 
     expect(resolveTimelineIsAtEnd({ isNearEnd: true, isAtEnd: false })).toBe(true);
     expect(resolveTimelineIsAtEnd({ isNearEnd: false, isAtEnd: true })).toBe(false);
     expect(resolveTimelineIsAtEnd({ isAtEnd: true })).toBe(true);
     expect(resolveTimelineIsAtEnd(undefined)).toBeUndefined();
+    expect(
+      resolveTimelineScrollThumb({
+        contentLength: 2_000,
+        scroll: 600,
+        trackLength: 400,
+        viewportLength: 800,
+      }),
+    ).toEqual({ length: 160, offset: 120 });
+    expect(
+      resolveTimelineScrollThumb({
+        contentLength: 800,
+        scroll: 0,
+        trackLength: 400,
+        viewportLength: 800,
+      }),
+    ).toBeNull();
+  });
 
-    expect(resolveTimelineMinimapHeightStyle(5)).toBe("min(32px, calc(100vh - 18rem))");
-    expect(resolveTimelineMinimapTopPercent(2, 5)).toBe(50);
-    expect(
-      resolveTimelineMinimapIndexFromPointer({
-        itemCount: 101,
-        railTop: 100,
-        railHeight: 500,
-        pointerY: 350,
-      }),
-    ).toBe(50);
-    expect(
-      resolveTimelineMinimapIndexFromPointer({
-        itemCount: 101,
-        railTop: 100,
-        railHeight: 500,
-        pointerY: 999,
-      }),
-    ).toBe(100);
-    expect(resolveTimelineMinimapHasPersistentGutter(832)).toBe(false);
-    expect(resolveTimelineMinimapHasPersistentGutter(863)).toBe(false);
-    expect(resolveTimelineMinimapHasPersistentGutter(864)).toBe(true);
+  it("renders a compact synced scroll indicator outside the native viewport", async () => {
+    const { MessagesTimeline } = await import("./MessagesTimeline");
+    const markup = renderToStaticMarkup(
+      <MessagesTimeline
+        {...buildProps()}
+        timelineEntries={[buildUserTimelineEntry("Scrollbar layout")]}
+      />,
+    );
+
+    expect(markup).toContain('data-testid="timeline-scroll-indicator"');
+    expect(markup).toContain("timeline-scroll-viewport");
+    expect(markup).toContain("right:0");
+    expect(markup).not.toContain("chat-end-rail-width");
+    expect(markup).not.toContain("scrollbar-gutter-both");
+    expect(markup).not.toContain("timeline-minimap");
+  });
+
+  it("renders active work as a full-width status separator", async () => {
+    const { MessagesTimeline } = await import("./MessagesTimeline");
+    const markup = renderToStaticMarkup(
+      <MessagesTimeline
+        {...buildProps()}
+        isWorking
+        activeTurnInProgress
+        activeTurnStartedAt={MESSAGE_CREATED_AT}
+        timelineEntries={[]}
+      />,
+    );
+
+    expect(markup).toContain('data-testid="working-status-separator"');
+    expect(markup).toContain("border-b border-border/60");
+    expect(markup).toContain("Working for ");
+    expect(markup).not.toContain("animate-pulse");
   });
 
   it("anchors a sent attachment message using its measured height", async () => {
@@ -318,7 +406,7 @@ describe("MessagesTimeline", () => {
     expect(onAnchorSizeChanged).toHaveBeenCalledWith(secondEntry.message.id, 240);
   });
 
-  it("highlights only the message surface when opening a task source", async () => {
+  it("does not outline the entire message when opening a task source", async () => {
     const { MessagesTimeline } = await import("./MessagesTimeline");
     const entry = buildUserTimelineEntry("Task source prompt.");
     const markup = renderToStaticMarkup(
@@ -329,8 +417,8 @@ describe("MessagesTimeline", () => {
       />,
     );
 
-    expect(markup).toContain('data-source-highlight="true"');
-    expect(markup.match(/ring-primary\/45/g)).toHaveLength(1);
+    expect(markup).not.toContain('data-source-highlight="true"');
+    expect(markup).not.toContain("ring-primary/45");
   });
 
   it("renders collapse controls for long user messages", async () => {
@@ -475,16 +563,16 @@ describe("MessagesTimeline", () => {
               createdAt: "2026-03-17T19:12:28.000Z",
               label: "Updated files",
               tone: "tool",
-              changedFiles: ["C:/Users/mike/dev-stuff/t3code/apps/web/src/session-logic.ts"],
+              changedFiles: ["C:/Users/mike/dev-stuff/v12/apps/web/src/session-logic.ts"],
             },
           },
         ]}
-        workspaceRoot="C:/Users/mike/dev-stuff/t3code"
+        workspaceRoot="C:/Users/mike/dev-stuff/v12"
       />,
     );
 
-    expect(markup).toContain("t3code/apps/web/src/session-logic.ts");
-    expect(markup).not.toContain("C:/Users/mike/dev-stuff/t3code/apps/web/src/session-logic.ts");
+    expect(markup).toContain("v12/apps/web/src/session-logic.ts");
+    expect(markup).not.toContain("C:/Users/mike/dev-stuff/v12/apps/web/src/session-logic.ts");
   });
 
   it("renders command cards with category, status, duration, and exit metadata", async () => {

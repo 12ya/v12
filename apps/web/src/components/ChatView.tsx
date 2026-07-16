@@ -20,26 +20,26 @@ import {
   ProviderDriverKind,
   RuntimeMode,
   TerminalOpenInput,
-} from "@t3tools/contracts";
+} from "@v12/contracts";
 import {
   connectionStatusText,
   type EnvironmentConnectionPresentation,
-} from "@t3tools/client-runtime/connection";
+} from "@v12/client-runtime/connection";
 import {
   parseScopedThreadKey,
   scopedThreadKey,
   scopeProjectRef,
   scopeThreadRef,
-} from "@t3tools/client-runtime/environment";
+} from "@v12/client-runtime/environment";
 import {
   applyClaudePromptEffortPrefix,
   createModelSelection,
   resolvePromptInjectedEffort,
-} from "@t3tools/shared/model";
-import { CHAT_LIST_ANCHOR_OFFSET } from "@t3tools/shared/chatList";
-import { projectScriptCwd, projectScriptRuntimeEnv } from "@t3tools/shared/projectScripts";
-import { truncate } from "@t3tools/shared/String";
-import { nextTerminalId, resolveTerminalSessionLabel } from "@t3tools/shared/terminalLabels";
+} from "@v12/shared/model";
+import { CHAT_LIST_ANCHOR_OFFSET } from "@v12/shared/chatList";
+import { projectScriptCwd, projectScriptRuntimeEnv } from "@v12/shared/projectScripts";
+import { truncate } from "@v12/shared/String";
+import { nextTerminalId, resolveTerminalSessionLabel } from "@v12/shared/terminalLabels";
 import { Debouncer } from "@tanstack/react-pacer";
 import { useAtomValue } from "@effect/atom-react";
 import {
@@ -61,7 +61,7 @@ import {
   settlePromise,
   squashAtomCommandFailure,
   type AtomCommandResult,
-} from "@t3tools/client-runtime/state/runtime";
+} from "@v12/client-runtime/state/runtime";
 import * as Cause from "effect/Cause";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { isElectron } from "../env";
@@ -112,7 +112,7 @@ import {
 import { useTheme } from "../hooks/useTheme";
 import { useTurnDiffSummaries } from "../hooks/useTurnDiffSummaries";
 import { isCommandPaletteOpen } from "../commandPaletteContext";
-import { buildTemporaryWorktreeBranchName } from "@t3tools/shared/git";
+import { buildTemporaryWorktreeBranchName } from "@v12/shared/git";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { RIGHT_PANEL_INLINE_LAYOUT_MEDIA_QUERY } from "../rightPanelLayout";
 import {
@@ -211,7 +211,10 @@ import { NoActiveThreadState } from "./NoActiveThreadState";
 import { resolveEffectiveEnvMode } from "./BranchToolbar.logic";
 import { ProviderStatusBanner } from "./chat/ProviderStatusBanner";
 import { ThreadErrorBanner } from "./chat/ThreadErrorBanner";
-import { deriveOpenThreadActivityPresentation } from "./OpenThreadActivityStatus";
+import {
+  deriveOpenThreadActivityPresentation,
+  OpenThreadActivityStatus,
+} from "./OpenThreadActivityStatus";
 import { TaskHud } from "./TaskHud";
 import {
   appendContextTasksToPrompt,
@@ -246,6 +249,7 @@ import {
   waitForStartedServerThread,
 } from "./ChatView.logic";
 import { useLocalStorage } from "~/hooks/useLocalStorage";
+import { useAnimatedPresence } from "~/hooks/useAnimatedPresence";
 import { useComposerHandleContext } from "../composerHandleContext";
 import { sanitizeThreadErrorMessage } from "~/rpc/transportError";
 import { RightPanelSheet } from "./RightPanelSheet";
@@ -781,41 +785,50 @@ const PersistentThreadTerminalDrawer = memo(function PersistentThreadTerminalDra
     [onAddTerminalContext, visible],
   );
 
-  if (!project || !terminalUiState.terminalOpen || !cwd) {
+  if (!project || !cwd) {
     return null;
   }
 
   return (
-    <div className={visible ? undefined : "hidden"}>
-      <ThreadTerminalDrawer
-        threadRef={threadRef}
-        threadId={threadId}
-        cwd={cwd}
-        worktreePath={effectiveWorktreePath}
-        runtimeEnv={runtimeEnv}
-        visible={visible}
-        height={terminalUiState.terminalHeight}
-        // Known-session order is MRU and changes on focus; persisted store order keeps sidebar labels stable.
-        terminalIds={terminalUiState.terminalIds}
-        activeTerminalId={terminalUiState.activeTerminalId}
-        terminalGroups={terminalUiState.terminalGroups}
-        activeTerminalGroupId={terminalUiState.activeTerminalGroupId}
-        focusRequestId={focusRequestId + localFocusRequestId + (visible ? 1 : 0)}
-        onSplitTerminal={splitTerminal}
-        onSplitTerminalVertical={splitTerminalVertical}
-        onNewTerminal={createNewTerminal}
-        splitShortcutLabel={visible ? splitShortcutLabel : undefined}
-        splitVerticalShortcutLabel={visible ? splitVerticalShortcutLabel : undefined}
-        newShortcutLabel={visible ? newShortcutLabel : undefined}
-        closeShortcutLabel={visible ? closeShortcutLabel : undefined}
-        keybindings={keybindings}
-        onActiveTerminalChange={activateTerminal}
-        onCloseTerminal={closeTerminal}
-        onHeightChange={setTerminalHeight}
-        onAddTerminalContext={handleAddTerminalContext}
-        terminalLabelsById={terminalLabelsById}
-        terminalLaunchLocationsById={terminalLaunchLocationsById}
-      />
+    <div
+      aria-hidden={!visible}
+      inert={!visible ? true : undefined}
+      className={cn(
+        "grid shrink-0 overflow-hidden transition-[grid-template-rows,opacity] duration-200 ease-out motion-reduce:transition-none",
+        visible ? "grid-rows-[1fr] opacity-100" : "pointer-events-none grid-rows-[0fr] opacity-0",
+      )}
+    >
+      <div className="min-h-0 overflow-hidden">
+        <ThreadTerminalDrawer
+          threadRef={threadRef}
+          threadId={threadId}
+          cwd={cwd}
+          worktreePath={effectiveWorktreePath}
+          runtimeEnv={runtimeEnv}
+          visible={visible}
+          height={terminalUiState.terminalHeight}
+          // Known-session order is MRU and changes on focus; persisted store order keeps sidebar labels stable.
+          terminalIds={terminalUiState.terminalIds}
+          activeTerminalId={terminalUiState.activeTerminalId}
+          terminalGroups={terminalUiState.terminalGroups}
+          activeTerminalGroupId={terminalUiState.activeTerminalGroupId}
+          focusRequestId={focusRequestId + localFocusRequestId + (visible ? 1 : 0)}
+          onSplitTerminal={splitTerminal}
+          onSplitTerminalVertical={splitTerminalVertical}
+          onNewTerminal={createNewTerminal}
+          splitShortcutLabel={visible ? splitShortcutLabel : undefined}
+          splitVerticalShortcutLabel={visible ? splitVerticalShortcutLabel : undefined}
+          newShortcutLabel={visible ? newShortcutLabel : undefined}
+          closeShortcutLabel={visible ? closeShortcutLabel : undefined}
+          keybindings={keybindings}
+          onActiveTerminalChange={activateTerminal}
+          onCloseTerminal={closeTerminal}
+          onHeightChange={setTerminalHeight}
+          onAddTerminalContext={handleAddTerminalContext}
+          terminalLabelsById={terminalLabelsById}
+          terminalLaunchLocationsById={terminalLaunchLocationsById}
+        />
+      </div>
     </div>
   );
 });
@@ -1191,6 +1204,7 @@ function ChatViewContent(props: ChatViewProps) {
   const terminalUiState = useTerminalUiStateStore((state) =>
     selectThreadTerminalUiState(state.terminalUiStateByThreadKey, routeThreadRef),
   );
+  const terminalDrawerPresence = useAnimatedPresence(Boolean(terminalUiState.terminalOpen));
   const openTerminalThreadKeys = useTerminalUiStateStore(
     useShallow((state) =>
       Object.entries(state.terminalUiStateByThreadKey).flatMap(
@@ -1359,9 +1373,11 @@ function ChatViewContent(props: ChatViewProps) {
   );
   const previewPanelOpen = activeRightPanelKind === "preview" && isPreviewSupportedInRuntime();
   const rightPanelOpen = rightPanelState.isOpen;
+  const rightPanelPresence = useAnimatedPresence(rightPanelOpen);
   const canMaximizeRightPanel = rightPanelOpen && !shouldUsePlanSidebarSheet;
   const rightPanelMaximized =
-    canMaximizeRightPanel && maximizedRightPanelThreadKey === routeThreadKey;
+    !shouldUsePlanSidebarSheet && maximizedRightPanelThreadKey === routeThreadKey;
+  const rightPanelMaximizedVisible = rightPanelMaximized && rightPanelPresence.visible;
   const inlineRightPanelOwnsTitleBar = rightPanelOpen && !shouldUsePlanSidebarSheet;
 
   useEffect(() => {
@@ -1418,7 +1434,7 @@ function ChatViewContent(props: ChatViewProps) {
         currentThreadIds,
         openThreadIds: existingOpenTerminalThreadKeys,
         activeThreadId: activeThreadKey,
-        activeThreadTerminalOpen: Boolean(activeThreadKey && terminalUiState.terminalOpen),
+        activeThreadTerminalOpen: Boolean(activeThreadKey && terminalDrawerPresence.mounted),
         maxHiddenThreadCount: MAX_HIDDEN_MOUNTED_TERMINAL_THREADS,
       });
       return currentThreadIds.length === nextThreadIds.length &&
@@ -1426,7 +1442,7 @@ function ChatViewContent(props: ChatViewProps) {
         ? currentThreadIds
         : nextThreadIds;
     });
-  }, [activeThreadKey, existingOpenTerminalThreadKeys, terminalUiState.terminalOpen]);
+  }, [activeThreadKey, existingOpenTerminalThreadKeys, terminalDrawerPresence.mounted]);
   const latestTurnSettled = isLatestTurnSettled(activeLatestTurn, activeThread?.session ?? null);
   const activeProjectRef = activeThread
     ? scopeProjectRef(activeThread.environmentId, activeThread.projectId)
@@ -2828,18 +2844,21 @@ function ChatViewContent(props: ChatViewProps) {
     planSidebarDismissedForTurnRef.current =
       activePlan?.turnId ?? sidebarProposedPlan?.turnId ?? "__dismissed__";
   }, [activePlan?.turnId, sidebarProposedPlan?.turnId]);
-  const togglePlanSidebar = useCallback(() => {
-    if (planSidebarOpen) {
-      dismissPlanSidebarForCurrentTurn();
-    } else {
-      planSidebarDismissedForTurnRef.current = null;
-    }
-    setPlanSidebarOpen((open) => !open);
-  }, [dismissPlanSidebarForCurrentTurn, planSidebarOpen]);
   const closePlanSidebar = useCallback(() => {
     setPlanSidebarOpen(false);
     dismissPlanSidebarForCurrentTurn();
   }, [dismissPlanSidebarForCurrentTurn]);
+  const handlePlanSidebarOpenChange = useCallback(
+    (open: boolean) => {
+      if (open) {
+        planSidebarDismissedForTurnRef.current = null;
+        setPlanSidebarOpen(true);
+        return;
+      }
+      closePlanSidebar();
+    },
+    [closePlanSidebar],
+  );
   const createBrowserSurface = useCallback(() => {
     if (!activeThreadRef) return;
     void addBrowserSurface({ threadRef: activeThreadRef, openPreview });
@@ -5189,10 +5208,10 @@ function ChatViewContent(props: ChatViewProps) {
         completed: false,
         pendingSend: true,
       });
-      setPlanSidebarOpen(true);
     },
     [activeThread, activeThreadKey],
   );
+  const onShowTasks = useCallback(() => setPlanSidebarOpen(true), []);
   const onOpenTaskSource = useCallback(
     (task: ContextualTask) => {
       if (!activeThread) return;
@@ -5242,6 +5261,22 @@ function ChatViewContent(props: ChatViewProps) {
         <RightPanelMaximizeControl
           maximized={rightPanelMaximized}
           onToggle={toggleRightPanelMaximized}
+        />
+      ) : null}
+      {activeThreadRef ? (
+        <TaskHud
+          mode="toolbar"
+          activePlan={activePlan}
+          activeProposedPlan={sidebarProposedPlan}
+          label={planSidebarLabel}
+          environmentId={environmentId}
+          threadRef={activeThreadRef}
+          markdownCwd={gitCwd ?? undefined}
+          workspaceRoot={activeWorkspaceRoot}
+          timestampFormat={timestampFormat}
+          open={planSidebarOpen}
+          onOpenChange={handlePlanSidebarOpenChange}
+          onOpenTaskSource={onOpenTaskSource}
         />
       ) : null}
       {panelToggleControls}
@@ -5310,10 +5345,10 @@ function ChatViewContent(props: ChatViewProps) {
       {rightPanelOpen && !shouldUsePlanSidebarSheet ? panelLayoutControls : null}
       <div
         className={cn(
-          "flex min-h-0 min-w-0 flex-col overflow-x-hidden",
-          rightPanelMaximized ? "w-0 flex-none" : "flex-1",
+          "flex min-h-0 min-w-0 basis-0 flex-col overflow-x-hidden transition-[flex-grow] duration-200 ease-out motion-reduce:transition-none",
+          rightPanelMaximizedVisible ? "grow-0" : "grow",
         )}
-        data-chat-column-maximized-away={rightPanelMaximized ? "true" : "false"}
+        data-chat-column-maximized-away={rightPanelMaximizedVisible ? "true" : "false"}
       >
         {/* Top bar */}
         <header
@@ -5372,36 +5407,12 @@ function ChatViewContent(props: ChatViewProps) {
           error={threadError}
           onDismiss={() => setThreadError(activeThread.id, null)}
         />
-        {/* Main chat content; task/plan details float above it in the HUD. */}
-        <div className="flex min-h-0 min-w-0 flex-1">
+        {/* Main chat content with a non-reflowing Tasks overlay. */}
+        <div className="relative flex min-h-0 min-w-0 flex-1">
           {/* Chat column */}
           <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
             {/* Messages Wrapper */}
             <div className="relative flex min-h-0 flex-1 flex-col">
-              {activeThreadRef ? (
-                <div className="pointer-events-none absolute top-2 right-2 z-30 sm:top-3 sm:right-4">
-                  <TaskHud
-                    activePlan={activePlan}
-                    activeProposedPlan={sidebarProposedPlan}
-                    label={planSidebarLabel}
-                    environmentId={environmentId}
-                    threadRef={activeThreadRef}
-                    markdownCwd={gitCwd ?? undefined}
-                    workspaceRoot={activeWorkspaceRoot}
-                    timestampFormat={timestampFormat}
-                    open={planSidebarOpen}
-                    onOpenChange={(open) => {
-                      if (open) {
-                        planSidebarDismissedForTurnRef.current = null;
-                        setPlanSidebarOpen(true);
-                      } else {
-                        closePlanSidebar();
-                      }
-                    }}
-                    onOpenTaskSource={onOpenTaskSource}
-                  />
-                </div>
-              ) : null}
               {/* Messages — LegendList handles virtualization and scrolling internally */}
               <MessagesTimeline
                 key={activeThread.id}
@@ -5424,6 +5435,7 @@ function ChatViewContent(props: ChatViewProps) {
                 onRevertUserMessage={onRevertUserMessage}
                 onForkMessage={onForkMessage}
                 onAddSelectionTask={onAddSelectionTask}
+                onShowTasks={onShowTasks}
                 isRevertingCheckpoint={isRevertingCheckpoint}
                 onImageExpand={onExpandTimelineImage}
                 markdownCwd={gitCwd ?? undefined}
@@ -5437,7 +5449,6 @@ function ChatViewContent(props: ChatViewProps) {
                 onAnchorSizeChanged={onTimelineAnchorSizeChanged}
                 contentInsetEndAdjustment={composerOverlayHeight}
                 onIsAtEndChange={onIsAtEndChange}
-                onManualNavigation={cancelTimelineLiveFollowForUserNavigation}
               />
 
               {/* scroll to end pill — shown when user has scrolled away from the live edge */}
@@ -5494,7 +5505,6 @@ function ChatViewContent(props: ChatViewProps) {
                       isConnecting={isConnecting}
                       isSendBusy={isSendBusy}
                       isPreparingWorktree={isPreparingWorktree}
-                      openThreadActivityStatus={openThreadActivityStatus}
                       environmentUnavailable={activeEnvironmentUnavailableState}
                       activePendingApproval={activePendingApproval}
                       pendingApprovals={pendingApprovals}
@@ -5507,10 +5517,6 @@ function ChatViewContent(props: ChatViewProps) {
                       respondingRequestIds={respondingRequestIds}
                       showPlanFollowUpPrompt={showPlanFollowUpPrompt}
                       activeProposedPlan={activeProposedPlan}
-                      activePlan={activePlan as { turnId?: TurnId } | null}
-                      sidebarProposedPlan={sidebarProposedPlan as { turnId?: TurnId } | null}
-                      planSidebarLabel={planSidebarLabel}
-                      planSidebarOpen={planSidebarOpen}
                       runtimeMode={runtimeMode}
                       interactionMode={interactionMode}
                       lockedProvider={lockedProvider}
@@ -5544,7 +5550,6 @@ function ChatViewContent(props: ChatViewProps) {
                       toggleInteractionMode={toggleInteractionMode}
                       handleRuntimeModeChange={handleRuntimeModeChange}
                       handleInteractionModeChange={handleInteractionModeChange}
-                      togglePlanSidebar={togglePlanSidebar}
                       focusComposer={focusComposer}
                       scheduleComposerFocus={scheduleComposerFocus}
                       setThreadError={setThreadError}
@@ -5561,7 +5566,7 @@ function ChatViewContent(props: ChatViewProps) {
                     : "pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:pb-[calc(env(safe-area-inset-bottom)+1rem)]",
                 )}
               >
-                {isGitRepo && (
+                {isGitRepo ? (
                   <div className="pointer-events-auto">
                     <BranchToolbar
                       environmentId={activeThread.environmentId}
@@ -5586,7 +5591,12 @@ function ChatViewContent(props: ChatViewProps) {
                         : {})}
                       {...(hasMultipleEnvironments ? { onEnvironmentChange } : {})}
                       availableEnvironments={logicalProjectEnvironments}
+                      activityStatus={openThreadActivityStatus}
                     />
+                  </div>
+                ) : (
+                  <div className="pointer-events-auto mx-auto flex w-full max-w-3xl justify-end px-2.5 pt-1 sm:px-3">
+                    <OpenThreadActivityStatus status={openThreadActivityStatus} variant="toolbar" />
                   </div>
                 )}
               </div>
@@ -5610,6 +5620,34 @@ function ChatViewContent(props: ChatViewProps) {
             ) : null}
           </div>
           {/* end chat column */}
+          {activeThreadRef ? (
+            <div
+              aria-hidden={!planSidebarOpen}
+              className={cn(
+                "pointer-events-none absolute bottom-3 right-3 top-3 z-40 min-h-0 w-[19rem] max-w-[calc(100%-1.5rem)] overflow-hidden transition-[opacity,transform,visibility] duration-200 ease-out motion-reduce:transition-none",
+                planSidebarOpen
+                  ? "visible translate-x-0 opacity-100"
+                  : "invisible translate-x-3 opacity-0",
+              )}
+            >
+              <div className={cn("h-full w-full", planSidebarOpen && "pointer-events-auto")}>
+                <TaskHud
+                  mode="panel"
+                  activePlan={activePlan}
+                  activeProposedPlan={sidebarProposedPlan}
+                  label={planSidebarLabel}
+                  environmentId={environmentId}
+                  threadRef={activeThreadRef}
+                  markdownCwd={gitCwd ?? undefined}
+                  workspaceRoot={activeWorkspaceRoot}
+                  timestampFormat={timestampFormat}
+                  open={planSidebarOpen}
+                  onOpenChange={handlePlanSidebarOpenChange}
+                  onOpenTaskSource={onOpenTaskSource}
+                />
+              </div>
+            </div>
+          ) : null}
         </div>
         {/* end horizontal flex container */}
 
@@ -5618,7 +5656,7 @@ function ChatViewContent(props: ChatViewProps) {
             key={mountedThreadKey}
             threadRef={mountedThreadRef}
             threadId={mountedThreadRef.threadId}
-            visible={mountedThreadKey === activeThreadKey && terminalUiState.terminalOpen}
+            visible={mountedThreadKey === activeThreadKey && terminalDrawerPresence.visible}
             launchContext={
               mountedThreadKey === activeThreadKey ? (activeTerminalLaunchContext ?? null) : null
             }
@@ -5633,9 +5671,10 @@ function ChatViewContent(props: ChatViewProps) {
         ))}
       </div>
 
-      {!shouldUsePlanSidebarSheet && rightPanelOpen && activeThreadRef ? (
+      {!shouldUsePlanSidebarSheet && rightPanelPresence.mounted && activeThreadRef ? (
         <RightPanelTabs
           mode="inline"
+          open={rightPanelPresence.visible}
           maximized={rightPanelMaximized}
           surfaces={rightPanelState.surfaces}
           activeSurfaceId={activeRightPanelSurface?.id ?? null}
@@ -5659,8 +5698,8 @@ function ChatViewContent(props: ChatViewProps) {
           {rightPanelContent}
         </RightPanelTabs>
       ) : null}
-      {shouldUsePlanSidebarSheet && rightPanelOpen && activeThreadRef ? (
-        <RightPanelSheet open onClose={closePreviewPanel}>
+      {shouldUsePlanSidebarSheet && rightPanelPresence.mounted && activeThreadRef ? (
+        <RightPanelSheet open={rightPanelPresence.visible} onClose={closePreviewPanel}>
           <RightPanelTabs
             mode="sheet"
             layoutControls={panelToggleControls}

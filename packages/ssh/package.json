@@ -1,5 +1,5 @@
 {
-  "name": "@t3tools/ssh",
+  "name": "@v12/ssh",
   "private": true,
   "type": "module",
   "exports": {
@@ -29,8 +29,8 @@
     "test": "vp test run"
   },
   "dependencies": {
-    "@t3tools/contracts": "workspace:*",
-    "@t3tools/shared": "workspace:*",
+    "@v12/contracts": "workspace:*",
+    "@v12/shared": "workspace:*",
     "effect": "catalog:"
   },
   "devDependencies": {

@@ -1,9 +1,5 @@
-import type {
-  BrowserNavigationTarget,
-  EnvironmentId,
-  PreviewUrlResolution,
-} from "@t3tools/contracts";
-import { isLoopbackHost, normalizePreviewUrl } from "@t3tools/shared/preview";
+import type { BrowserNavigationTarget, EnvironmentId, PreviewUrlResolution } from "@v12/contracts";
+import { isLoopbackHost, normalizePreviewUrl } from "@v12/shared/preview";
 
 import { readPreparedConnection } from "~/state/session";
 

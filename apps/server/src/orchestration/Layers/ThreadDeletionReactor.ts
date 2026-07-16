@@ -1,5 +1,5 @@
-import type { OrchestrationEvent } from "@t3tools/contracts";
-import { makeDrainableWorker } from "@t3tools/shared/DrainableWorker";
+import type { OrchestrationEvent } from "@v12/contracts";
+import { makeDrainableWorker } from "@v12/shared/DrainableWorker";
 import * as Cause from "effect/Cause";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";

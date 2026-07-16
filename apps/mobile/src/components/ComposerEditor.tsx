@@ -1,6 +1,6 @@
-export { ComposerEditor } from "../native/T3ComposerEditor";
+export { ComposerEditor } from "../native/V12ComposerEditor";
 export type {
   ComposerEditorHandle,
   ComposerEditorProps,
   ComposerEditorSelection,
-} from "../native/T3ComposerEditor";
+} from "../native/V12ComposerEditor";

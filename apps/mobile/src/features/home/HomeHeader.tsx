@@ -2,7 +2,7 @@ import type {
   EnvironmentId,
   SidebarProjectGroupingMode,
   SidebarThreadSortOrder,
-} from "@t3tools/contracts";
+} from "@v12/contracts";
 import type { MenuAction } from "@react-native-menu/menu";
 import { NativeHeaderToolbar, NativeStackScreenOptions } from "../../native/StackHeader";
 import { useCallback, useMemo, useRef } from "react";
@@ -172,11 +172,11 @@ function AndroidHomeHeader(props: HomeHeaderProps) {
         <View className="w-full max-w-[720px] self-center gap-3">
           <View className="flex-row items-center gap-2.5">
             <View className="flex-1 flex-row items-center gap-2">
-              <RNText className="text-[21px] font-t3-bold tracking-[-0.5px] text-foreground">
+              <RNText className="text-[21px] font-v12-bold tracking-[-0.5px] text-foreground">
                 V12
               </RNText>
               <View className="rounded-full bg-subtle px-2 py-0.75">
-                <RNText className="text-[11px] font-t3-bold tracking-[1.1px] text-foreground-muted uppercase">
+                <RNText className="text-[11px] font-v12-bold tracking-[1.1px] text-foreground-muted uppercase">
                   Alpha
                 </RNText>
               </View>

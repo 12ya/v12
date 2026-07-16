@@ -4,9 +4,9 @@ import {
   type ScopedThreadRef,
   type ServerProviderSkill,
   type TurnId,
-} from "@t3tools/contracts";
-import { parseScopedThreadKey } from "@t3tools/client-runtime/environment";
-import { resolveChatListAnchoredEndSpace } from "@t3tools/shared/chatList";
+} from "@v12/contracts";
+import { parseScopedThreadKey } from "@v12/client-runtime/environment";
+import { resolveChatListAnchoredEndSpace } from "@v12/shared/chatList";
 import {
   createContext,
   Fragment,
@@ -18,8 +18,8 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
-  type MouseEvent,
   type ReactNode,
+  type RefObject,
 } from "react";
 import { flushSync } from "react-dom";
 import { LegendList, type LegendListRef } from "@legendapp/list/react";
@@ -73,13 +73,9 @@ import {
   normalizeCompactToolLabel,
   resolveAssistantMessageCopyState,
   resolveTimelineIsAtEnd,
-  resolveTimelineMinimapHasPersistentGutter,
-  resolveTimelineMinimapHeightStyle,
-  resolveTimelineMinimapIndexFromPointer,
-  resolveTimelineMinimapTopPercent,
+  resolveTimelineScrollThumb,
   type StableMessagesTimelineRowsState,
   type MessagesTimelineRow,
-  TIMELINE_MINIMAP_MIN_ITEMS,
   type TimelineLatestTurn,
 } from "./MessagesTimeline.logic";
 import { TerminalContextInlineChip } from "./TerminalContextInlineChip";
@@ -99,8 +95,9 @@ import {
 } from "~/lib/previewAnnotation";
 import { cn } from "~/lib/utils";
 import { useUiStateStore } from "~/uiStateStore";
-import { type TimestampFormat } from "@t3tools/contracts/settings";
+import { type TimestampFormat } from "@v12/contracts/settings";
 import { formatChatTimestampTooltip, formatShortTimestamp } from "../../timestampFormat";
+import { type ContextualTask, useTaskHudStore } from "../../taskHudState";
 
 import {
   buildInlineTerminalContextText,
@@ -134,6 +131,8 @@ interface TimelineRowSharedState {
   activeThreadEnvironmentId: EnvironmentId;
   anchorMessageId: MessageId | null;
   sourceHighlightMessageId: MessageId | null;
+  contextTasksBySourceMessageId: ReadonlyMap<MessageId, readonly ContextualTask[]>;
+  onShowTasks: () => void;
   onRevertUserMessage: (messageId: MessageId) => void;
   onForkMessage: (messageId: MessageId, initialPrompt?: string) => void;
   onAddSelectionTask: (input: {
@@ -160,7 +159,9 @@ const TimelineRowActivityCtx = createContext<TimelineRowActivityState>(null!);
 const TIMELINE_LIST_HEADER = <div className="h-3 sm:h-4" />;
 const TIMELINE_LIST_FOOTER = <div className="h-3 sm:h-4" />;
 const EMPTY_TIMELINE_SKILLS: ReadonlyArray<Pick<ServerProviderSkill, "name" | "displayName">> = [];
+const EMPTY_CONTEXT_TASKS: readonly ContextualTask[] = Object.freeze([]);
 const NOOP_ADD_SELECTION_TASK: TimelineRowSharedState["onAddSelectionTask"] = () => {};
+const NOOP_SHOW_TASKS = () => {};
 
 // ---------------------------------------------------------------------------
 // Props (public API)
@@ -181,6 +182,7 @@ interface MessagesTimelineProps {
   onRevertUserMessage: (messageId: MessageId) => void;
   onForkMessage: (messageId: MessageId, initialPrompt?: string) => void;
   onAddSelectionTask?: TimelineRowSharedState["onAddSelectionTask"];
+  onShowTasks?: () => void;
   isRevertingCheckpoint: boolean;
   onImageExpand: (preview: ExpandedImagePreview) => void;
   activeThreadEnvironmentId: EnvironmentId;
@@ -195,7 +197,6 @@ interface MessagesTimelineProps {
   onAnchorSizeChanged: (messageId: MessageId, size: number) => void;
   contentInsetEndAdjustment: number;
   onIsAtEndChange: (isAtEnd: boolean) => void;
-  onManualNavigation: () => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -217,6 +218,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
   onRevertUserMessage,
   onForkMessage,
   onAddSelectionTask = NOOP_ADD_SELECTION_TASK,
+  onShowTasks = NOOP_SHOW_TASKS,
   isRevertingCheckpoint,
   onImageExpand,
   activeThreadEnvironmentId,
@@ -231,11 +233,16 @@ export const MessagesTimeline = memo(function MessagesTimeline({
   onAnchorSizeChanged,
   contentInsetEndAdjustment,
   onIsAtEndChange,
-  onManualNavigation,
 }: MessagesTimelineProps) {
+  const contextTasks = useTaskHudStore(
+    (state) => state.contextTasksByThreadKey[routeThreadKey] ?? EMPTY_CONTEXT_TASKS,
+  );
+  const contextTasksBySourceMessageId = useMemo(
+    () => groupContextTasksBySourceMessageId(contextTasks),
+    [contextTasks],
+  );
   const [expandedTurnIds, setExpandedTurnIds] = useState<ReadonlySet<TurnId>>(new Set());
   const [expandedWorkGroupIds, setExpandedWorkGroupIds] = useState<ReadonlySet<string>>(new Set());
-  const [minimapStripMap] = useState(() => new Map<string, HTMLSpanElement>());
 
   const onToggleTurnFold = useCallback((turnId: TurnId) => {
     setExpandedTurnIds((existing) => {
@@ -337,11 +344,8 @@ export const MessagesTimeline = memo(function MessagesTimeline({
     ],
   );
   const rows = useStableRows(rawRows);
-  const minimapItems = useMemo(() => deriveTimelineMinimapItems(rows), [rows]);
-  const [timelineViewportElement, setTimelineViewportElement] = useState<HTMLDivElement | null>(
-    null,
-  );
-  const [minimapHasPersistentGutter, setMinimapHasPersistentGutter] = useState(false);
+  const scrollIndicatorTrackRef = useRef<HTMLDivElement>(null);
+  const scrollIndicatorThumbRef = useRef<HTMLDivElement>(null);
   const handleAnchorReady = useCallback(
     (info: { anchorIndex: number | undefined }) => {
       if (anchorMessageId !== null && info.anchorIndex !== undefined) {
@@ -367,35 +371,52 @@ export const MessagesTimeline = memo(function MessagesTimeline({
       : undefined;
   }, [anchorMessageId, handleAnchorReady, handleAnchorSizeChanged, rows]);
 
+  const updateScrollIndicator = useCallback(() => {
+    const state = listRef.current?.getState?.();
+    const track = scrollIndicatorTrackRef.current;
+    const thumb = scrollIndicatorThumbRef.current;
+    if (!state || !track || !thumb || state.data.length === 0) {
+      if (thumb) thumb.style.opacity = "0";
+      return;
+    }
+
+    const lastIndex = state.data.length - 1;
+    const lastTop = state.positionAtIndex(lastIndex);
+    const lastHeight = state.sizeAtIndex(lastIndex);
+    if (
+      typeof lastTop !== "number" ||
+      typeof lastHeight !== "number" ||
+      !Number.isFinite(lastTop) ||
+      !Number.isFinite(lastHeight)
+    ) {
+      thumb.style.opacity = "0";
+      return;
+    }
+
+    const geometry = resolveTimelineScrollThumb({
+      contentLength: lastTop + Math.max(1, lastHeight),
+      scroll: state.scroll ?? 0,
+      trackLength: track.getBoundingClientRect().height,
+      viewportLength: state.scrollLength ?? 0,
+    });
+    if (!geometry) {
+      thumb.style.opacity = "0";
+      return;
+    }
+
+    thumb.style.height = `${geometry.length}px`;
+    thumb.style.transform = `translateY(${geometry.offset}px)`;
+    thumb.style.opacity = "1";
+  }, [listRef]);
+
   const handleScroll = useCallback(() => {
     const state = listRef.current?.getState?.();
     const isAtEnd = resolveTimelineIsAtEnd(state);
     if (isAtEnd !== undefined) {
       onIsAtEndChange(isAtEnd);
     }
-    if (!state || minimapItems.length === 0) {
-      return;
-    }
-
-    const scrollTop = state.scroll ?? 0;
-    const scrollBottom = scrollTop + (state.scrollLength ?? 0);
-
-    for (const item of minimapItems) {
-      const strip = minimapStripMap.get(item.id);
-      if (!strip) {
-        continue;
-      }
-
-      const rowTop = resolveTimelineRowTop(state, item.rowIndex);
-      const rowHeight = resolveTimelineRowHeight(state, item.rowIndex);
-      const inView =
-        rowTop !== null &&
-        rowTop < scrollBottom &&
-        rowTop + Math.max(1, rowHeight ?? 1) > scrollTop;
-
-      strip.dataset.inView = inView ? "true" : "false";
-    }
-  }, [listRef, minimapItems, minimapStripMap, onIsAtEndChange]);
+    updateScrollIndicator();
+  }, [listRef, onIsAtEndChange, updateScrollIndicator]);
 
   useEffect(() => {
     const frame = requestAnimationFrame(handleScroll);
@@ -403,28 +424,12 @@ export const MessagesTimeline = memo(function MessagesTimeline({
   }, [handleScroll, rows.length]);
 
   useEffect(() => {
-    if (!timelineViewportElement) {
-      return;
-    }
-
-    const measure = () => {
-      const viewportWidth = timelineViewportElement.getBoundingClientRect().width;
-      const nextHasPersistentGutter = resolveTimelineMinimapHasPersistentGutter(viewportWidth);
-      setMinimapHasPersistentGutter((current) =>
-        current === nextHasPersistentGutter ? current : nextHasPersistentGutter,
-      );
-    };
-
-    const frame = requestAnimationFrame(measure);
-
-    const observer = new ResizeObserver(measure);
-    observer.observe(timelineViewportElement);
-
-    return () => {
-      cancelAnimationFrame(frame);
-      observer.disconnect();
-    };
-  }, [timelineViewportElement, rows.length]);
+    const track = scrollIndicatorTrackRef.current;
+    if (!track) return;
+    const observer = new ResizeObserver(updateScrollIndicator);
+    observer.observe(track);
+    return () => observer.disconnect();
+  }, [updateScrollIndicator]);
 
   const sharedState = useMemo<TimelineRowSharedState>(
     () => ({
@@ -438,6 +443,8 @@ export const MessagesTimeline = memo(function MessagesTimeline({
       activeThreadEnvironmentId,
       anchorMessageId,
       sourceHighlightMessageId,
+      contextTasksBySourceMessageId,
+      onShowTasks,
       onRevertUserMessage,
       onForkMessage,
       onAddSelectionTask,
@@ -456,6 +463,8 @@ export const MessagesTimeline = memo(function MessagesTimeline({
       activeThreadEnvironmentId,
       anchorMessageId,
       sourceHighlightMessageId,
+      contextTasksBySourceMessageId,
+      onShowTasks,
       onRevertUserMessage,
       onForkMessage,
       onAddSelectionTask,
@@ -498,7 +507,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
   return (
     <TimelineRowCtx value={sharedState}>
       <TimelineRowActivityCtx value={activityState}>
-        <div ref={setTimelineViewportElement} className="relative h-full min-h-0">
+        <div className="relative h-full min-h-0">
           <LegendList<MessagesTimelineRow>
             ref={listRef}
             data={rows}
@@ -526,24 +535,25 @@ export const MessagesTimeline = memo(function MessagesTimeline({
               size: false,
             }}
             onScroll={handleScroll}
-            className="scrollbar-gutter-both h-full min-h-0 overflow-x-hidden overscroll-y-contain px-3 [overflow-anchor:none] sm:px-5"
+            className="timeline-scroll-viewport h-full min-h-0 overflow-x-hidden overscroll-y-contain px-3 [overflow-anchor:none] sm:px-5"
             ListHeaderComponent={TIMELINE_LIST_HEADER}
             ListFooterComponent={TIMELINE_LIST_FOOTER}
           />
-          <TimelineMinimap
-            items={minimapItems}
-            bottomInset={contentInsetEndAdjustment}
-            hasPersistentGutter={minimapHasPersistentGutter}
-            stripMap={minimapStripMap}
-            onSelect={(item) => {
-              onManualNavigation();
-              void listRef.current?.scrollToIndex({
-                index: item.rowIndex,
-                animated: true,
-                viewOffset: 24,
-              });
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1 z-50 w-[var(--app-scrollbar-width)]"
+            data-testid="timeline-scroll-indicator"
+            ref={scrollIndicatorTrackRef}
+            style={{
+              bottom: Math.max(4, Math.ceil(contentInsetEndAdjustment) + 4),
+              right: 0,
             }}
-          />
+          >
+            <div
+              className="absolute right-0 top-0 w-full rounded-full bg-muted-foreground/35 opacity-0 transition-opacity duration-150"
+              ref={scrollIndicatorThumbRef}
+            />
+          </div>
         </div>
       </TimelineRowActivityCtx>
     </TimelineRowCtx>
@@ -556,261 +566,6 @@ function keyExtractor(item: MessagesTimelineRow) {
 
 function getItemType(item: MessagesTimelineRow) {
   return item.kind === "message" ? `message:${item.message.role}` : item.kind;
-}
-
-interface TimelineMinimapItem {
-  readonly id: string;
-  readonly rowIndex: number;
-  readonly userText: string | null;
-  readonly assistantText: string | null;
-}
-
-interface TimelinePositionState {
-  readonly contentLength?: number;
-  readonly scroll?: number;
-  readonly scrollLength?: number;
-  readonly positionAtIndex?: (index: number) => number | undefined;
-  readonly sizeAtIndex?: (index: number) => number | undefined;
-}
-
-function deriveTimelineMinimapItems(
-  rows: ReadonlyArray<MessagesTimelineRow>,
-): TimelineMinimapItem[] {
-  const items: TimelineMinimapItem[] = [];
-  for (let index = 0; index < rows.length; index += 1) {
-    const row = rows[index];
-    if (row?.kind !== "message" || row.message.role !== "user") {
-      continue;
-    }
-
-    items.push({
-      id: row.id,
-      rowIndex: index,
-      userText: compactMinimapPreview(row.message.text),
-      assistantText: compactMinimapPreview(resolveFinalAssistantTextForTurn(rows, index)),
-    });
-  }
-  return items;
-}
-
-function resolveFinalAssistantTextForTurn(
-  rows: ReadonlyArray<MessagesTimelineRow>,
-  userRowIndex: number,
-) {
-  let finalAssistantText: string | null = null;
-  for (let index = userRowIndex + 1; index < rows.length; index += 1) {
-    const row = rows[index];
-    if (row?.kind !== "message") {
-      continue;
-    }
-    if (row.message.role === "user") {
-      break;
-    }
-    if (row.message.role === "assistant") {
-      finalAssistantText = row.message.text ?? null;
-    }
-  }
-  return finalAssistantText;
-}
-
-function compactMinimapPreview(text: string | null | undefined) {
-  const compact = text?.replace(/\s+/g, " ").trim() ?? "";
-  return compact.length > 0 ? compact : null;
-}
-
-function resolveTimelineRowTop(state: TimelinePositionState, rowIndex: number) {
-  const top = state.positionAtIndex?.(rowIndex);
-  return typeof top === "number" && Number.isFinite(top) ? top : null;
-}
-
-function resolveTimelineRowHeight(state: TimelinePositionState, rowIndex: number) {
-  const height = state.sizeAtIndex?.(rowIndex);
-  return typeof height === "number" && Number.isFinite(height) ? height : null;
-}
-
-function TimelineMinimap({
-  bottomInset,
-  hasPersistentGutter,
-  items,
-  stripMap,
-  onSelect,
-}: {
-  bottomInset: number;
-  hasPersistentGutter: boolean;
-  items: ReadonlyArray<TimelineMinimapItem>;
-  stripMap: Map<string, HTMLSpanElement>;
-  onSelect: (item: TimelineMinimapItem) => void;
-}) {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-
-  const resolvedActiveIndex =
-    activeIndex !== null && activeIndex < items.length ? activeIndex : null;
-  const activeItem = resolvedActiveIndex === null ? null : (items[resolvedActiveIndex] ?? null);
-  const activeTopPercent =
-    resolvedActiveIndex === null
-      ? 0
-      : resolveTimelineMinimapTopPercent(resolvedActiveIndex, items.length);
-  const activeTooltipTranslate =
-    resolvedActiveIndex === null
-      ? "-50%"
-      : resolvedActiveIndex === 0
-        ? "0%"
-        : resolvedActiveIndex === items.length - 1
-          ? "-100%"
-          : "-50%";
-
-  const resolveActiveIndexFromPointer = useCallback(
-    (event: MouseEvent<HTMLElement>) => {
-      const rect = event.currentTarget.getBoundingClientRect();
-      return resolveTimelineMinimapIndexFromPointer({
-        itemCount: items.length,
-        railTop: rect.top,
-        railHeight: rect.height,
-        pointerY: event.clientY,
-      });
-    },
-    [items.length],
-  );
-
-  const updateActiveIndexFromPointer = useCallback(
-    (event: MouseEvent<HTMLElement>) => {
-      const nextIndex = resolveActiveIndexFromPointer(event);
-      setActiveIndex(nextIndex);
-    },
-    [resolveActiveIndexFromPointer],
-  );
-
-  const moveActiveIndex = useCallback(
-    (delta: number) => {
-      setActiveIndex((current) => {
-        const base = current ?? 0;
-        return Math.max(0, Math.min(items.length - 1, base + delta));
-      });
-    },
-    [items.length],
-  );
-
-  if (items.length < TIMELINE_MINIMAP_MIN_ITEMS) {
-    return null;
-  }
-
-  const safeBottomInset = Math.max(0, Math.ceil(bottomInset));
-
-  return (
-    <div
-      className={cn(
-        "group/minimap pointer-events-auto absolute top-0 left-0 z-40 hidden w-18 [@media(pointer:fine)]:block",
-        hasPersistentGutter
-          ? "opacity-100"
-          : "opacity-0 transition-opacity duration-150 hover:opacity-100 focus-within:opacity-100",
-      )}
-      data-testid="timeline-minimap"
-      data-persistent-gutter={hasPersistentGutter ? "true" : "false"}
-      style={{ bottom: safeBottomInset }}
-    >
-      <div className="relative h-full w-full select-none">
-        <button
-          aria-label={`Jump to message: ${activeItem?.userText ?? "User message"}`}
-          className="pointer-events-auto absolute top-1/2 left-3 w-10 -translate-y-1/2 cursor-pointer bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
-          onBlur={() => setActiveIndex(null)}
-          onClick={(event) => {
-            const nextIndex = resolveActiveIndexFromPointer(event);
-            const nextItem = nextIndex === null ? null : (items[nextIndex] ?? null);
-            if (nextItem) {
-              onSelect(nextItem);
-            }
-            event.currentTarget.blur();
-          }}
-          onFocus={() => setActiveIndex((current) => current ?? 0)}
-          onKeyDown={(event) => {
-            if (event.key === "ArrowDown") {
-              event.preventDefault();
-              moveActiveIndex(1);
-            } else if (event.key === "ArrowUp") {
-              event.preventDefault();
-              moveActiveIndex(-1);
-            } else if (event.key === "Home") {
-              event.preventDefault();
-              setActiveIndex(0);
-            } else if (event.key === "End") {
-              event.preventDefault();
-              setActiveIndex(items.length - 1);
-            } else if (event.key === "Enter" || event.key === " ") {
-              event.preventDefault();
-              if (activeItem) {
-                onSelect(activeItem);
-              }
-            }
-          }}
-          onMouseLeave={() => setActiveIndex(null)}
-          onMouseMove={updateActiveIndexFromPointer}
-          onMouseDown={(event) => {
-            event.preventDefault();
-          }}
-          style={{ height: resolveTimelineMinimapHeightStyle(items.length) }}
-          type="button"
-        >
-          <div className="absolute top-0 left-3 h-full w-px bg-border/15" />
-          {items.map((item, index) => {
-            const top = `${resolveTimelineMinimapTopPercent(index, items.length)}%`;
-            const activeDistance =
-              resolvedActiveIndex === null ? null : Math.abs(index - resolvedActiveIndex);
-            return (
-              <span
-                aria-hidden="true"
-                className={cn(
-                  "pointer-events-none absolute left-0 h-0.5 -translate-y-1/2 rounded-full bg-muted-foreground/35 transition-[background-color,width] duration-150 data-[in-view=true]:bg-foreground/90",
-                  activeDistance === 0
-                    ? "w-6 bg-muted-foreground/75"
-                    : activeDistance === 1
-                      ? "w-4"
-                      : activeDistance === 2
-                        ? "w-2.5"
-                        : "w-2",
-                )}
-                data-in-view="false"
-                data-minimap-strip
-                key={item.id}
-                ref={(node) => {
-                  if (node) {
-                    stripMap.set(item.id, node);
-                  } else {
-                    stripMap.delete(item.id);
-                  }
-                }}
-                style={{ top }}
-              />
-            );
-          })}
-          {activeItem ? (
-            <span
-              className="pointer-events-none absolute left-8 w-80 rounded-xl border border-border/70 bg-popover/95 p-3 text-left text-popover-foreground shadow-xl shadow-black/25 backdrop-blur"
-              style={{
-                top: `${activeTopPercent}%`,
-                transform: `translateY(${activeTooltipTranslate})`,
-              }}
-            >
-              <span className="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium leading-5">
-                {activeItem.userText ?? "User message"}
-              </span>
-              {activeItem.assistantText ? (
-                <span
-                  className="mt-1 max-h-[3.75rem] overflow-hidden text-muted-foreground text-sm leading-5"
-                  style={{
-                    display: "-webkit-box",
-                    WebkitBoxOrient: "vertical",
-                    WebkitLineClamp: 3,
-                  }}
-                >
-                  {activeItem.assistantText}
-                </span>
-              ) : null}
-            </span>
-          ) : null}
-        </button>
-      </div>
-    </div>
-  );
 }
 
 // ---------------------------------------------------------------------------
@@ -853,9 +608,169 @@ const TimelineRowContent = memo(function TimelineRowContent({ row }: { row: Time
   );
 });
 
+interface TaskSourceAnchor {
+  readonly key: string;
+  readonly count: number;
+  readonly left: number;
+  readonly top: number;
+}
+
+function collectTaskSourceTextNodes(root: Node): Text[] {
+  const nodes: Text[] = [];
+  for (const child of root.childNodes) {
+    if (child.nodeType === 3) {
+      const textNode = child as Text;
+      if (!textNode.parentElement?.closest("[data-task-source-marker]")) {
+        nodes.push(textNode);
+      }
+      continue;
+    }
+    if (child instanceof HTMLElement && child.dataset.taskSourceMarker !== undefined) {
+      continue;
+    }
+    nodes.push(...collectTaskSourceTextNodes(child));
+  }
+  return nodes;
+}
+
+function measureTaskSourceAnchor(
+  container: HTMLElement,
+  quote: string,
+): Pick<TaskSourceAnchor, "left" | "top"> | null {
+  const textNodes = collectTaskSourceTextNodes(container);
+  const fullText = textNodes.map((node) => node.data).join("");
+  const quoteStart = fullText.indexOf(quote);
+  if (quoteStart < 0) return null;
+
+  const quoteEnd = quoteStart + quote.length;
+  let traversed = 0;
+  let startNode: Text | null = null;
+  let startOffset = 0;
+  let endNode: Text | null = null;
+  let endOffset = 0;
+
+  for (const node of textNodes) {
+    const nodeEnd = traversed + node.data.length;
+    if (!startNode && quoteStart >= traversed && quoteStart <= nodeEnd) {
+      startNode = node;
+      startOffset = quoteStart - traversed;
+    }
+    if (quoteEnd >= traversed && quoteEnd <= nodeEnd) {
+      endNode = node;
+      endOffset = quoteEnd - traversed;
+      break;
+    }
+    traversed = nodeEnd;
+  }
+
+  if (!startNode || !endNode) return null;
+  const range = document.createRange();
+  range.setStart(startNode, startOffset);
+  range.setEnd(endNode, endOffset);
+  const rects = Array.from(range.getClientRects()).filter(
+    (rect) => rect.width > 0 || rect.height > 0,
+  );
+  const quoteRect = rects.at(-1) ?? range.getBoundingClientRect();
+  if (quoteRect.width === 0 && quoteRect.height === 0) return null;
+
+  const containerRect = container.getBoundingClientRect();
+  return {
+    left: Math.min(Math.max(quoteRect.right - containerRect.left, 10), containerRect.width - 10),
+    top: quoteRect.bottom - containerRect.top,
+  };
+}
+
+function TaskSourceMarkersOverlay({
+  messageId,
+  containerRef,
+  contentKey,
+}: {
+  readonly messageId: MessageId;
+  readonly containerRef: RefObject<HTMLDivElement | null>;
+  readonly contentKey: string;
+}) {
+  const ctx = use(TimelineRowCtx);
+  const tasks = ctx.contextTasksBySourceMessageId.get(messageId) ?? EMPTY_CONTEXT_TASKS;
+  const taskGroups = useMemo(() => {
+    const groups = new Map<string, number>();
+    for (const task of tasks) {
+      groups.set(task.quote, (groups.get(task.quote) ?? 0) + 1);
+    }
+    return groups;
+  }, [tasks]);
+  const [anchors, setAnchors] = useState<readonly TaskSourceAnchor[]>([]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || taskGroups.size === 0) {
+      setAnchors([]);
+      return;
+    }
+
+    const measure = () => {
+      const next: TaskSourceAnchor[] = [];
+      for (const [quote, count] of taskGroups) {
+        const position = measureTaskSourceAnchor(container, quote);
+        if (position) next.push({ key: quote, count, ...position });
+      }
+      setAnchors((current) => {
+        if (
+          current.length === next.length &&
+          current.every(
+            (anchor, index) =>
+              anchor.key === next[index]?.key &&
+              anchor.count === next[index]?.count &&
+              Math.abs(anchor.left - (next[index]?.left ?? 0)) < 0.5 &&
+              Math.abs(anchor.top - (next[index]?.top ?? 0)) < 0.5,
+          )
+        ) {
+          return current;
+        }
+        return next;
+      });
+    };
+
+    const frame = requestAnimationFrame(measure);
+    const observer = new ResizeObserver(measure);
+    observer.observe(container);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [containerRef, contentKey, taskGroups]);
+
+  if (anchors.length === 0) return null;
+
+  const highlighted = ctx.sourceHighlightMessageId === messageId;
+  return (
+    <>
+      {anchors.map((anchor) => (
+        <button
+          key={anchor.key}
+          type="button"
+          aria-label={`${anchor.count} task${anchor.count === 1 ? "" : "s"} from this selection`}
+          data-source-highlight={highlighted ? "true" : undefined}
+          data-task-source-marker="true"
+          className={cn(
+            "absolute z-10 flex size-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-background bg-blue-500 font-semibold text-[10px] text-white shadow-sm transition-[scale,box-shadow] hover:scale-110",
+            highlighted ? "scale-110 shadow-[0_0_0_4px_rgb(59_130_246/0.2)]" : null,
+          )}
+          style={{ left: anchor.left, top: anchor.top }}
+          onPointerUp={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.stopPropagation();
+            ctx.onShowTasks();
+          }}
+        >
+          {anchor.count}
+        </button>
+      ))}
+    </>
+  );
+}
+
 function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" }> }) {
   const ctx = use(TimelineRowCtx);
-  const isSourceHighlighted = ctx.sourceHighlightMessageId === row.message.id;
   const {
     selectionContainerRef,
     selectedQuote,
@@ -885,72 +800,75 @@ function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" 
 
   return (
     <div className="group flex flex-col items-end gap-1">
-      <div
-        ref={selectionContainerRef}
-        className={cn(
-          "relative max-w-[80%] rounded-2xl border border-border bg-secondary p-3 transition-[box-shadow,background-color]",
-          isSourceHighlighted ? "bg-accent/45 ring-2 ring-primary/45" : null,
-        )}
-        data-source-highlight={isSourceHighlighted ? "true" : undefined}
-        onPointerUp={captureSelection}
-        onKeyUp={captureSelection}
-      >
-        {regularImages.length > 0 && (
-          <div className="mb-2 grid max-w-[420px] grid-cols-2 gap-2">
-            {regularImages.map((image: NonNullable<TimelineMessage["attachments"]>[number]) => (
-              <div
-                key={image.id}
-                className="overflow-hidden rounded-lg border border-border/80 bg-background/70"
-              >
-                {image.previewUrl ? (
-                  <button
-                    type="button"
-                    className="h-full w-full cursor-zoom-in"
-                    aria-label={`Preview ${image.name}`}
-                    onClick={() => {
-                      const preview = buildExpandedImagePreview(regularImages, image.id);
-                      if (!preview) return;
-                      ctx.onImageExpand(preview);
-                    }}
-                  >
-                    <img
-                      src={image.previewUrl}
-                      alt={image.name}
-                      className="block h-auto max-h-[220px] w-full object-cover"
-                    />
-                  </button>
-                ) : (
-                  <div className="flex min-h-[72px] items-center justify-center px-2 py-3 text-center text-[11px] text-muted-foreground/70">
-                    {image.name}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-        {previewAnnotations.map((annotation, index) => (
-          <UserMessagePreviewAnnotationCard
-            key={annotation.id}
-            annotation={annotation}
-            image={previewImages[index] ?? null}
+      <div className="max-w-[80%]">
+        <div
+          ref={selectionContainerRef}
+          className="relative min-w-0 rounded-2xl border border-border bg-secondary p-3"
+          onPointerUp={captureSelection}
+          onKeyUp={captureSelection}
+        >
+          {regularImages.length > 0 && (
+            <div className="mb-2 grid max-w-[420px] grid-cols-2 gap-2">
+              {regularImages.map((image: NonNullable<TimelineMessage["attachments"]>[number]) => (
+                <div
+                  key={image.id}
+                  className="overflow-hidden rounded-lg border border-border/80 bg-background/70"
+                >
+                  {image.previewUrl ? (
+                    <button
+                      type="button"
+                      className="h-full w-full cursor-zoom-in"
+                      aria-label={`Preview ${image.name}`}
+                      onClick={() => {
+                        const preview = buildExpandedImagePreview(regularImages, image.id);
+                        if (!preview) return;
+                        ctx.onImageExpand(preview);
+                      }}
+                    >
+                      <img
+                        src={image.previewUrl}
+                        alt={image.name}
+                        className="block h-auto max-h-[220px] w-full object-cover"
+                      />
+                    </button>
+                  ) : (
+                    <div className="flex min-h-[72px] items-center justify-center px-2 py-3 text-center text-[11px] text-muted-foreground/70">
+                      {image.name}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+          {previewAnnotations.map((annotation, index) => (
+            <UserMessagePreviewAnnotationCard
+              key={annotation.id}
+              annotation={annotation}
+              image={previewImages[index] ?? null}
+            />
+          ))}
+          {elementContexts.length > 0 ? (
+            <div className="mb-2 flex flex-wrap gap-1.5">
+              {elementContexts.map((context) => (
+                <UserMessageElementContextChip
+                  key={`${context.header}:${context.body}`}
+                  context={context}
+                />
+              ))}
+            </div>
+          ) : null}
+          <CollapsibleUserMessageBody
+            text={elementContextState.promptText}
+            terminalContexts={terminalContexts}
+            skills={ctx.skills}
+            markdownCwd={ctx.markdownCwd}
           />
-        ))}
-        {elementContexts.length > 0 ? (
-          <div className="mb-2 flex flex-wrap gap-1.5">
-            {elementContexts.map((context) => (
-              <UserMessageElementContextChip
-                key={`${context.header}:${context.body}`}
-                context={context}
-              />
-            ))}
-          </div>
-        ) : null}
-        <CollapsibleUserMessageBody
-          text={elementContextState.promptText}
-          terminalContexts={terminalContexts}
-          skills={ctx.skills}
-          markdownCwd={ctx.markdownCwd}
-        />
+          <TaskSourceMarkersOverlay
+            messageId={row.message.id}
+            containerRef={selectionContainerRef}
+            contentKey={elementContextState.promptText}
+          />
+        </div>
       </div>
       <div className="flex w-full max-w-[80%] items-center justify-end pe-1 text-xs tabular-nums opacity-0 transition-opacity duration-200 focus-within:opacity-100 group-hover:opacity-100 max-sm:opacity-100">
         <div className="flex shrink-0 items-center gap-2">
@@ -1064,7 +982,6 @@ function TurnFoldTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "turn-
 
 function AssistantTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" }> }) {
   const ctx = use(TimelineRowCtx);
-  const isSourceHighlighted = ctx.sourceHighlightMessageId === row.message.id;
   const {
     selectionContainerRef,
     selectedQuote,
@@ -1076,47 +993,50 @@ function AssistantTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "mess
 
   return (
     <>
-      <div
-        ref={selectionContainerRef}
-        className={cn(
-          "relative min-w-0 rounded-lg px-1 py-0.5 transition-[box-shadow,background-color]",
-          isSourceHighlighted ? "bg-accent/35 ring-2 ring-primary/45" : null,
-        )}
-        data-source-highlight={isSourceHighlighted ? "true" : undefined}
-        onPointerUp={captureSelection}
-        onKeyUp={captureSelection}
-      >
-        <ChatMarkdown
-          text={messageText}
-          cwd={ctx.markdownCwd}
-          threadRef={ctx.threadRef ?? undefined}
-          isStreaming={Boolean(row.message.streaming)}
-          skills={ctx.skills}
-        />
-        <AssistantChangedFilesSection
-          turnSummary={row.assistantTurnDiffSummary}
-          routeThreadKey={ctx.routeThreadKey}
-          resolvedTheme={ctx.resolvedTheme}
-          onOpenTurnDiff={ctx.onOpenTurnDiff}
-        />
-        {row.showAssistantMeta ? (
-          <div className="mt-1.5 flex items-center gap-2 text-xs tabular-nums opacity-0 transition-opacity duration-200 focus-within:opacity-100 group-hover/assistant:opacity-100">
-            <AssistantCopyButton row={row} />
-            {!row.message.streaming ? <ForkMessageButton messageId={row.message.id} /> : null}
-            {!row.message.streaming && (
-              <Tooltip>
-                <TooltipTrigger
-                  render={<p className="text-muted-foreground text-xs tabular-nums" />}
-                >
-                  {formatShortTimestamp(row.message.updatedAt, ctx.timestampFormat)}
-                </TooltipTrigger>
-                <TooltipPopup>
-                  {formatChatTimestampTooltip(row.message.updatedAt, ctx.timestampFormat)}
-                </TooltipPopup>
-              </Tooltip>
-            )}
-          </div>
-        ) : null}
+      <div className="min-w-0">
+        <div
+          ref={selectionContainerRef}
+          className="relative min-w-0 rounded-lg px-1 py-0.5"
+          onPointerUp={captureSelection}
+          onKeyUp={captureSelection}
+        >
+          <ChatMarkdown
+            text={messageText}
+            cwd={ctx.markdownCwd}
+            threadRef={ctx.threadRef ?? undefined}
+            isStreaming={Boolean(row.message.streaming)}
+            skills={ctx.skills}
+          />
+          <AssistantChangedFilesSection
+            turnSummary={row.assistantTurnDiffSummary}
+            routeThreadKey={ctx.routeThreadKey}
+            resolvedTheme={ctx.resolvedTheme}
+            onOpenTurnDiff={ctx.onOpenTurnDiff}
+          />
+          {row.showAssistantMeta ? (
+            <div className="mt-1.5 flex items-center gap-2 text-xs tabular-nums opacity-0 transition-opacity duration-200 focus-within:opacity-100 group-hover/assistant:opacity-100">
+              <AssistantCopyButton row={row} />
+              {!row.message.streaming ? <ForkMessageButton messageId={row.message.id} /> : null}
+              {!row.message.streaming && (
+                <Tooltip>
+                  <TooltipTrigger
+                    render={<p className="text-muted-foreground text-xs tabular-nums" />}
+                  >
+                    {formatShortTimestamp(row.message.updatedAt, ctx.timestampFormat)}
+                  </TooltipTrigger>
+                  <TooltipPopup>
+                    {formatChatTimestampTooltip(row.message.updatedAt, ctx.timestampFormat)}
+                  </TooltipPopup>
+                </Tooltip>
+              )}
+            </div>
+          ) : null}
+          <TaskSourceMarkersOverlay
+            messageId={row.message.id}
+            containerRef={selectionContainerRef}
+            contentKey={messageText}
+          />
+        </div>
       </div>
       {selectedQuote && selectionAnchorRect ? (
         <SelectionActionBar
@@ -1252,7 +1172,14 @@ function SelectionActionBar(props: {
                 onChange={(event) => setInstruction(event.target.value)}
                 onKeyDown={(event) => {
                   if (event.key === "Escape") props.onCancel();
-                  if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+                  if (
+                    shouldSaveSelectionTaskContextOnKeyDown({
+                      key: event.key,
+                      shiftKey: event.shiftKey,
+                      isComposing: event.nativeEvent.isComposing,
+                    })
+                  ) {
+                    event.preventDefault();
                     props.onSave(resolveSelectionTaskInstruction(props.quote, instruction));
                   }
                 }}
@@ -1314,6 +1241,29 @@ export function resolveSelectionTaskInstruction(quote: string, optionalContext: 
   return optionalContext.trim() || quote;
 }
 
+export function groupContextTasksBySourceMessageId(
+  tasks: readonly ContextualTask[],
+): ReadonlyMap<MessageId, readonly ContextualTask[]> {
+  const groups = new Map<MessageId, ContextualTask[]>();
+  for (const task of tasks) {
+    const messageTasks = groups.get(task.sourceMessageId);
+    if (messageTasks) {
+      messageTasks.push(task);
+    } else {
+      groups.set(task.sourceMessageId, [task]);
+    }
+  }
+  return groups;
+}
+
+export function shouldSaveSelectionTaskContextOnKeyDown(input: {
+  readonly key: string;
+  readonly shiftKey: boolean;
+  readonly isComposing: boolean;
+}): boolean {
+  return input.key === "Enter" && !input.shiftKey && !input.isComposing;
+}
+
 function AssistantCopyButton({ row }: { row: Extract<TimelineRow, { kind: "message" }> }) {
   const assistantCopyState = resolveAssistantMessageCopyState({
     text: row.message.text ?? null,
@@ -1350,22 +1300,18 @@ function ProposedPlanTimelineRow({
 
 function WorkingTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "working" }> }) {
   return (
-    <div className="py-0.5 pl-1.5">
-      <div className="flex items-center gap-2 pt-1 text-[11px] text-muted-foreground/70 tabular-nums">
-        <span className="inline-flex items-center gap-[3px]">
-          <span className="h-1 w-1 rounded-full bg-muted-foreground/30 animate-pulse" />
-          <span className="h-1 w-1 rounded-full bg-muted-foreground/30 animate-pulse [animation-delay:200ms]" />
-          <span className="h-1 w-1 rounded-full bg-muted-foreground/30 animate-pulse [animation-delay:400ms]" />
-        </span>
-        <span>
-          {row.createdAt ? (
-            <>
-              Working for <WorkingTimer createdAt={row.createdAt} />
-            </>
-          ) : (
-            "Working..."
-          )}
-        </span>
+    <div
+      className="border-b border-border/60 px-1 pb-2.5 pt-1"
+      data-testid="working-status-separator"
+    >
+      <div className="text-sm text-muted-foreground tabular-nums">
+        {row.createdAt ? (
+          <>
+            Working for <WorkingTimer createdAt={row.createdAt} />
+          </>
+        ) : (
+          "Working..."
+        )}
       </div>
     </div>
   );

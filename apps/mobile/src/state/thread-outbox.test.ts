@@ -6,7 +6,7 @@ import {
   ProjectId,
   ProviderInstanceId,
   ThreadId,
-} from "@t3tools/contracts";
+} from "@v12/contracts";
 import { AtomRegistry } from "effect/unstable/reactivity";
 
 import {

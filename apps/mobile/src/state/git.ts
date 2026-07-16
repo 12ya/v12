@@ -1,4 +1,4 @@
-import { createGitEnvironmentAtoms } from "@t3tools/client-runtime/state/git";
+import { createGitEnvironmentAtoms } from "@v12/client-runtime/state/git";
 
 import { connectionAtomRuntime } from "../connection/runtime";
 

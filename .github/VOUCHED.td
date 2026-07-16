@@ -8,28 +8,5 @@
 #   github:username
 #   -github:username reason for denouncement
 #
-# Keep entries sorted alphabetically.
-github:adityavardhansharma
-github:binbandit
-github:chuks-qua
-github:cursoragent
-github:gbarros-dev
-github:github-actions[bot]
-github:hwanseoc
-github:jamesx0416
-github:jasonLaster
-github:JoeEverest
-github:maria-rcks
-github:nmggithub
-github:Noojuno
-github:notkainoa
-github:PatrickBauer
-github:realAhmedRoach
-github:shiroyasha9
-github:Yash-Singh1
-github:eggfriedrice24
-github:Ymit24
-github:shivamhwp
-github:jappyjan
-github:justsomelegs
-github:UtkarshUsername
+# Keep entries sorted alphabetically. This fork intentionally starts with no
+# inherited external trust entries; collaborators are trusted automatically.

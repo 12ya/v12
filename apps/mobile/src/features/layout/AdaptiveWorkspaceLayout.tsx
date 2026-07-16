@@ -1,8 +1,5 @@
-import type {
-  EnvironmentProject,
-  EnvironmentThreadShell,
-} from "@t3tools/client-runtime/state/shell";
-import { EnvironmentId, ThreadId } from "@t3tools/contracts";
+import type { EnvironmentProject, EnvironmentThreadShell } from "@v12/client-runtime/state/shell";
+import { EnvironmentId, ThreadId } from "@v12/contracts";
 import { useFocusEffect } from "@react-navigation/native";
 import {
   NavigationContext,

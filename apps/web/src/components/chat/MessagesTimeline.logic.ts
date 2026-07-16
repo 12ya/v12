@@ -7,14 +7,9 @@ import {
   type WorkLogEntry,
 } from "../../session-logic";
 import { type ChatMessage, type ProposedPlan, type TurnDiffSummary } from "../../types";
-import { type MessageId, type OrchestrationLatestTurn, type TurnId } from "@t3tools/contracts";
+import { type MessageId, type OrchestrationLatestTurn, type TurnId } from "@v12/contracts";
 
 export const MAX_VISIBLE_WORK_LOG_ENTRIES = 1;
-export const TIMELINE_MINIMAP_ITEM_SPACING = 8;
-export const TIMELINE_MINIMAP_MIN_ITEMS = 2;
-export const TIMELINE_MINIMAP_MAX_HEIGHT_CSS = "calc(100vh - 18rem)";
-export const TIMELINE_CONTENT_MAX_WIDTH = 768;
-export const TIMELINE_MINIMAP_PERSISTENT_GUTTER = 48;
 
 export interface TimelineEndState {
   readonly isAtEnd?: boolean;
@@ -25,43 +20,40 @@ export function resolveTimelineIsAtEnd(state: TimelineEndState | undefined): boo
   return state?.isNearEnd ?? state?.isAtEnd;
 }
 
-export function resolveTimelineMinimapHeightStyle(itemCount: number): string {
-  const naturalHeight = Math.max(1, (itemCount - 1) * TIMELINE_MINIMAP_ITEM_SPACING);
-  return `min(${naturalHeight}px, ${TIMELINE_MINIMAP_MAX_HEIGHT_CSS})`;
+export interface TimelineScrollThumbGeometry {
+  readonly length: number;
+  readonly offset: number;
 }
 
-export function resolveTimelineMinimapTopPercent(index: number, itemCount: number): number {
-  if (itemCount <= 1) {
-    return 0;
-  }
-  return (Math.max(0, Math.min(index, itemCount - 1)) / (itemCount - 1)) * 100;
-}
-
-export function resolveTimelineMinimapIndexFromPointer(input: {
-  readonly itemCount: number;
-  readonly railTop: number;
-  readonly railHeight: number;
-  readonly pointerY: number;
-}): number | null {
-  if (input.itemCount <= 0 || input.railHeight <= 0) {
+export function resolveTimelineScrollThumb(input: {
+  readonly contentLength: number;
+  readonly scroll: number;
+  readonly trackLength: number;
+  readonly viewportLength: number;
+  readonly minimumLength?: number;
+}): TimelineScrollThumbGeometry | null {
+  const { contentLength, trackLength, viewportLength } = input;
+  if (
+    !Number.isFinite(contentLength) ||
+    !Number.isFinite(trackLength) ||
+    !Number.isFinite(viewportLength) ||
+    contentLength <= viewportLength ||
+    trackLength <= 0 ||
+    viewportLength <= 0
+  ) {
     return null;
   }
-  if (input.itemCount === 1) {
-    return 0;
-  }
 
-  const progress = Math.max(0, Math.min(1, (input.pointerY - input.railTop) / input.railHeight));
-  return Math.max(0, Math.min(input.itemCount - 1, Math.round(progress * (input.itemCount - 1))));
-}
+  const minimumLength = Math.max(1, input.minimumLength ?? 32);
+  const length = Math.min(
+    trackLength,
+    Math.max(minimumLength, (viewportLength / contentLength) * trackLength),
+  );
+  const maximumScroll = contentLength - viewportLength;
+  const boundedScroll = Math.max(0, Math.min(input.scroll, maximumScroll));
+  const offset = (boundedScroll / maximumScroll) * Math.max(0, trackLength - length);
 
-export function resolveTimelineMinimapHasPersistentGutter(viewportWidth: number): boolean {
-  if (!Number.isFinite(viewportWidth) || viewportWidth <= 0) {
-    return false;
-  }
-
-  const contentWidth = Math.min(viewportWidth, TIMELINE_CONTENT_MAX_WIDTH);
-  const sideGutter = Math.max(0, (viewportWidth - contentWidth) / 2);
-  return sideGutter >= TIMELINE_MINIMAP_PERSISTENT_GUTTER;
+  return { length, offset };
 }
 
 function computeElapsedMs(startIso: string, endIso: string): number | null {

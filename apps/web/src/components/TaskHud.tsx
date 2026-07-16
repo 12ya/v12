@@ -1,7 +1,7 @@
-import type { EnvironmentId, ScopedThreadRef } from "@t3tools/contracts";
-import { scopedThreadKey } from "@t3tools/client-runtime/environment";
-import type { TimestampFormat } from "@t3tools/contracts/settings";
-import { CheckIcon, ListTodoIcon, Trash2Icon } from "lucide-react";
+import type { EnvironmentId, ScopedThreadRef } from "@v12/contracts";
+import { scopedThreadKey } from "@v12/client-runtime/environment";
+import type { TimestampFormat } from "@v12/contracts/settings";
+import { CheckIcon, ListTodoIcon, Trash2Icon, XIcon } from "lucide-react";
 import { memo, useCallback, useMemo } from "react";
 
 import type { ActivePlanState, LatestProposedPlanState } from "../session-logic";
@@ -13,7 +13,8 @@ import {
 } from "../taskHudState";
 import PlanSidebar from "./PlanSidebar";
 import { Button } from "./ui/button";
-import { Popover, PopoverPopup, PopoverTrigger } from "./ui/popover";
+import { Toggle } from "./ui/toggle";
+import { Tooltip, TooltipPopup, TooltipTrigger } from "./ui/tooltip";
 
 interface TaskHudProps {
   readonly activePlan: ActivePlanState | null;
@@ -24,6 +25,7 @@ interface TaskHudProps {
   readonly markdownCwd: string | undefined;
   readonly workspaceRoot: string | undefined;
   readonly timestampFormat: TimestampFormat;
+  readonly mode?: "trigger" | "toolbar" | "panel";
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   readonly onOpenTaskSource: (task: ContextualTask) => void;
@@ -40,6 +42,7 @@ export const TaskHud = memo(function TaskHud({
   markdownCwd,
   workspaceRoot,
   timestampFormat,
+  mode = "trigger",
   open,
   onOpenChange,
   onOpenTaskSource,
@@ -81,15 +84,16 @@ export const TaskHud = memo(function TaskHud({
     },
     [planKey, steps],
   );
-  const handleMoveStep = useCallback(
-    (index: number, direction: -1 | 1) => {
+  const handleReorderStep = useCallback(
+    (fromIndex: number, toIndex: number) => {
       if (!planKey) return;
-      const targetIndex = index + direction;
-      if (targetIndex < 0 || targetIndex >= steps.length) return;
+      if (fromIndex < 0 || toIndex < 0 || fromIndex >= steps.length || toIndex >= steps.length) {
+        return;
+      }
       const nextOrder = steps.map((step) => step.id);
-      const [moved] = nextOrder.splice(index, 1);
+      const [moved] = nextOrder.splice(fromIndex, 1);
       if (!moved) return;
-      nextOrder.splice(targetIndex, 0, moved);
+      nextOrder.splice(toIndex, 0, moved);
       useTaskHudStore.getState().setTaskOrder(planKey, nextOrder);
     },
     [planKey, steps],
@@ -97,104 +101,145 @@ export const TaskHud = memo(function TaskHud({
 
   if (!activePlan && !activeProposedPlan && contextTasks.length === 0) return null;
 
-  return (
-    <Popover open={open} onOpenChange={onOpenChange}>
-      <PopoverTrigger
-        render={
-          <Button
-            size="sm"
-            variant="outline"
-            aria-label={`${label}: ${completedCount} of ${totalCount} tasks complete`}
-            className="pointer-events-auto h-7 gap-1.5 rounded-full bg-background/90 px-2.5 text-xs shadow-sm backdrop-blur-sm"
-          />
-        }
+  if (mode === "toolbar") {
+    const accessibleLabel = `${label}: ${completedCount} of ${totalCount} tasks complete`;
+    return (
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Toggle
+              className="shrink-0 [-webkit-app-region:no-drag]"
+              pressed={open}
+              onPressedChange={onOpenChange}
+              aria-label={accessibleLabel}
+              variant="ghost"
+              size="sm"
+            >
+              <ListTodoIcon className="size-3.5" />
+            </Toggle>
+          }
+        />
+        <TooltipPopup side="bottom">
+          {label} {completedCount}/{totalCount}
+        </TooltipPopup>
+      </Tooltip>
+    );
+  }
+
+  if (mode === "trigger") {
+    return (
+      <Button
+        size="sm"
+        variant="outline"
+        aria-label={`${label}: ${completedCount} of ${totalCount} tasks complete`}
+        aria-expanded={open}
+        className="pointer-events-auto h-6 gap-1 rounded-full bg-background/90 px-2 text-[11px] shadow-sm backdrop-blur-sm"
+        onClick={() => onOpenChange(!open)}
       >
-        <ListTodoIcon className="size-3.5" />
+        <ListTodoIcon className="size-3" />
         <span className="font-medium">{label}</span>
         <span className="tabular-nums text-muted-foreground">
           {completedCount}/{totalCount}
         </span>
-      </PopoverTrigger>
-      <PopoverPopup
-        side="bottom"
-        align="end"
-        sideOffset={6}
-        positionerClassName="transition-none"
-        className="h-[min(32rem,calc(100vh-8rem))] w-[min(23rem,calc(100vw-1rem))] translate-x-0 overflow-hidden transition-[translate,opacity] duration-150 ease-out will-change-transform data-ending-style:translate-x-4 data-ending-style:scale-100 data-ending-style:opacity-0 data-starting-style:translate-x-4 data-starting-style:scale-100 motion-reduce:transition-none motion-reduce:data-ending-style:translate-x-0 motion-reduce:data-starting-style:translate-x-0"
-        viewportClassName="p-0 [--viewport-inline-padding:0px]"
-      >
-        <div className="flex h-full min-h-0 flex-col">
-          {contextTasks.length > 0 ? (
-            <section
-              className="shrink-0 border-b border-border p-3"
-              aria-label="Conversation tasks"
-            >
-              <p className="mb-2 text-xs font-medium text-muted-foreground">From conversation</p>
-              <div className="max-h-48 space-y-1 overflow-auto">
-                {contextTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="group flex items-start gap-2 rounded-md p-1.5 hover:bg-accent/30"
-                  >
-                    <Button
-                      size="icon-xs"
-                      variant="ghost"
-                      aria-label={task.completed ? "Mark task incomplete" : "Mark task complete"}
-                      onClick={() =>
-                        useTaskHudStore
-                          .getState()
-                          .setContextTaskCompleted(threadKey, task.id, !task.completed)
-                      }
-                    >
-                      <CheckIcon className={task.completed ? "size-3" : "size-3 opacity-20"} />
-                    </Button>
-                    <button
-                      type="button"
-                      className="min-w-0 flex-1 text-left"
-                      onClick={() => onOpenTaskSource(task)}
-                    >
-                      <p className={task.completed ? "text-xs line-through opacity-60" : "text-xs"}>
-                        {task.instruction}
-                      </p>
-                      {task.quote !== task.instruction ? (
-                        <p className="truncate text-[11px] text-muted-foreground">“{task.quote}”</p>
-                      ) : null}
-                    </button>
-                    <Button
-                      size="icon-xs"
-                      variant="ghost"
-                      aria-label="Remove task"
-                      onClick={() =>
-                        useTaskHudStore.getState().removeContextTask(threadKey, task.id)
-                      }
-                    >
-                      <Trash2Icon className="size-3" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </section>
-          ) : null}
-          {activePlan || activeProposedPlan ? (
-            <div className="min-h-0 flex-1">
-              <PlanSidebar
-                activePlan={displayedPlan}
-                activeProposedPlan={activeProposedPlan}
-                label={label}
-                environmentId={environmentId}
-                threadRef={threadRef}
-                markdownCwd={markdownCwd}
-                workspaceRoot={workspaceRoot}
-                timestampFormat={timestampFormat}
-                mode="popover"
-                onToggleStep={handleToggleStep}
-                onRemoveStep={handleRemoveStep}
-                onMoveStep={handleMoveStep}
-              />
-            </div>
-          ) : null}
+      </Button>
+    );
+  }
+
+  return (
+    <aside
+      aria-label={`${label} summary`}
+      className="max-h-[calc(100vh-8rem)] w-full select-none overflow-hidden rounded-2xl border border-border/70 bg-card/95 shadow-lg backdrop-blur-sm"
+    >
+      <header className="flex h-10 items-center justify-between px-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <ListTodoIcon className="size-3.5 text-muted-foreground" />
+          <span className="text-xs font-medium">{label}</span>
+          <span className="text-[11px] tabular-nums text-muted-foreground">
+            {completedCount}/{totalCount}
+          </span>
         </div>
-      </PopoverPopup>
-    </Popover>
+        <Button
+          size="icon-xs"
+          variant="ghost"
+          aria-label={`Close ${label}`}
+          onClick={() => onOpenChange(false)}
+        >
+          <XIcon className="size-3.5" />
+        </Button>
+      </header>
+      <div className="max-h-[calc(100vh-10.5rem)] overflow-y-auto">
+        {contextTasks.length > 0 ? (
+          <section
+            className={
+              activePlan || activeProposedPlan
+                ? "border-y border-border/60 p-2.5"
+                : "border-t border-border/60 p-2.5"
+            }
+            aria-label="Conversation tasks"
+          >
+            <p className="mb-1.5 text-xs font-medium text-muted-foreground">From conversation</p>
+            <div className="max-h-48 space-y-1 overflow-auto">
+              {contextTasks.map((task) => (
+                <div
+                  key={task.id}
+                  className="group flex items-start gap-2 rounded-md p-1.5 hover:bg-accent/30"
+                >
+                  <Button
+                    size="icon-xs"
+                    variant="ghost"
+                    aria-label={task.completed ? "Mark task incomplete" : "Mark task complete"}
+                    onClick={() =>
+                      useTaskHudStore
+                        .getState()
+                        .setContextTaskCompleted(threadKey, task.id, !task.completed)
+                    }
+                  >
+                    <CheckIcon className={task.completed ? "size-3" : "size-3 opacity-20"} />
+                  </Button>
+                  <button
+                    type="button"
+                    className="min-w-0 flex-1 text-left"
+                    onClick={() => onOpenTaskSource(task)}
+                  >
+                    <p className={task.completed ? "text-xs line-through opacity-60" : "text-xs"}>
+                      {task.instruction}
+                    </p>
+                    {task.quote !== task.instruction ? (
+                      <p className="truncate text-[11px] text-muted-foreground">“{task.quote}”</p>
+                    ) : null}
+                  </button>
+                  <Button
+                    size="icon-xs"
+                    variant="ghost"
+                    aria-label="Remove task"
+                    onClick={() => useTaskHudStore.getState().removeContextTask(threadKey, task.id)}
+                  >
+                    <Trash2Icon className="size-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
+        {activePlan || activeProposedPlan ? (
+          <div className="min-h-0">
+            <PlanSidebar
+              activePlan={displayedPlan}
+              activeProposedPlan={activeProposedPlan}
+              label={label}
+              environmentId={environmentId}
+              threadRef={threadRef}
+              markdownCwd={markdownCwd}
+              workspaceRoot={workspaceRoot}
+              timestampFormat={timestampFormat}
+              mode="summary"
+              onToggleStep={handleToggleStep}
+              onRemoveStep={handleRemoveStep}
+              onReorderStep={handleReorderStep}
+            />
+          </div>
+        ) : null}
+      </div>
+    </aside>
   );
 });

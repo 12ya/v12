@@ -5,7 +5,7 @@ import {
   ProviderDriverKind,
   ThreadId,
   type OrchestrationEvent,
-} from "@t3tools/contracts";
+} from "@v12/contracts";
 import * as Effect from "effect/Effect";
 import { describe, expect, it } from "vite-plus/test";
 
@@ -566,7 +566,7 @@ describe("orchestration projector", () => {
           threadId: "thread-1",
           turnId: "turn-1",
           checkpointTurnCount: 1,
-          checkpointRef: "refs/t3/checkpoints/thread-1/turn/1",
+          checkpointRef: "refs/v12/checkpoints/thread-1/turn/1",
           status: "ready",
           files: [],
           assistantMessageId: "assistant-msg-1",
@@ -640,7 +640,7 @@ describe("orchestration projector", () => {
           threadId: "thread-1",
           turnId: "turn-2",
           checkpointTurnCount: 2,
-          checkpointRef: "refs/t3/checkpoints/thread-1/turn/2",
+          checkpointRef: "refs/v12/checkpoints/thread-1/turn/2",
           status: "ready",
           files: [],
           assistantMessageId: "assistant-msg-2",
@@ -745,7 +745,7 @@ describe("orchestration projector", () => {
           threadId: "thread-revert",
           turnId: "turn-1",
           checkpointTurnCount: 1,
-          checkpointRef: "refs/t3/checkpoints/thread-revert/turn/1",
+          checkpointRef: "refs/v12/checkpoints/thread-revert/turn/1",
           status: "ready",
           files: [],
           assistantMessageId: "assistant-keep",
@@ -781,7 +781,7 @@ describe("orchestration projector", () => {
           threadId: "thread-revert",
           turnId: "turn-2",
           checkpointTurnCount: 2,
-          checkpointRef: "refs/t3/checkpoints/thread-revert/turn/2",
+          checkpointRef: "refs/v12/checkpoints/thread-revert/turn/2",
           status: "ready",
           files: [],
           assistantMessageId: "assistant-remove",
@@ -930,7 +930,7 @@ describe("orchestration projector", () => {
             threadId: "thread-capped",
             turnId: `turn-${index}`,
             checkpointTurnCount: index + 1,
-            checkpointRef: `refs/t3/checkpoints/thread-capped/turn/${index + 1}`,
+            checkpointRef: `refs/v12/checkpoints/thread-capped/turn/${index + 1}`,
             status: "ready",
             files: [],
             assistantMessageId: `msg-${index}`,

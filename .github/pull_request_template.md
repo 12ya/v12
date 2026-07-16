@@ -1,16 +1,3 @@
-<!--
-⚠️ READ BEFORE OPENING ⚠️
-
-We are not actively accepting contributions right now.
-
-You can still open a PR, but please do so knowing there is a high chance
-we may close it without merging it, or never review it.
-
-- Small, focused PRs are strongly preferred. Bug fixes are most likely to be merged.
-- New features will most likely just annoy us.
-- 1,000+ line PRs with a bunch of new features will probably get you banned from the repo.
--->
-
 ## What Changed
 
 <!-- Describe the change clearly and keep scope tight. -->
@@ -18,6 +5,10 @@ we may close it without merging it, or never review it.
 ## Why
 
 <!-- Explain the problem being solved and why this approach is the right one. -->
+
+## Validation
+
+<!-- List the checks and tests you ran. -->
 
 ## UI Changes
 
@@ -29,5 +20,7 @@ we may close it without merging it, or never review it.
 
 - [ ] This PR is small and focused
 - [ ] I explained what changed and why
+- [ ] `vp check` and `vp run typecheck` pass
 - [ ] I included before/after screenshots for any UI changes
 - [ ] I included a video for animation/interaction changes
+- [ ] I did not include secrets, private data, or machine-specific files

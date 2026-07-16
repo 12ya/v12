@@ -2,7 +2,7 @@ import { SymbolView } from "./AppSymbol";
 import { Image } from "expo-image";
 import { useState } from "react";
 import { View } from "react-native";
-import type { EnvironmentId } from "@t3tools/contracts";
+import type { EnvironmentId } from "@v12/contracts";
 import { useThemeColor } from "../lib/useThemeColor";
 import { useAssetUrl } from "../state/assets";
 

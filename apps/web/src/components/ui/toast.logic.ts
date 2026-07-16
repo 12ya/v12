@@ -1,4 +1,4 @@
-import type { ScopedThreadRef, ThreadId } from "@t3tools/contracts";
+import type { ScopedThreadRef, ThreadId } from "@v12/contracts";
 
 export function shouldHideCollapsedToastContent(
   visibleToastIndex: number,

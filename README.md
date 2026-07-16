@@ -1,3 +1,5 @@
+Built on the goated [T3 Code](https://github.com/pingdotgg/t3code) by T3 Tools.
+
 # V12
 
 V12 is a minimal web GUI for coding agents (currently Codex, Claude, Cursor, and OpenCode, more coming soon).
@@ -16,38 +18,36 @@ V12 is a minimal web GUI for coding agents (currently Codex, Claude, Cursor, and
 ### Run without installing
 
 ```bash
-npx t3@latest
+npx v12@latest
 ```
 
-Tip: Use `npx t3@latest --help` for the full CLI reference.
+Tip: Use `npx v12@latest --help` for the full CLI reference.
 
 ### Desktop app
 
-Install the latest version of the desktop app from [GitHub Releases](https://github.com/pingdotgg/t3code/releases), or from your favorite package registry:
+Install the latest version of the desktop app from [GitHub Releases](https://github.com/12ya/t3code/releases), or from your favorite package registry:
 
 #### Windows (`winget`)
 
 ```bash
-winget install T3Tools.T3Code
+winget install V12.V12
 ```
 
 #### macOS (Homebrew)
 
 ```bash
-brew install --cask t3-code
+brew install --cask 12ya/tap/v12-code
 ```
 
 #### Arch Linux (AUR)
 
 ```bash
-yay -S t3code-bin
+yay -S v12-bin
 ```
 
 ## Some notes
 
 We are very very early in this project. Expect bugs.
-
-We are not accepting contributions yet.
 
 There's no public docs site yet, checkout the miscellaneous markdown files in [docs](./docs).
 
@@ -60,7 +60,9 @@ There's no public docs site yet, checkout the miscellaneous markdown files in [d
 - [Operations](./docs/operations/ci.md)
 - [Reference](./docs/reference/encyclopedia.md)
 
-## If you REALLY want to contribute still.... read this first
+## Contributing
+
+Contributions are welcome. Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening an issue or PR.
 
 ### Install `vp`
 
@@ -86,6 +88,4 @@ Checkout their getting started guide for more information: https://viteplus.dev/
 vp i
 ```
 
-Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening an issue or PR.
-
-Need support? Join the [Discord](https://discord.gg/jn4EGJjrvv).
+Need support? [Open an issue](https://github.com/12ya/t3code/issues).

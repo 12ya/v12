@@ -1,8 +1,5 @@
-import type {
-  EnvironmentProject,
-  EnvironmentThreadShell,
-} from "@t3tools/client-runtime/state/shell";
-import { EnvironmentId, ProjectId, ProviderInstanceId, ThreadId } from "@t3tools/contracts";
+import type { EnvironmentProject, EnvironmentThreadShell } from "@v12/client-runtime/state/shell";
+import { EnvironmentId, ProjectId, ProviderInstanceId, ThreadId } from "@v12/contracts";
 import { describe, expect, it } from "vite-plus/test";
 
 import { buildHomeThreadGroups } from "./homeThreadList";
@@ -180,31 +177,31 @@ describe("buildHomeThreadGroups", () => {
   it("matches web repository, repository-path, and separate grouping modes", () => {
     const environmentId = EnvironmentId.make("environment-1");
     const repositoryIdentity = {
-      canonicalKey: "github.com/t3tools/t3code",
+      canonicalKey: "github.com/v12/v12",
       locator: {
         source: "git-remote" as const,
         remoteName: "origin",
-        remoteUrl: "git@github.com:t3tools/t3code.git",
+        remoteUrl: "git@github.com:v12/v12.git",
       },
       provider: "github",
-      owner: "t3tools",
-      name: "t3code",
+      owner: "v12",
+      name: "v12",
       displayName: "V12",
-      rootPath: "/workspaces/t3code",
+      rootPath: "/workspaces/v12",
     };
     const projects = [
       makeProject({
         environmentId,
         id: ProjectId.make("project-web"),
         title: "Web",
-        workspaceRoot: "/workspaces/t3code/apps/web",
+        workspaceRoot: "/workspaces/v12/apps/web",
         repositoryIdentity,
       }),
       makeProject({
         environmentId,
         id: ProjectId.make("project-mobile"),
         title: "Mobile",
-        workspaceRoot: "/workspaces/t3code/apps/mobile",
+        workspaceRoot: "/workspaces/v12/apps/mobile",
         repositoryIdentity,
       }),
     ];
@@ -319,23 +316,23 @@ describe("buildHomeThreadGroups", () => {
     const laptopEnv = EnvironmentId.make("environment-laptop");
     const desktopEnv = EnvironmentId.make("environment-desktop");
     const repositoryIdentity = {
-      canonicalKey: "github.com/pingdotgg/t3code",
+      canonicalKey: "github.com/12ya/V12",
       locator: {
         source: "git-remote" as const,
         remoteName: "origin",
-        remoteUrl: "git@github.com:pingdotgg/t3code.git",
+        remoteUrl: "git@github.com:12ya/V12.git",
       },
     };
     const laptopProject = makeProject({
       environmentId: laptopEnv,
       id: ProjectId.make("project-laptop"),
-      title: "t3code",
+      title: "v12",
       repositoryIdentity,
     });
     const desktopProject = makeProject({
       environmentId: desktopEnv,
       id: ProjectId.make("project-desktop"),
-      title: "t3code",
+      title: "v12",
       repositoryIdentity,
     });
     const threads = [

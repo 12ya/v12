@@ -3,7 +3,7 @@
 - [V12 roadmap](./project/roadmap.md)
 - [Getting started](./getting-started/quick-start.md)
 - [Architecture](./architecture/overview.md)
-- [V12 Connect](./cloud/t3-connect-clerk.md)
+- [V12 Connect](./cloud/v12-connect-clerk.md)
 - [Integrations](./integrations/source-control-providers.md)
 - [Mobile](./mobile/app.md)
 - [Operations](./operations/ci.md)

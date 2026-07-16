@@ -1,5 +1,5 @@
-import type { ContextMenuItem, PreviewSessionSnapshot } from "@t3tools/contracts";
-import { getTerminalLabel } from "@t3tools/shared/terminalLabels";
+import type { ContextMenuItem, PreviewSessionSnapshot } from "@v12/contracts";
+import { getTerminalLabel } from "@v12/shared/terminalLabels";
 import { ClipboardList, FileDiff, Files, Globe2, Plus, TerminalSquare, X } from "lucide-react";
 import {
   type MouseEvent as ReactMouseEvent,
@@ -27,6 +27,7 @@ import { PierreEntryIcon } from "./chat/PierreEntryIcon";
 
 interface RightPanelTabsProps {
   mode: PreviewPanelMode;
+  open?: boolean;
   maximized?: boolean;
   layoutControls?: ReactNode;
   surfaces: readonly RightPanelSurface[];
@@ -353,6 +354,7 @@ export function RightPanelTabs(props: RightPanelTabsProps) {
   return (
     <PreviewPanelShell
       mode={props.mode}
+      {...(props.open !== undefined ? { open: props.open } : {})}
       {...(props.maximized !== undefined ? { maximized: props.maximized } : {})}
     >
       <div

@@ -9,7 +9,7 @@ import {
   TurnId,
   type OrchestrationEvent,
   type OrchestrationReadModel,
-} from "@t3tools/contracts";
+} from "@v12/contracts";
 import { expect, it } from "@effect/vitest";
 import * as Effect from "effect/Effect";
 

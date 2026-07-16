@@ -1,5 +1,5 @@
-import { resolveDefaultBranchActionDialogCopy } from "@t3tools/client-runtime/state/vcs";
-import { resolveAutoFeatureBranchName } from "@t3tools/shared/git";
+import { resolveDefaultBranchActionDialogCopy } from "@v12/client-runtime/state/vcs";
+import { resolveAutoFeatureBranchName } from "@v12/shared/git";
 import * as Arr from "effect/Array";
 import * as Result from "effect/Result";
 import { StackActions, useNavigation, type StaticScreenProps } from "@react-navigation/native";
@@ -105,10 +105,10 @@ export function GitConfirmSheet(props: GitConfirmSheetProps) {
       <View className="min-h-4 pt-2" />
 
       <View className="items-center gap-1 px-5 pb-3 pt-4">
-        <Text className="text-xs font-t3-bold tracking-[1px] uppercase text-foreground-muted">
+        <Text className="text-xs font-v12-bold tracking-[1px] uppercase text-foreground-muted">
           Confirm
         </Text>
-        <Text className="text-center text-3xl font-t3-bold">
+        <Text className="text-center text-3xl font-v12-bold">
           {copy?.title ?? "Run action on default branch?"}
         </Text>
         <Text className="text-center text-foreground-secondary text-sm font-medium leading-normal">

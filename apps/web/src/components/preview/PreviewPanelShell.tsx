@@ -8,7 +8,7 @@ import { RightPanelResizeHandle } from "./RightPanelResizeHandle";
 
 export type PreviewPanelMode = "inline" | "sheet" | "sidebar" | "embedded";
 
-const PREVIEW_PANEL_WIDTH_STORAGE_KEY = "t3code:preview-panel-width";
+const PREVIEW_PANEL_WIDTH_STORAGE_KEY = "v12:preview-panel-width";
 const PREVIEW_PANEL_MIN_WIDTH = 360;
 /** Hard ceiling so a wide monitor can't yield a panel that swallows the chat. */
 const PREVIEW_PANEL_MAX_WIDTH_PX = 1400;
@@ -23,11 +23,13 @@ const PREVIEW_PANEL_DEFAULT_WIDTH = 540;
  */
 export function PreviewPanelShell(props: {
   mode: PreviewPanelMode;
+  open?: boolean;
   maximized?: boolean;
   children: ReactNode;
 }) {
   const useDragRegion = isElectron && props.mode !== "sheet" && props.mode !== "embedded";
   const isInline = props.mode === "inline";
+  const open = props.open ?? true;
   const maxWidth = useViewportClampedMaxWidth();
   const { width, handlers } = useResizableWidth({
     storageKey: PREVIEW_PANEL_WIDTH_STORAGE_KEY,
@@ -36,18 +38,26 @@ export function PreviewPanelShell(props: {
     maxWidth,
     edge: "left",
   });
+  const inlineStyle = isInline
+    ? {
+        width: open && !props.maximized ? `${width}px` : "0px",
+        flexGrow: open && props.maximized ? 1 : 0,
+      }
+    : undefined;
 
   return (
     <div
       className={cn(
-        "relative flex h-full min-h-0 min-w-0 flex-col self-stretch bg-background",
+        "relative flex h-full min-h-0 min-w-0 flex-col self-stretch overflow-hidden bg-background transition-[width,flex-grow,opacity,border-color] duration-200 ease-out motion-reduce:transition-none",
         isInline
-          ? props.maximized
-            ? "flex-1 border-l border-border"
-            : "shrink-0 border-l border-border"
+          ? !open
+            ? "pointer-events-none w-0 shrink-0 border-l border-transparent opacity-0"
+            : "shrink-0 border-l border-border opacity-100"
           : "w-full",
       )}
-      style={isInline && !props.maximized ? { width: `${width}px` } : undefined}
+      style={inlineStyle}
+      aria-hidden={isInline && !open ? true : undefined}
+      inert={isInline && !open ? true : undefined}
       data-preview-panel-mode={props.mode}
       data-preview-panel-maximized={props.maximized ? "true" : "false"}
     >

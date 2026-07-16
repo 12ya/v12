@@ -1,4 +1,4 @@
-import { MessageId, type OrchestrationMessage } from "@t3tools/contracts";
+import { MessageId, type OrchestrationMessage } from "@v12/contracts";
 import { describe, expect, it } from "@effect/vitest";
 
 import { buildForkContinuationInput } from "./forkContinuation.ts";

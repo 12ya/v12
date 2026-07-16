@@ -1,65 +1,50 @@
 # Contributing
 
-## Read This First
+Thanks for helping improve V12. Bug fixes, reliability improvements, performance work, documentation, and focused features are welcome.
 
-We are not actively accepting contributions right now.
+## Before You Start
 
-You can still open an issue or PR, but please do so knowing there is a high chance we close it, defer it forever, or never look at it.
+- Search existing issues and pull requests first.
+- Open an issue before starting a significant feature or architectural change.
+- Keep pull requests focused on one problem.
+- Report security vulnerabilities privately according to [SECURITY.md](./SECURITY.md).
 
-If that sounds annoying, that is because it is. This project is still early and we are trying to keep scope, quality, and direction under control.
+Small fixes can be submitted directly when the problem and solution are clear.
 
-PRs are automatically labeled with a `vouch:*` trust status and a `size:*` diff size based on changed lines.
+## Development Setup
 
-If you are an external contributor, expect `vouch:unvouched` until we explicitly add you to [.github/VOUCHED.td](.github/VOUCHED.td).
+Install [Vite+](https://viteplus.dev/guide/), then install dependencies:
 
-## What We Are Most Likely To Accept
+```bash
+vp i
+```
 
-Small, focused bug fixes.
+Before submitting a change, run:
 
-Small reliability fixes.
+```bash
+vp check
+vp run typecheck
+```
 
-Small performance improvements.
+For native mobile changes, also run:
 
-Tightly scoped maintenance work that clearly improves the project without changing its direction.
+```bash
+vp run lint:mobile
+```
 
-## What We Are Least Likely To Accept
+Use `vp test` for the built-in Vite+ test command. Use `vp run test` when you specifically need the repository's `test` package script.
 
-Large PRs.
+## Pull Requests
 
-Drive-by feature work.
+- Explain the problem, the solution, and any important tradeoffs.
+- Include tests for behavior changes when practical.
+- Include before-and-after images for visual changes.
+- Include a short recording for motion or interaction changes.
+- Avoid unrelated refactors, generated files, and dependency churn.
+- Confirm that no secrets, private data, or machine-specific files are included.
 
-Opinionated rewrites.
+Maintainers may ask for changes or decline work that does not fit the project's direction. Reviews will stay focused on the contribution and its technical merits.
 
-Anything that expands product scope without us asking for it first.
+## Community
 
-If you open a 1,000+ line PR full of new features, we will probably close it quickly and remember that you ignored the clearly written instructions.
-
-## If You Still Want To Open A PR
-
-Keep it small.
-
-Explain exactly what changed.
-
-Explain exactly why the change should exist.
-
-Do not mix unrelated fixes together.
-
-If the PR makes anything resembling a UI change, include clear before/after images.
-
-If the change depends on motion, timing, transitions, or interaction details, include a short video.
-
-If we have to guess what changed, we are much less likely to review it.
-
-## Issues First
-
-If you are thinking about a non-trivial change, open an issue first.
-
-That still does not mean we will want the PR, but it gives you a chance to avoid wasting your time.
-
-## Be Realistic
-
-Opening a PR does not create an obligation on our side.
-
-We may close it. We may ignore it. We may ask you to shrink it. We may reimplement the idea ourselves later.
-
-If you are fine with that, proceed.
+Participation in this project is governed by our [Code of Conduct](./CODE_OF_CONDUCT.md).

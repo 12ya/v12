@@ -1,4 +1,4 @@
-import type { OrchestrationMessage } from "@t3tools/contracts";
+import type { OrchestrationMessage } from "@v12/contracts";
 
 const ROLE_LABELS = {
   user: "User",

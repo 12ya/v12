@@ -3,8 +3,8 @@ import {
   buildMenuItems,
   getGitActionDisabledReason,
   requiresDefaultBranchConfirmation,
-} from "@t3tools/client-runtime/state/vcs";
-import { EnvironmentId, ThreadId } from "@t3tools/contracts";
+} from "@v12/client-runtime/state/vcs";
+import { EnvironmentId, ThreadId } from "@v12/contracts";
 import { useNavigation, type StaticScreenProps } from "@react-navigation/native";
 import { SymbolView } from "../../../components/AppSymbol";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -374,10 +374,10 @@ export function GitOverviewSheet(props: GitOverviewSheetProps) {
               weight="medium"
             />
           </Pressable>
-          <Text className="text-xs font-t3-bold tracking-[1px] uppercase text-foreground-muted">
+          <Text className="text-xs font-v12-bold tracking-[1px] uppercase text-foreground-muted">
             Repository
           </Text>
-          <Text className="pr-10 text-xl font-t3-bold">{currentBranchLabel}</Text>
+          <Text className="pr-10 text-xl font-v12-bold">{currentBranchLabel}</Text>
           <Text className="text-foreground-secondary text-sm font-medium leading-normal">
             {currentStatusSummary}
           </Text>
@@ -390,10 +390,10 @@ export function GitOverviewSheet(props: GitOverviewSheetProps) {
         // refresh button.
         <View className="flex-row items-end justify-between gap-3 px-10 pb-4 pt-4">
           <View className="shrink gap-0.5">
-            <Text className="text-xs font-t3-bold tracking-[1px] uppercase text-foreground-muted">
+            <Text className="text-xs font-v12-bold tracking-[1px] uppercase text-foreground-muted">
               Branch
             </Text>
-            <Text className="text-xl font-t3-bold" numberOfLines={1}>
+            <Text className="text-xl font-v12-bold" numberOfLines={1}>
               {currentBranchLabel}
             </Text>
           </View>

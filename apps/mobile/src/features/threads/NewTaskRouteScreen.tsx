@@ -1,7 +1,7 @@
 import { NativeHeaderToolbar, NativeStackScreenOptions } from "../../native/StackHeader";
 import { useNavigation } from "@react-navigation/native";
 import { SymbolView } from "../../components/AppSymbol";
-import type { EnvironmentId, ProjectId } from "@t3tools/contracts";
+import type { EnvironmentId, ProjectId } from "@v12/contracts";
 import { useMemo } from "react";
 import { ActivityIndicator, Platform, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -159,7 +159,7 @@ export function NewTaskRouteScreen() {
         {items.length === 0 ? (
           <View collapsable={false} className="items-center gap-3 rounded-[24px] bg-card px-6 py-8">
             {projectEmptyState.loading ? <ActivityIndicator color={accentColor} /> : null}
-            <Text className="text-center text-lg font-t3-bold text-foreground">
+            <Text className="text-center text-lg font-v12-bold text-foreground">
               {projectEmptyState.title}
             </Text>
             <Text className="text-center text-sm leading-normal text-foreground-muted">
@@ -170,7 +170,7 @@ export function NewTaskRouteScreen() {
                 className="mt-1 rounded-full bg-primary px-4 py-2.5 active:opacity-70"
                 onPress={() => navigation.navigate("ConnectionsNew")}
               >
-                <Text className="text-sm font-t3-bold text-primary-foreground">
+                <Text className="text-sm font-v12-bold text-primary-foreground">
                   Add environment
                 </Text>
               </Pressable>
@@ -179,7 +179,7 @@ export function NewTaskRouteScreen() {
                 className="mt-1 rounded-full bg-primary px-4 py-2.5 active:opacity-70"
                 onPress={() => navigation.navigate("NewTaskSheet", { screen: "AddProject" })}
               >
-                <Text className="text-sm font-t3-bold text-primary-foreground">
+                <Text className="text-sm font-v12-bold text-primary-foreground">
                   Add new project
                 </Text>
               </Pressable>
@@ -221,7 +221,7 @@ export function NewTaskRouteScreen() {
                       />
                     </View>
                     <View className="flex-1">
-                      <Text className="text-base leading-snug font-t3-bold">{item.title}</Text>
+                      <Text className="text-base leading-snug font-v12-bold">{item.title}</Text>
                     </View>
                     <SymbolView
                       name="chevron.right"

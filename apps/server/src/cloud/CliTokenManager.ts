@@ -108,7 +108,7 @@ export class CloudCliTokenManager extends Context.Service<
     readonly hasCredential: Effect.Effect<boolean, CloudCliTokenManagerError>;
     readonly clear: Effect.Effect<void, CloudCliTokenManagerError>;
   }
->()("t3/cloud/CliTokenManager/CloudCliTokenManager") {}
+>()("v12/cloud/CliTokenManager/CloudCliTokenManager") {}
 
 const wrapError =
   <WrappedError extends CloudCliTokenManagerError>(makeError: (cause: unknown) => WrappedError) =>

@@ -6,7 +6,7 @@ import {
   type OrchestrationLatestTurn,
   type OrchestrationSession,
   type OrchestrationThreadActivity,
-} from "@t3tools/contracts";
+} from "@v12/contracts";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vite-plus/test";
 
@@ -177,9 +177,9 @@ describe("formatOpenThreadActivityElapsed", () => {
 });
 
 describe("OpenThreadActivityStatus", () => {
-  it("renders an accessible quiet composer status", () => {
+  it("renders an accessible quiet checkout-toolbar status", () => {
     const markup = renderToStaticMarkup(
-      <OpenThreadActivityStatus status={derive()} variant="composer" />,
+      <OpenThreadActivityStatus status={derive()} variant="toolbar" />,
     );
 
     expect(markup).toContain('role="status"');

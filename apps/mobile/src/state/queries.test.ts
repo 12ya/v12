@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@effect/vitest";
-import { EnvironmentId, ThreadId } from "@t3tools/contracts";
+import { EnvironmentId, ThreadId } from "@v12/contracts";
 
 import { buildCheckpointDiffTargets, normalizeComposerPathSearchQuery } from "./queryTargets";
 

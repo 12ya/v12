@@ -4,7 +4,7 @@ import {
   ThreadId,
   TurnId,
   type OrchestrationThreadActivity,
-} from "@t3tools/contracts";
+} from "@v12/contracts";
 import { describe, expect, it } from "vite-plus/test";
 
 import {
@@ -937,7 +937,7 @@ describe("deriveWorkLogEntries", () => {
   it("preserves MCP server, tool, arguments, and results for expanded display", () => {
     const item = {
       type: "mcpToolCall",
-      server: "t3-code",
+      server: "v12",
       tool: "preview_status",
       arguments: {},
       status: "completed",
@@ -947,24 +947,24 @@ describe("deriveWorkLogEntries", () => {
       makeActivity({
         id: "mcp-tool-done",
         kind: "tool.completed",
-        summary: "t3-code · preview_status",
+        summary: "v12 · preview_status",
         payload: {
           itemType: "mcp_tool_call",
-          title: "t3-code · preview_status",
+          title: "v12 · preview_status",
           data: { item },
         },
       }),
     ];
 
     const [entry] = deriveWorkLogEntries(activities);
-    expect(entry?.toolTitle).toBe("t3-code · preview_status");
+    expect(entry?.toolTitle).toBe("v12 · preview_status");
     expect(entry?.toolData).toEqual(item);
   });
 
   it("keeps MCP payloads while collapsing lifecycle updates", () => {
     const item = {
       type: "mcpToolCall",
-      server: "t3-code",
+      server: "v12",
       tool: "preview_snapshot",
       arguments: { interactiveOnly: true },
       status: "completed",
@@ -973,7 +973,7 @@ describe("deriveWorkLogEntries", () => {
       makeActivity({
         id: "mcp-tool-progress",
         kind: "tool.updated",
-        summary: "t3-code · preview_snapshot",
+        summary: "v12 · preview_snapshot",
         payload: {
           itemType: "mcp_tool_call",
           toolCallId: "call-1",
@@ -983,7 +983,7 @@ describe("deriveWorkLogEntries", () => {
       makeActivity({
         id: "mcp-tool-complete",
         kind: "tool.completed",
-        summary: "t3-code · preview_snapshot",
+        summary: "v12 · preview_snapshot",
         payload: {
           itemType: "mcp_tool_call",
           toolCallId: "call-1",
@@ -1398,6 +1398,52 @@ describe("deriveWorkLogEntries", () => {
       itemType: "dynamic_tool_call",
       toolTitle: "Tool call",
     });
+  });
+
+  it("shows a running web source and replaces it with its completed state", () => {
+    const started = makeActivity({
+      id: "web-started",
+      createdAt: "2026-02-23T00:00:01.000Z",
+      kind: "tool.started",
+      summary: "Fetch page started",
+      payload: {
+        itemType: "web_search",
+        title: "Fetch page",
+        detail: "https://example.com/source",
+        status: "inProgress",
+        data: { item: { id: "web-1" } },
+      },
+    });
+    const completed = makeActivity({
+      id: "web-completed",
+      createdAt: "2026-02-23T00:00:02.000Z",
+      kind: "tool.completed",
+      summary: "Fetch page",
+      payload: {
+        itemType: "web_search",
+        title: "Fetch page",
+        detail: "https://example.com/source",
+        status: "completed",
+        data: { item: { id: "web-1" } },
+      },
+    });
+
+    expect(deriveWorkLogEntries([started])).toMatchObject([
+      {
+        id: "web-started",
+        detail: "https://example.com/source",
+        toolLifecycleStatus: "inProgress",
+        sourceActivityKind: "tool.started",
+      },
+    ]);
+    expect(deriveWorkLogEntries([started, completed])).toMatchObject([
+      {
+        id: "web-completed",
+        detail: "https://example.com/source",
+        toolLifecycleStatus: "completed",
+        sourceActivityKind: "tool.completed",
+      },
+    ]);
   });
 
   it("keeps separate tool entries when an identical call starts after the prior one completed", () => {

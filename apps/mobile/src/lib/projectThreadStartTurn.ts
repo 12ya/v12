@@ -6,7 +6,7 @@ import {
   type ProjectId,
   type ProviderInteractionMode,
   type RuntimeMode,
-} from "@t3tools/contracts";
+} from "@v12/contracts";
 
 import type { DraftComposerImageAttachment } from "./composerImages";
 

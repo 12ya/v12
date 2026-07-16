@@ -23,7 +23,7 @@ import {
   ProviderApprovalDecision,
   ThreadId,
   ProviderSendTurnInput,
-} from "@t3tools/contracts";
+} from "@v12/contracts";
 import * as Effect from "effect/Effect";
 import * as Crypto from "effect/Crypto";
 import * as Exit from "effect/Exit";
@@ -37,7 +37,7 @@ import { ChildProcessSpawner } from "effect/unstable/process";
 import * as CodexErrors from "effect-codex-app-server/errors";
 import * as EffectCodexSchema from "effect-codex-app-server/schema";
 
-import { getModelSelectionStringOptionValue } from "@t3tools/shared/model";
+import { getModelSelectionStringOptionValue } from "@v12/shared/model";
 import { getCodexServiceTierOptionValue } from "../../codexModelOptions.ts";
 import * as McpProviderSession from "../../mcp/McpProviderSession.ts";
 
@@ -239,6 +239,16 @@ function itemTitle(itemType: CanonicalItemType, item?: CodexLifecycleItem): stri
   if (itemType === "mcp_tool_call" && item?.type === "mcpToolCall") {
     return `${item.server} · ${item.tool}`;
   }
+  if (itemType === "web_search" && item?.type === "webSearch") {
+    switch (item.action?.type) {
+      case "openPage":
+        return "Fetch page";
+      case "findInPage":
+        return "Find in page";
+      default:
+        return "Web search";
+    }
+  }
   switch (itemType) {
     case "assistant_message":
       return "Assistant message";
@@ -268,6 +278,29 @@ function itemTitle(itemType: CanonicalItemType, item?: CodexLifecycleItem): stri
 }
 
 function itemDetail(item: CodexLifecycleItem): string | undefined {
+  if (item.type === "webSearch") {
+    const action = item.action;
+    if (action?.type === "search") {
+      const queries = action.queries
+        ?.map(trimText)
+        .filter((query): query is string => Boolean(query));
+      if (queries && queries.length > 0) {
+        return queries.join(" · ");
+      }
+      return trimText(action.query) ?? trimText(item.query);
+    }
+    if (action?.type === "openPage") {
+      return trimText(action.url) ?? trimText(item.query);
+    }
+    if (action?.type === "findInPage") {
+      const pattern = trimText(action.pattern);
+      const url = trimText(action.url);
+      if (pattern && url) return `${pattern} · ${url}`;
+      return pattern ?? url ?? trimText(item.query);
+    }
+    return trimText(item.query);
+  }
+
   const candidates = [
     "command" in item ? item.command : undefined,
     "title" in item ? item.title : undefined,
@@ -281,6 +314,24 @@ function itemDetail(item: CodexLifecycleItem): string | undefined {
     if (!trimmed) continue;
     return trimmed;
   }
+  return undefined;
+}
+
+function itemLifecycleStatus(
+  item: CodexLifecycleItem,
+  lifecycle: "item.started" | "item.updated" | "item.completed",
+): "inProgress" | "completed" | "failed" | "declined" | undefined {
+  const itemStatus = "status" in item && typeof item.status === "string" ? item.status : undefined;
+  if (
+    itemStatus === "inProgress" ||
+    itemStatus === "completed" ||
+    itemStatus === "failed" ||
+    itemStatus === "declined"
+  ) {
+    return itemStatus;
+  }
+  if (lifecycle === "item.started") return "inProgress";
+  if (lifecycle === "item.completed") return "completed";
   return undefined;
 }
 
@@ -466,12 +517,7 @@ function mapItemLifecycle(
   }
 
   const detail = itemDetail(item);
-  const status =
-    lifecycle === "item.started"
-      ? "inProgress"
-      : lifecycle === "item.completed"
-        ? "completed"
-        : undefined;
+  const status = itemLifecycleStatus(item, lifecycle);
 
   return {
     ...runtimeEventBase(event, canonicalThreadId),
@@ -1406,13 +1452,13 @@ export const makeCodexAdapter = Effect.fn("makeCodexAdapter")(function* (
             ? {
                 environment: {
                   ...(options?.environment ?? process.env),
-                  T3_MCP_BEARER_TOKEN: mcpSession.authorizationHeader.replace(/^Bearer\s+/, ""),
+                  V12_MCP_BEARER_TOKEN: mcpSession.authorizationHeader.replace(/^Bearer\s+/, ""),
                 },
                 appServerArgs: [
                   "-c",
-                  `mcp_servers.t3-code.url=${mcpSession.endpoint}`,
+                  `mcp_servers.v12.url=${mcpSession.endpoint}`,
                   "-c",
-                  'mcp_servers.t3-code.bearer_token_env_var="T3_MCP_BEARER_TOKEN"',
+                  'mcp_servers.v12.bearer_token_env_var="V12_MCP_BEARER_TOKEN"',
                 ],
               }
             : {}),

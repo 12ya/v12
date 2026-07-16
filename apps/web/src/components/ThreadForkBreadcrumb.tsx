@@ -1,4 +1,4 @@
-import type { ThreadId } from "@t3tools/contracts";
+import type { ThreadId } from "@v12/contracts";
 import { GitForkIcon } from "lucide-react";
 import { memo } from "react";
 

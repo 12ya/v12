@@ -1,21 +1,38 @@
 import { memo, useCallback, useMemo, useState } from "react";
 import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  type DragCancelEvent,
+  type DragEndEvent,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { restrictToFirstScrollableAncestor, restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import { CSS } from "@dnd-kit/utilities";
+import {
   isAtomCommandInterrupted,
   squashAtomCommandFailure,
-} from "@t3tools/client-runtime/state/runtime";
-import type { EnvironmentId, ScopedThreadRef } from "@t3tools/contracts";
-import { type TimestampFormat } from "@t3tools/contracts/settings";
+} from "@v12/client-runtime/state/runtime";
+import type { EnvironmentId, ScopedThreadRef } from "@v12/contracts";
+import { type TimestampFormat } from "@v12/contracts/settings";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
 import ChatMarkdown from "./ChatMarkdown";
 import {
-  ArrowDownIcon,
-  ArrowUpIcon,
   CheckIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   EllipsisIcon,
+  GripVerticalIcon,
   LoaderIcon,
   XIcon,
 } from "lucide-react";
@@ -67,10 +84,120 @@ interface PlanSidebarProps {
   markdownCwd: string | undefined;
   workspaceRoot: string | undefined;
   timestampFormat: TimestampFormat;
-  mode?: "sheet" | "sidebar" | "embedded" | "popover";
+  mode?: "sheet" | "sidebar" | "embedded" | "popover" | "summary";
   onToggleStep?: ((index: number) => void) | undefined;
   onRemoveStep?: ((index: number) => void) | undefined;
-  onMoveStep?: ((index: number, direction: -1 | 1) => void) | undefined;
+  onReorderStep?: ((fromIndex: number, toIndex: number) => void) | undefined;
+}
+
+interface SortablePlanStepRowProps {
+  readonly taskId: string;
+  readonly step: ActivePlanState["steps"][number];
+  readonly index: number;
+  readonly canReorder: boolean;
+  readonly onToggleStep: ((index: number) => void) | undefined;
+  readonly onRemoveStep: ((index: number) => void) | undefined;
+}
+
+function SortablePlanStepRow({
+  taskId,
+  step,
+  index,
+  canReorder,
+  onToggleStep,
+  onRemoveStep,
+}: SortablePlanStepRowProps) {
+  const {
+    attributes,
+    listeners,
+    setActivatorNodeRef,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: taskId, disabled: !canReorder });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Translate.toString(transform), transition }}
+      className={cn(
+        "group/task flex select-none items-center gap-2 rounded-lg px-2 py-2 transition-colors duration-200",
+        step.status === "inProgress" && "bg-blue-500/5",
+        step.status === "completed" && "bg-emerald-500/5",
+        isDragging && "relative z-10 opacity-70 shadow-sm",
+      )}
+    >
+      {onToggleStep ? (
+        <button
+          type="button"
+          aria-label={
+            step.status === "completed"
+              ? `Mark task incomplete: ${step.step}`
+              : `Mark task complete: ${step.step}`
+          }
+          className="shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          onClick={() => onToggleStep(index)}
+        >
+          {stepStatusIcon(step.status)}
+        </button>
+      ) : (
+        stepStatusIcon(step.status)
+      )}
+      <p
+        className={cn(
+          "min-w-0 flex-1 text-[13px] leading-snug",
+          step.status === "completed"
+            ? "text-muted-foreground/50 line-through decoration-muted-foreground/20"
+            : step.status === "inProgress"
+              ? "text-foreground/90"
+              : "text-muted-foreground/70",
+        )}
+      >
+        {step.step}
+      </p>
+      {canReorder || onRemoveStep ? (
+        <div className="flex shrink-0 items-center opacity-0 transition-opacity group-hover/task:opacity-100 group-focus-within/task:opacity-100">
+          {canReorder ? (
+            <button
+              ref={setActivatorNodeRef}
+              type="button"
+              aria-label={`Reorder task: ${step.step}`}
+              className="inline-flex size-6 touch-none cursor-grab items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-accent hover:text-foreground active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-ring"
+              {...attributes}
+              {...listeners}
+            >
+              <GripVerticalIcon className="size-3" />
+            </button>
+          ) : null}
+          {onRemoveStep ? (
+            <Button
+              type="button"
+              size="icon-xs"
+              variant="ghost"
+              aria-label={`Remove task: ${step.step}`}
+              onClick={() => onRemoveStep(index)}
+            >
+              <XIcon className="size-3" />
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function releasePointerDragFocus(event: DragEndEvent | DragCancelEvent): void {
+  if (typeof PointerEvent === "undefined" || !(event.activatorEvent instanceof PointerEvent)) {
+    return;
+  }
+  const focusedElement =
+    document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  requestAnimationFrame(() => {
+    if (focusedElement && document.activeElement === focusedElement) {
+      focusedElement.blur();
+    }
+  });
 }
 
 const PlanSidebar = memo(function PlanSidebar({
@@ -85,7 +212,7 @@ const PlanSidebar = memo(function PlanSidebar({
   mode = "sidebar",
   onToggleStep,
   onRemoveStep,
-  onMoveStep,
+  onReorderStep,
 }: PlanSidebarProps) {
   const [proposedPlanExpanded, setProposedPlanExpanded] = useState(false);
   const [isSavingToWorkspace, setIsSavingToWorkspace] = useState(false);
@@ -105,6 +232,24 @@ const PlanSidebar = memo(function PlanSidebar({
       return { key: `${step.step}\u0000${occurrence}`, step };
     });
   }, [activePlan?.steps]);
+  const reorderSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+  const handleStepDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      releasePointerDragFocus(event);
+      if (!onReorderStep || !event.over || event.active.id === event.over.id) return;
+      const fromIndex = renderedPlanSteps.findIndex(({ key }) => key === event.active.id);
+      const toIndex = renderedPlanSteps.findIndex(({ key }) => key === event.over?.id);
+      if (fromIndex < 0 || toIndex < 0) return;
+      onReorderStep(fromIndex, toIndex);
+    },
+    [onReorderStep, renderedPlanSteps],
+  );
+  const handleStepDragCancel = useCallback((event: DragCancelEvent) => {
+    releasePointerDragFocus(event);
+  }, []);
 
   const handleCopyPlan = useCallback(() => {
     if (!planMarkdown) return;
@@ -158,11 +303,18 @@ const PlanSidebar = memo(function PlanSidebar({
         "flex min-h-0 flex-col bg-card/50",
         mode === "sidebar"
           ? "h-full w-[340px] shrink-0 border-l border-border/70"
-          : "h-full w-full",
+          : mode === "summary"
+            ? "h-auto w-full bg-transparent"
+            : "h-full w-full",
       )}
     >
       {/* Header */}
-      <div className="flex h-12 shrink-0 items-center justify-between border-b border-border/60 px-3">
+      <div
+        className={cn(
+          "flex h-12 shrink-0 items-center justify-between border-b border-border/60 px-3",
+          mode === "summary" && "hidden",
+        )}
+      >
         <div className="flex items-center gap-2">
           <Badge
             variant="info"
@@ -210,8 +362,8 @@ const PlanSidebar = memo(function PlanSidebar({
       </div>
 
       {/* Content */}
-      <ScrollArea className="min-h-0 flex-1">
-        <div className="p-3 space-y-4">
+      <ScrollArea className={mode === "summary" ? "max-h-[calc(100vh-12rem)]" : "min-h-0 flex-1"}>
+        <div className={cn("space-y-4", mode === "summary" ? "p-2.5" : "p-3")}>
           {/* Explanation */}
           {activePlan?.explanation ? (
             <p className="text-[13px] leading-relaxed text-muted-foreground/80">
@@ -225,84 +377,30 @@ const PlanSidebar = memo(function PlanSidebar({
               <p className="mb-2 text-[10px] font-semibold tracking-widest text-muted-foreground/40 uppercase">
                 Steps
               </p>
-              {renderedPlanSteps.map(({ key, step }, index) => (
-                <div
-                  key={key}
-                  className={cn(
-                    "group/task flex items-center gap-2 rounded-lg px-2 py-2 transition-colors duration-200",
-                    step.status === "inProgress" && "bg-blue-500/5",
-                    step.status === "completed" && "bg-emerald-500/5",
-                  )}
+              <DndContext
+                sensors={reorderSensors}
+                collisionDetection={closestCenter}
+                modifiers={[restrictToVerticalAxis, restrictToFirstScrollableAncestor]}
+                onDragEnd={handleStepDragEnd}
+                onDragCancel={handleStepDragCancel}
+              >
+                <SortableContext
+                  items={renderedPlanSteps.map(({ key }) => key)}
+                  strategy={verticalListSortingStrategy}
                 >
-                  {onToggleStep ? (
-                    <button
-                      type="button"
-                      aria-label={
-                        step.status === "completed"
-                          ? `Mark task incomplete: ${step.step}`
-                          : `Mark task complete: ${step.step}`
-                      }
-                      className="shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      onClick={() => onToggleStep(index)}
-                    >
-                      {stepStatusIcon(step.status)}
-                    </button>
-                  ) : (
-                    stepStatusIcon(step.status)
-                  )}
-                  <p
-                    className={cn(
-                      "min-w-0 flex-1 text-[13px] leading-snug",
-                      step.status === "completed"
-                        ? "text-muted-foreground/50 line-through decoration-muted-foreground/20"
-                        : step.status === "inProgress"
-                          ? "text-foreground/90"
-                          : "text-muted-foreground/70",
-                    )}
-                  >
-                    {step.step}
-                  </p>
-                  {onMoveStep || onRemoveStep ? (
-                    <div className="flex shrink-0 items-center opacity-0 transition-opacity group-hover/task:opacity-100 group-focus-within/task:opacity-100">
-                      {onMoveStep ? (
-                        <>
-                          <Button
-                            type="button"
-                            size="icon-xs"
-                            variant="ghost"
-                            aria-label={`Move task up: ${step.step}`}
-                            disabled={index === 0}
-                            onClick={() => onMoveStep(index, -1)}
-                          >
-                            <ArrowUpIcon className="size-3" />
-                          </Button>
-                          <Button
-                            type="button"
-                            size="icon-xs"
-                            variant="ghost"
-                            aria-label={`Move task down: ${step.step}`}
-                            disabled={index === activePlan.steps.length - 1}
-                            onClick={() => onMoveStep(index, 1)}
-                          >
-                            <ArrowDownIcon className="size-3" />
-                          </Button>
-                        </>
-                      ) : null}
-                      {onRemoveStep ? (
-                        <Button
-                          type="button"
-                          size="icon-xs"
-                          variant="ghost"
-                          aria-label={`Remove task: ${step.step}`}
-                          onClick={() => onRemoveStep(index)}
-                        >
-                          <XIcon className="size-3" />
-                        </Button>
-                      ) : null}
-                    </div>
-                  ) : null}
-                </div>
-              ))}
+                  {renderedPlanSteps.map(({ key, step }, index) => (
+                    <SortablePlanStepRow
+                      key={key}
+                      taskId={key}
+                      step={step}
+                      index={index}
+                      canReorder={Boolean(onReorderStep)}
+                      onToggleStep={onToggleStep}
+                      onRemoveStep={onRemoveStep}
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
             </div>
           ) : null}
 

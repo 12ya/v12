@@ -2,7 +2,7 @@ import type {
   OrchestrationLatestTurn,
   OrchestrationSession,
   OrchestrationThreadActivity,
-} from "@t3tools/contracts";
+} from "@v12/contracts";
 import {
   CheckCircle2Icon,
   CircleAlertIcon,
@@ -211,7 +211,7 @@ export const OpenThreadActivityStatus = memo(function OpenThreadActivityStatus({
   variant = "pill",
 }: {
   readonly status: OpenThreadActivityPresentation | null;
-  readonly variant?: "pill" | "composer";
+  readonly variant?: "pill" | "toolbar";
 }) {
   const [nowMs, setNowMs] = useState(() => Date.now());
   const isLive =
@@ -233,6 +233,7 @@ export const OpenThreadActivityStatus = memo(function OpenThreadActivityStatus({
     endedAt: status.endedAt,
     nowMs,
   });
+  const compact = variant === "toolbar";
 
   return (
     <div
@@ -241,19 +242,19 @@ export const OpenThreadActivityStatus = memo(function OpenThreadActivityStatus({
       aria-label={
         status.latestActivity ? `${status.label}. ${status.latestActivity}` : status.label
       }
-      title={variant === "composer" ? (status.latestActivity ?? undefined) : undefined}
+      title={compact ? (status.latestActivity ?? undefined) : undefined}
       data-testid="open-thread-activity-status"
       className={
-        variant === "composer"
+        compact
           ? "inline-flex h-7 max-w-32 shrink-0 items-center gap-1 px-1 text-[10px] text-muted-foreground/65"
           : "inline-flex h-6 max-w-[min(24rem,calc(100vw-2rem))] items-center gap-1.5 rounded-full border border-border/70 bg-card/90 px-2 text-[11px] shadow-sm backdrop-blur-sm"
       }
     >
-      <div aria-hidden className={variant === "composer" ? "contents opacity-75" : "contents"}>
+      <div aria-hidden className={compact ? "contents opacity-75" : "contents"}>
         <StatusIcon phase={status.phase} />
         <span
           className={
-            variant === "composer"
+            compact
               ? "shrink-0 font-medium text-muted-foreground"
               : "shrink-0 font-medium text-foreground/90"
           }
@@ -262,11 +263,11 @@ export const OpenThreadActivityStatus = memo(function OpenThreadActivityStatus({
         </span>
         {elapsed ? (
           <>
-            {variant === "composer" ? <span className="text-muted-foreground/40">·</span> : null}
+            {compact ? <span className="text-muted-foreground/40">·</span> : null}
             <span className="shrink-0 tabular-nums text-muted-foreground">{elapsed}</span>
           </>
         ) : null}
-        {status.latestActivity && variant !== "composer" ? (
+        {status.latestActivity && !compact ? (
           <>
             <span className="text-muted-foreground/50">·</span>
             <span className="min-w-0 truncate text-muted-foreground">{status.latestActivity}</span>

@@ -1,13 +1,9 @@
-import {
-  scopedProjectKey,
-  scopeProjectRef,
-  scopeThreadRef,
-} from "@t3tools/client-runtime/environment";
+import { scopedProjectKey, scopeProjectRef, scopeThreadRef } from "@v12/client-runtime/environment";
 import {
   DEFAULT_RUNTIME_MODE,
   DEFAULT_SERVER_SETTINGS,
   type ScopedProjectRef,
-} from "@t3tools/contracts";
+} from "@v12/contracts";
 import { useParams, useRouter } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
 import {

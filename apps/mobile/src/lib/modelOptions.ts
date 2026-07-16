@@ -1,12 +1,12 @@
 import type {
   ModelCapabilities,
   ModelSelection,
-  ServerConfig as T3ServerConfig,
-} from "@t3tools/contracts";
+  ServerConfig as V12ServerConfig,
+} from "@v12/contracts";
 import {
   buildProviderOptionSelectionsFromDescriptors,
   getProviderOptionDescriptors,
-} from "@t3tools/shared/model";
+} from "@v12/shared/model";
 
 export type ModelOption = {
   readonly key: string;
@@ -58,7 +58,7 @@ function normalizeSelectionOptions(
 }
 
 export function buildModelOptions(
-  config: T3ServerConfig | null | undefined,
+  config: V12ServerConfig | null | undefined,
   fallbackModelSelection: ModelSelection | null,
 ): ReadonlyArray<ModelOption> {
   const options = new Map<string, ModelOption>();

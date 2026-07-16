@@ -1,4 +1,4 @@
-import { type TurnId } from "@t3tools/contracts";
+import { type TurnId } from "@v12/contracts";
 import { memo, useCallback, useMemo, useState } from "react";
 import { type TurnDiffFileChange } from "../../types";
 import {
@@ -11,6 +11,7 @@ import { cn } from "~/lib/utils";
 import { DiffStatLabel, hasNonZeroStat } from "./DiffStatLabel";
 import { PierreEntryIcon } from "./PierreEntryIcon";
 import { Button } from "../ui/button";
+import { Collapsible, CollapsiblePanel } from "../ui/collapsible";
 
 const EMPTY_DIRECTORY_OVERRIDES: Record<string, boolean> = {};
 
@@ -128,10 +129,11 @@ export const ChangedFilesTree = memo(function ChangedFilesTree(props: {
     if (node.kind === "directory") {
       const isExpanded = expandedDirectories[node.path] ?? allDirectoriesExpanded;
       return (
-        <div key={`dir:${node.path}`}>
+        <Collapsible key={`dir:${node.path}`} open={isExpanded}>
           <button
             type="button"
             data-scroll-anchor-ignore
+            aria-expanded={isExpanded}
             className="group flex w-full items-center gap-1.5 rounded-xl py-1 pr-3 text-left transition-colors hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background"
             style={{ paddingLeft: `${leftPadding}px` }}
             onClick={() => toggleDirectory(node.path)}
@@ -139,7 +141,7 @@ export const ChangedFilesTree = memo(function ChangedFilesTree(props: {
             <ChevronRightIcon
               aria-hidden="true"
               className={cn(
-                "size-3.5 shrink-0 text-muted-foreground/70 transition-transform group-hover:text-foreground/80",
+                "size-3.5 shrink-0 text-muted-foreground/70 transition-transform duration-200 group-hover:text-foreground/80 motion-reduce:transition-none",
                 isExpanded && "rotate-90",
               )}
             />
@@ -157,12 +159,10 @@ export const ChangedFilesTree = memo(function ChangedFilesTree(props: {
               </span>
             )}
           </button>
-          {isExpanded && (
-            <div className="space-y-0.5">
-              {node.children.map((childNode) => renderTreeNode(childNode, depth + 1))}
-            </div>
-          )}
-        </div>
+          <CollapsiblePanel className="space-y-0.5 ease-out motion-reduce:transition-none">
+            {node.children.map((childNode) => renderTreeNode(childNode, depth + 1))}
+          </CollapsiblePanel>
+        </Collapsible>
       );
     }
 

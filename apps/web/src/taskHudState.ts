@@ -1,12 +1,12 @@
-import { scopedThreadKey } from "@t3tools/client-runtime/environment";
-import type { MessageId, ScopedThreadRef, ThreadId } from "@t3tools/contracts";
+import { scopedThreadKey } from "@v12/client-runtime/environment";
+import type { MessageId, ScopedThreadRef, ThreadId } from "@v12/contracts";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 import { resolveStorage } from "./lib/storage";
 import type { ActivePlanState } from "./session-logic";
 
-const TASK_HUD_STORAGE_KEY = "t3code:task-hud-state:v1";
+const TASK_HUD_STORAGE_KEY = "v12:task-hud-state:v1";
 const MAX_PERSISTED_PLAN_OVERRIDES = 100;
 const MAX_PERSISTED_CONTEXT_TASKS = 200;
 
