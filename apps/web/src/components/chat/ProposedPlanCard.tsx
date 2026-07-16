@@ -32,6 +32,7 @@ import { stackedThreadToast, toastManager } from "../ui/toast";
 import { projectEnvironment } from "~/state/projects";
 import { useCopyToClipboard } from "~/hooks/useCopyToClipboard";
 import { useAtomCommand } from "~/state/use-atom-command";
+import { useMeasuredScrollHeight } from "~/hooks/useMeasuredScrollHeight";
 
 export const ProposedPlanCard = memo(function ProposedPlanCard({
   planMarkdown,
@@ -75,6 +76,7 @@ export const ProposedPlanCard = memo(function ProposedPlanCard({
     : null;
   const downloadFilename = buildProposedPlanMarkdownFilename(planMarkdown);
   const saveContents = normalizePlanMarkdownForExport(planMarkdown);
+  const { ref: planBodyRef, height: planBodyHeight } = useMeasuredScrollHeight<HTMLDivElement>();
 
   const handleDownload = () => {
     downloadPlanAsTextFile(downloadFilename, saveContents);
@@ -170,7 +172,23 @@ export const ProposedPlanCard = memo(function ProposedPlanCard({
         </Menu>
       </div>
       <div className="mt-4">
-        <div className={cn("relative", canCollapse && !expanded && "max-h-104 overflow-hidden")}>
+        <div
+          ref={planBodyRef}
+          className={cn(
+            "relative",
+            canCollapse &&
+              "overflow-hidden transition-[max-height] duration-200 ease-out motion-reduce:transition-none",
+          )}
+          style={{
+            maxHeight: canCollapse
+              ? expanded
+                ? planBodyHeight !== null
+                  ? `${planBodyHeight}px`
+                  : undefined
+                : "26rem"
+              : undefined,
+          }}
+        >
           {canCollapse && !expanded ? (
             <ChatMarkdown
               text={collapsedPreview ?? ""}

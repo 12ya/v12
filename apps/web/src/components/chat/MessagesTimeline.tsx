@@ -97,6 +97,7 @@ import {
 } from "~/lib/previewAnnotation";
 import { cn } from "~/lib/utils";
 import { useUiStateStore } from "~/uiStateStore";
+import { useMeasuredScrollHeight } from "~/hooks/useMeasuredScrollHeight";
 import { type TimestampFormat } from "@v12/contracts/settings";
 import { formatChatTimestampTooltip, formatShortTimestamp } from "../../timestampFormat";
 import {
@@ -1839,24 +1840,33 @@ const CollapsibleUserMessageBody = memo(function CollapsibleUserMessageBody(prop
   const hasVisibleBody = props.text.trim().length > 0 || props.terminalContexts.length > 0;
   const canCollapse = hasVisibleBody && shouldCollapseUserMessage(props.text);
   const isCollapsed = canCollapse && !expanded;
+  const { ref: bodyRef, height: bodyHeight } = useMeasuredScrollHeight<HTMLDivElement>();
 
   return (
     <div>
       {hasVisibleBody ? (
         <div
-          className={cn("relative", isCollapsed && "max-h-44 overflow-hidden")}
+          ref={bodyRef}
+          className={cn(
+            "relative",
+            canCollapse &&
+              "overflow-hidden transition-[max-height] duration-200 ease-out motion-reduce:transition-none",
+          )}
           data-user-message-body="true"
           data-user-message-collapsed={isCollapsed ? "true" : "false"}
           data-user-message-collapsible={canCollapse ? "true" : "false"}
           data-user-message-fade={isCollapsed ? "true" : "false"}
-          style={
-            isCollapsed
-              ? {
-                  WebkitMaskImage: COLLAPSED_USER_MESSAGE_FADE_MASK,
-                  maskImage: COLLAPSED_USER_MESSAGE_FADE_MASK,
-                }
-              : undefined
-          }
+          style={{
+            maxHeight: canCollapse
+              ? isCollapsed
+                ? "11rem"
+                : bodyHeight !== null
+                  ? `${bodyHeight}px`
+                  : undefined
+              : undefined,
+            WebkitMaskImage: isCollapsed ? COLLAPSED_USER_MESSAGE_FADE_MASK : undefined,
+            maskImage: isCollapsed ? COLLAPSED_USER_MESSAGE_FADE_MASK : undefined,
+          }}
         >
           <UserMessageBody
             text={props.text}
