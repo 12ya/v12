@@ -102,6 +102,7 @@ import {
   type LucideIcon,
   LockIcon,
   LockOpenIcon,
+  ListTreeIcon,
   PenLineIcon,
   XIcon,
 } from "lucide-react";
@@ -444,6 +445,7 @@ export interface ChatComposerProps {
   // Mode
   runtimeMode: RuntimeMode;
   interactionMode: ProviderInteractionMode;
+  multitaskEnabled: boolean;
 
   // Provider / model
   lockedProvider: ProviderDriverKind | null;
@@ -492,6 +494,7 @@ export interface ChatComposerProps {
   toggleInteractionMode: () => void;
   handleRuntimeModeChange: (mode: RuntimeMode) => void;
   handleInteractionModeChange: (mode: ProviderInteractionMode) => void;
+  onToggleMultitask: () => void;
   onSteerQueuedSubmission: (submission: QueuedChatSubmission) => void;
   onRemoveQueuedSubmission: (submission: QueuedChatSubmission) => void;
 
@@ -537,6 +540,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
     activeProposedPlan,
     runtimeMode,
     interactionMode,
+    multitaskEnabled,
     lockedProvider,
     providerStatuses,
     activeProjectDefaultModelSelection,
@@ -565,6 +569,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
     toggleInteractionMode,
     handleRuntimeModeChange,
     handleInteractionModeChange,
+    onToggleMultitask,
     onSteerQueuedSubmission,
     onRemoveQueuedSubmission,
     focusComposer,
@@ -942,6 +947,15 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
           label: "/default",
           description: "Switch this thread back to normal build mode",
         },
+        {
+          id: "slash:multitask",
+          type: "slash-command",
+          command: "multitask",
+          label: "/multitask",
+          description: multitaskEnabled
+            ? "Turn off parallel child worktrees"
+            : "Run queued prompts in parallel child worktrees",
+        },
       ] satisfies ReadonlyArray<Extract<ComposerCommandItem, { type: "slash-command" }>>;
       const providerSlashCommandItems = (selectedProviderStatus?.slashCommands ?? []).map(
         (command) => ({
@@ -976,7 +990,13 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
       );
     }
     return [];
-  }, [composerTrigger, selectedProvider, selectedProviderStatus, workspaceEntries.entries]);
+  }, [
+    composerTrigger,
+    multitaskEnabled,
+    selectedProvider,
+    selectedProviderStatus,
+    workspaceEntries.entries,
+  ]);
 
   const composerMenuOpen = Boolean(composerTrigger);
   const composerMenuSearchKey = composerTrigger
@@ -1559,6 +1579,14 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
           }
           return;
         }
+        if (item.command === "multitask") {
+          onToggleMultitask();
+          const applied = applyPromptReplacement(trigger.rangeStart, trigger.rangeEnd, "", {
+            expectedText: snapshot.value.slice(trigger.rangeStart, trigger.rangeEnd),
+          });
+          if (applied) setComposerHighlightedItemId(null);
+          return;
+        }
         void handleInteractionModeChange(item.command === "plan" ? "plan" : "default");
         const applied = applyPromptReplacement(trigger.rangeStart, trigger.rangeEnd, "", {
           expectedText: snapshot.value.slice(trigger.rangeStart, trigger.rangeEnd),
@@ -1605,7 +1633,12 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
         return;
       }
     },
-    [applyPromptReplacement, handleInteractionModeChange, resolveActiveComposerTrigger],
+    [
+      applyPromptReplacement,
+      handleInteractionModeChange,
+      onToggleMultitask,
+      resolveActiveComposerTrigger,
+    ],
   );
 
   const onComposerMenuItemHighlighted = useCallback(
@@ -2494,6 +2527,29 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                     getModelDisabledReason={getModelDisabledReason}
                     onInstanceModelChange={onProviderModelSelect}
                   />
+
+                  {multitaskEnabled ? (
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            type="button"
+                            className="shrink-0 bg-violet-500/10 px-2 text-violet-400 hover:bg-violet-500/15 hover:text-violet-300 sm:px-3"
+                            aria-label="Multitask enabled — click to turn off"
+                            onClick={onToggleMultitask}
+                          />
+                        }
+                      >
+                        <ListTreeIcon />
+                        <span className="sr-only sm:not-sr-only">Multitask</span>
+                      </TooltipTrigger>
+                      <TooltipPopup side="top">
+                        Multitask enabled — queued prompts start in parallel worktrees
+                      </TooltipPopup>
+                    </Tooltip>
+                  ) : null}
 
                   {isComposerFooterCompact ? (
                     <CompactComposerControlsMenu

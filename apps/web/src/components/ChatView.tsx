@@ -1044,6 +1044,9 @@ function ChatViewContent(props: ChatViewProps) {
     reportFailure: false,
   });
   const startThreadTurn = useAtomCommand(threadEnvironment.startTurn, { reportFailure: false });
+  const startLocalMultitask = useAtomCommand(threadEnvironment.startLocalMultitask, {
+    reportFailure: false,
+  });
   const interruptThreadTurn = useAtomCommand(threadEnvironment.interruptTurn, {
     reportFailure: false,
   });
@@ -1354,6 +1357,21 @@ function ChatViewContent(props: ChatViewProps) {
       ? (state.queuesByThreadKey[activeThreadKey] ?? EMPTY_QUEUED_CHAT_SUBMISSIONS)
       : EMPTY_QUEUED_CHAT_SUBMISSIONS,
   );
+  const multitaskEnabled = useChatQueueStore((state) =>
+    activeThreadKey ? state.multitaskEnabledByThreadKey[activeThreadKey] === true : false,
+  );
+  const toggleMultitask = useCallback(() => {
+    if (!activeThreadKey) return;
+    const nextEnabled = !useChatQueueStore.getState().multitaskEnabledByThreadKey[activeThreadKey];
+    useChatQueueStore.getState().setMultitaskEnabled(activeThreadKey, nextEnabled);
+    toastManager.add({
+      type: "success",
+      title: nextEnabled ? "Multitask enabled" : "Multitask disabled",
+      description: nextEnabled
+        ? "New prompts sent during a run will start in parallel worktrees."
+        : "New prompts sent during a run will wait in the queue.",
+    });
+  }, [activeThreadKey]);
   const pendingTaskSourceRef = useRef<{
     readonly threadKey: string;
     readonly messageId: MessageId;
@@ -4189,8 +4207,12 @@ function ChatViewContent(props: ChatViewProps) {
       pendingContextTasks.length === 0
         ? parseStandaloneComposerSlashCommand(trimmed)
         : null;
-    if (standaloneSlashCommand) {
-      handleInteractionModeChange(standaloneSlashCommand);
+    if (queuedSubmission === undefined && standaloneSlashCommand) {
+      if (standaloneSlashCommand === "multitask") {
+        toggleMultitask();
+      } else {
+        handleInteractionModeChange(standaloneSlashCommand);
+      }
       promptRef.current = "";
       clearComposerDraftContent(composerDraftTarget);
       composerRef.current?.resetCursorState();
@@ -5682,6 +5704,7 @@ function ChatViewContent(props: ChatViewProps) {
                       activeProposedPlan={activeProposedPlan}
                       runtimeMode={runtimeMode}
                       interactionMode={interactionMode}
+                      multitaskEnabled={multitaskEnabled}
                       lockedProvider={lockedProvider}
                       providerStatuses={providerStatuses as ServerProvider[]}
                       activeProjectDefaultModelSelection={activeProject?.defaultModelSelection}
@@ -5713,6 +5736,7 @@ function ChatViewContent(props: ChatViewProps) {
                       toggleInteractionMode={toggleInteractionMode}
                       handleRuntimeModeChange={handleRuntimeModeChange}
                       handleInteractionModeChange={handleInteractionModeChange}
+                      onToggleMultitask={toggleMultitask}
                       onSteerQueuedSubmission={onSteerQueuedSubmission}
                       onRemoveQueuedSubmission={onRemoveQueuedSubmission}
                       focusComposer={focusComposer}

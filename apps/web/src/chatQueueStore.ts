@@ -42,9 +42,11 @@ export interface QueuedChatSubmission {
 
 interface ChatQueueState {
   readonly queuesByThreadKey: Readonly<Record<string, readonly QueuedChatSubmission[]>>;
+  readonly multitaskEnabledByThreadKey: Readonly<Record<string, true>>;
   readonly enqueue: (submission: QueuedChatSubmission) => void;
   readonly remove: (threadKey: string, submissionId: MessageId) => void;
   readonly clearThread: (threadKey: string) => void;
+  readonly setMultitaskEnabled: (threadKey: string, enabled: boolean) => void;
 }
 
 export function shouldEnqueueChatSubmission(input: {
@@ -61,6 +63,7 @@ export function shouldEnqueueChatSubmission(input: {
 
 export const useChatQueueStore = create<ChatQueueState>()((set) => ({
   queuesByThreadKey: {},
+  multitaskEnabledByThreadKey: {},
   enqueue: (submission) =>
     set((state) => ({
       queuesByThreadKey: {
@@ -87,5 +90,14 @@ export const useChatQueueStore = create<ChatQueueState>()((set) => ({
       const queuesByThreadKey = { ...state.queuesByThreadKey };
       delete queuesByThreadKey[threadKey];
       return { queuesByThreadKey };
+    }),
+  setMultitaskEnabled: (threadKey, enabled) =>
+    set((state) => {
+      const currentlyEnabled = state.multitaskEnabledByThreadKey[threadKey] === true;
+      if (currentlyEnabled === enabled) return state;
+      const multitaskEnabledByThreadKey = { ...state.multitaskEnabledByThreadKey };
+      if (enabled) multitaskEnabledByThreadKey[threadKey] = true;
+      else delete multitaskEnabledByThreadKey[threadKey];
+      return { multitaskEnabledByThreadKey };
     }),
 }));
