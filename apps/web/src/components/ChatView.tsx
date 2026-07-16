@@ -4106,6 +4106,7 @@ function ChatViewContent(props: ChatViewProps) {
   const onSend = async (
     e?: { preventDefault: () => void },
     queuedSubmission?: QueuedChatSubmission,
+    steerQueuedSubmission = false,
   ): Promise<boolean> => {
     e?.preventDefault();
     if (
@@ -4116,7 +4117,7 @@ function ChatViewContent(props: ChatViewProps) {
         (queuedSubmission.threadKey !== activeThreadKey ||
           queuedSubmission.environmentId !== activeThread.environmentId ||
           queuedSubmission.threadId !== activeThread.id ||
-          phase === "running" ||
+          (phase === "running" && !steerQueuedSubmission) ||
           isSendBusy ||
           sendInFlightRef.current))
     )
@@ -4540,6 +4541,19 @@ function ChatViewContent(props: ChatViewProps) {
   };
 
   queueDeliveryRef.current = (submission) => onSend(undefined, submission);
+
+  const onSteerQueuedSubmission = (submission: QueuedChatSubmission) => {
+    if (phase !== "running" || isSendBusy || sendInFlightRef.current) return;
+    void onSend(undefined, submission, true).then((sent) => {
+      if (!sent) return;
+      useChatQueueStore.getState().remove(submission.threadKey, submission.id);
+    });
+  };
+
+  const onRemoveQueuedSubmission = (submission: QueuedChatSubmission) => {
+    useChatQueueStore.getState().remove(submission.threadKey, submission.id);
+    scheduleComposerFocus();
+  };
 
   const nextQueuedChatSubmission = queuedChatSubmissions[0] ?? null;
   useEffect(() => {
@@ -5650,7 +5664,10 @@ function ChatViewContent(props: ChatViewProps) {
                       isConnecting={isConnecting}
                       isSendBusy={isSendBusy}
                       isPreparingWorktree={isPreparingWorktree}
-                      queuedMessageCount={queuedChatSubmissions.length}
+                      queuedSubmissions={queuedChatSubmissions}
+                      canSteerQueuedSubmissions={
+                        phase === "running" && !isSendBusy && !sendInFlightRef.current
+                      }
                       environmentUnavailable={activeEnvironmentUnavailableState}
                       activePendingApproval={activePendingApproval}
                       pendingApprovals={pendingApprovals}
@@ -5696,6 +5713,8 @@ function ChatViewContent(props: ChatViewProps) {
                       toggleInteractionMode={toggleInteractionMode}
                       handleRuntimeModeChange={handleRuntimeModeChange}
                       handleInteractionModeChange={handleInteractionModeChange}
+                      onSteerQueuedSubmission={onSteerQueuedSubmission}
+                      onRemoveQueuedSubmission={onRemoveQueuedSubmission}
                       focusComposer={focusComposer}
                       scheduleComposerFocus={scheduleComposerFocus}
                       setThreadError={setThreadError}

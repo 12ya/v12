@@ -73,6 +73,7 @@ import { type ComposerCommandItem, ComposerCommandMenu } from "./ComposerCommand
 import { ComposerPendingApprovalActions } from "./ComposerPendingApprovalActions";
 import { CompactComposerControlsMenu } from "./CompactComposerControlsMenu";
 import { ComposerPrimaryActions } from "./ComposerPrimaryActions";
+import { ComposerQueuePanel } from "./ComposerQueuePanel";
 import { ComposerPendingApprovalPanel } from "./ComposerPendingApprovalPanel";
 import { ComposerPendingUserInputPanel } from "./ComposerPendingUserInputPanel";
 import { ComposerPlanFollowUpBanner } from "./ComposerPlanFollowUpBanner";
@@ -127,6 +128,7 @@ import { searchProviderSkills } from "../../providerSkillSearch";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import type { ReviewCommentContext } from "../../reviewCommentContext";
 import { filterPendingContextTasks, useTaskHudStore } from "../../taskHudState";
+import type { QueuedChatSubmission } from "../../chatQueueStore";
 
 const IMAGE_SIZE_LIMIT_LABEL = `${Math.round(PROVIDER_SEND_TURN_MAX_IMAGE_BYTES / (1024 * 1024))}MB`;
 
@@ -411,7 +413,8 @@ export interface ChatComposerProps {
   isConnecting: boolean;
   isSendBusy: boolean;
   isPreparingWorktree: boolean;
-  queuedMessageCount: number;
+  queuedSubmissions: readonly QueuedChatSubmission[];
+  canSteerQueuedSubmissions: boolean;
   environmentUnavailable: {
     readonly label: string;
     readonly connection: EnvironmentConnectionPresentation;
@@ -489,6 +492,8 @@ export interface ChatComposerProps {
   toggleInteractionMode: () => void;
   handleRuntimeModeChange: (mode: RuntimeMode) => void;
   handleInteractionModeChange: (mode: ProviderInteractionMode) => void;
+  onSteerQueuedSubmission: (submission: QueuedChatSubmission) => void;
+  onRemoveQueuedSubmission: (submission: QueuedChatSubmission) => void;
 
   focusComposer: () => void;
   scheduleComposerFocus: () => void;
@@ -516,7 +521,8 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
     isConnecting,
     isSendBusy,
     isPreparingWorktree,
-    queuedMessageCount,
+    queuedSubmissions,
+    canSteerQueuedSubmissions,
     environmentUnavailable,
     activePendingApproval,
     pendingApprovals,
@@ -559,6 +565,8 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
     toggleInteractionMode,
     handleRuntimeModeChange,
     handleInteractionModeChange,
+    onSteerQueuedSubmission,
+    onRemoveQueuedSubmission,
     focusComposer,
     scheduleComposerFocus,
     setThreadError,
@@ -2031,6 +2039,12 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
   // ------------------------------------------------------------------
   return (
     <>
+      <ComposerQueuePanel
+        submissions={queuedSubmissions}
+        canSteer={canSteerQueuedSubmissions}
+        onSteer={onSteerQueuedSubmission}
+        onRemove={onRemoveQueuedSubmission}
+      />
       <form
         ref={composerFormRef}
         onSubmit={submitComposer}
@@ -2548,15 +2562,6 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
           </div>
         </div>
       </form>
-      {queuedMessageCount > 0 ? (
-        <div
-          data-chat-composer-queue-status="true"
-          className="px-4 pt-1 text-muted-foreground text-xs"
-        >
-          {queuedMessageCount} queued message{queuedMessageCount === 1 ? "" : "s"} will send
-          automatically.
-        </div>
-      ) : null}
       {isDraggingFiles
         ? createPortal(
             <div className="pointer-events-none fixed inset-3 z-[100] flex items-center justify-center rounded-2xl border-2 border-dashed border-primary/55 bg-background/80 backdrop-blur-sm [-webkit-app-region:no-drag]">
