@@ -154,6 +154,7 @@ interface TimelineRowSharedState {
   onOpenTurnDiff: (turnId: TurnId, filePath?: string) => void;
   onToggleTurnFold: (turnId: TurnId) => void;
   onToggleWorkGroup: (groupId: string, anchorElement?: HTMLElement) => void;
+  onFoldAnimationStart: () => void;
 }
 
 interface TimelineRowActivityState {
@@ -260,6 +261,8 @@ export const MessagesTimeline = memo(function MessagesTimeline({
   const expandedTurnIdsRef = useRef(expandedTurnIds);
   const collapsingTurnIdsRef = useRef(collapsingTurnIds);
   const turnFoldTimersRef = useRef(new Map<TurnId, ReturnType<typeof setTimeout>>());
+  const foldAnimationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [foldAnimationActive, setFoldAnimationActive] = useState(false);
   const [expandedWorkGroupIds, setExpandedWorkGroupIds] = useState<ReadonlySet<string>>(new Set());
 
   const updateExpandedTurnIds = useCallback(
@@ -278,6 +281,14 @@ export const MessagesTimeline = memo(function MessagesTimeline({
     },
     [],
   );
+  const onFoldAnimationStart = useCallback(() => {
+    if (foldAnimationTimerRef.current) clearTimeout(foldAnimationTimerRef.current);
+    setFoldAnimationActive(true);
+    foldAnimationTimerRef.current = setTimeout(() => {
+      foldAnimationTimerRef.current = null;
+      setFoldAnimationActive(false);
+    }, TURN_FOLD_ANIMATION_MS + 50);
+  }, []);
   const onToggleTurnFold = useCallback(
     (turnId: TurnId) => {
       const pendingTimer = turnFoldTimersRef.current.get(turnId);
@@ -329,6 +340,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
   useEffect(
     () => () => {
       for (const timer of turnFoldTimersRef.current.values()) clearTimeout(timer);
+      if (foldAnimationTimerRef.current) clearTimeout(foldAnimationTimerRef.current);
     },
     [],
   );
@@ -531,6 +543,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
       onOpenTurnDiff,
       onToggleTurnFold,
       onToggleWorkGroup,
+      onFoldAnimationStart,
     }),
     [
       timestampFormat,
@@ -551,6 +564,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
       onOpenTurnDiff,
       onToggleTurnFold,
       onToggleWorkGroup,
+      onFoldAnimationStart,
     ],
   );
   const activityState = useMemo<TimelineRowActivityState>(
@@ -598,7 +612,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
             {...(anchoredEndSpace ? { anchoredEndSpace } : {})}
             contentInsetEndAdjustment={contentInsetEndAdjustment}
             maintainScrollAtEnd={
-              anchoredEndSpace
+              anchoredEndSpace || foldAnimationActive
                 ? false
                 : {
                     animated: false,
@@ -611,7 +625,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
             }
             maintainVisibleContentPosition={{
               data: true,
-              size: false,
+              size: !anchoredEndSpace && !foldAnimationActive,
             }}
             onScroll={handleScroll}
             className="timeline-scroll-viewport h-full min-h-0 overflow-x-hidden overscroll-y-contain px-3 [overflow-anchor:none] sm:px-5"
@@ -2377,6 +2391,7 @@ const SimpleWorkEntryRow = memo(function SimpleWorkEntryRow(props: {
 }) {
   const { workEntry, workspaceRoot } = props;
   const activity = use(TimelineRowActivityCtx);
+  const timeline = use(TimelineRowCtx);
   const [expanded, setExpanded] = useState(false);
   const iconConfig = workToneIcon(workEntry.tone);
   const showWarningIndicator = workEntry.sourceActivityKind === "runtime.warning";
@@ -2421,17 +2436,21 @@ const SimpleWorkEntryRow = memo(function SimpleWorkEntryRow(props: {
   const showSuccessIndicator =
     workEntryIndicatesToolSuccess(workEntry) ||
     (turnSettled && workEntryIndicatesToolNeutralStatus(workEntry));
+  const toggleExpanded = () => {
+    timeline.onFoldAnimationStart();
+    setExpanded((value) => !value);
+  };
   const rowToggleProps = canExpand
     ? {
         role: "button" as const,
         tabIndex: 0 as const,
         "aria-label": displayText,
         "aria-expanded": expanded,
-        onClick: () => setExpanded((v) => !v),
+        onClick: toggleExpanded,
         onKeyDown: (e: KeyboardEvent<HTMLDivElement>) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
-            setExpanded((v) => !v);
+            toggleExpanded();
           }
         },
       }

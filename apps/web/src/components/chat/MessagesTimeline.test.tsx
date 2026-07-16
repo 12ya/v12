@@ -355,6 +355,7 @@ describe("MessagesTimeline", () => {
     expect(markup).toContain('data-testid="timeline-scroll-indicator"');
     expect(markup).toContain("timeline-scroll-viewport");
     expect(markup).toContain("right:0");
+    expect(markup).toContain('data-maintain-visible-content-position-size="true"');
     expect(markup).not.toContain("chat-end-rail-width");
     expect(markup).not.toContain("scrollbar-gutter-both");
     expect(markup).not.toContain("timeline-minimap");
