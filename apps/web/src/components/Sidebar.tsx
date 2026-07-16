@@ -194,6 +194,7 @@ import {
   isContextMenuPointerDown,
   isTrailingDoubleClick,
   resolveProjectStatusIndicator,
+  resolveSidebarComposerBadge,
   resolveSidebarNewThreadSeedContext,
   resolveSidebarNewThreadEnvMode,
   resolveSidebarStageBadgeLabel,
@@ -400,12 +401,13 @@ export const SidebarThreadRow = memo(function SidebarThreadRow(props: SidebarThr
   } = props;
   const threadRef = scopeThreadRef(thread.environmentId, thread.id);
   const threadKey = scopedThreadKey(threadRef);
-  const isDraft = useComposerDraftStore((store) => {
-    return (
-      store.getDraftThreadByRef(threadRef) !== null &&
-      hasComposerDraftUserContent(store.getComposerDraft(threadRef))
-    );
-  });
+  const composerBadge = useComposerDraftStore((store) =>
+    resolveSidebarComposerBadge({
+      hasUserInput: hasComposerDraftUserContent(store.getComposerDraft(threadRef)),
+      isActive,
+      isDraftThread: store.getDraftThreadByRef(threadRef) !== null,
+    }),
+  );
   const threadDrag = useDraggable({ id: threadKey });
   const lastVisitedAt = useUiStateStore((state) => state.threadLastVisitedAtById[threadKey]);
   const isSelected = useThreadSelectionStore((state) => state.selectedThreadKeys.has(threadKey));
@@ -748,7 +750,7 @@ export const SidebarThreadRow = memo(function SidebarThreadRow(props: SidebarThr
         className={`${resolveThreadRowClassName({
           isActive,
           isSelected,
-          isDraft,
+          isDraft: composerBadge === "Draft",
         })} relative isolate`}
         onClick={handleRowClick}
         onDoubleClick={handleRowDoubleClick}
@@ -804,12 +806,12 @@ export const SidebarThreadRow = memo(function SidebarThreadRow(props: SidebarThr
               </TooltipPopup>
             </Tooltip>
           )}
-          {isDraft && (
+          {composerBadge && (
             <span
-              data-testid={`thread-draft-${thread.id}`}
+              data-testid={`thread-${composerBadge.toLowerCase()}-${thread.id}`}
               className="shrink-0 rounded-full bg-amber-500/12 px-1.5 py-0.5 text-[9px] font-medium text-amber-700 dark:text-amber-300"
             >
-              Draft
+              {composerBadge}
             </span>
           )}
         </div>

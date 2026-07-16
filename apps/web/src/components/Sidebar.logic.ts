@@ -378,6 +378,17 @@ export function isContextMenuPointerDown(input: {
   return input.isMac && input.button === 0 && input.ctrlKey;
 }
 
+export function resolveSidebarComposerBadge(input: {
+  hasUserInput: boolean;
+  isActive: boolean;
+  isDraftThread: boolean;
+}): "Draft" | "Unsent" | null {
+  if (!input.hasUserInput || input.isActive) {
+    return null;
+  }
+  return input.isDraftThread ? "Draft" : "Unsent";
+}
+
 export function resolveThreadRowClassName(input: {
   isActive: boolean;
   isSelected: boolean;

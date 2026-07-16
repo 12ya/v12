@@ -13,6 +13,7 @@ import {
   orderItemsByPreferredIds,
   prioritizeThreadsByPinnedKeys,
   resolveProjectStatusIndicator,
+  resolveSidebarComposerBadge,
   resolveSidebarNewThreadSeedContext,
   resolveSidebarNewThreadEnvMode,
   resolveSidebarStageBadgeLabel,
@@ -838,6 +839,55 @@ describe("resolveThreadRowClassName", () => {
     });
     expect(className).not.toContain("bg-amber-500/8");
     expect(className).toContain("text-muted-foreground");
+  });
+});
+
+describe("resolveSidebarComposerBadge", () => {
+  it("hides composer badges while the chat is active", () => {
+    expect(
+      resolveSidebarComposerBadge({
+        hasUserInput: true,
+        isActive: true,
+        isDraftThread: true,
+      }),
+    ).toBeNull();
+    expect(
+      resolveSidebarComposerBadge({
+        hasUserInput: true,
+        isActive: true,
+        isDraftThread: false,
+      }),
+    ).toBeNull();
+  });
+
+  it("labels inactive new chats with input as drafts", () => {
+    expect(
+      resolveSidebarComposerBadge({
+        hasUserInput: true,
+        isActive: false,
+        isDraftThread: true,
+      }),
+    ).toBe("Draft");
+  });
+
+  it("labels inactive existing chats with input as unsent", () => {
+    expect(
+      resolveSidebarComposerBadge({
+        hasUserInput: true,
+        isActive: false,
+        isDraftThread: false,
+      }),
+    ).toBe("Unsent");
+  });
+
+  it("hides composer badges when there is no user input", () => {
+    expect(
+      resolveSidebarComposerBadge({
+        hasUserInput: false,
+        isActive: false,
+        isDraftThread: true,
+      }),
+    ).toBeNull();
   });
 });
 
