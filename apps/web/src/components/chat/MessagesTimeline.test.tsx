@@ -575,7 +575,7 @@ describe("MessagesTimeline", () => {
     expect(markup).not.toContain("C:/Users/mike/dev-stuff/v12/apps/web/src/session-logic.ts");
   });
 
-  it("renders command cards with category, status, duration, and exit metadata", async () => {
+  it("renders compact command rows with status, duration, and exit metadata", async () => {
     const { MessagesTimeline } = await import("./MessagesTimeline");
     const markup = renderToStaticMarkup(
       <MessagesTimeline
@@ -606,7 +606,6 @@ describe("MessagesTimeline", () => {
     expect(markup).toContain("Succeeded");
     expect(markup).toContain("1.3s");
     expect(markup).toContain("exit 0");
-    expect(markup).toContain("border-s-sky-500/45");
   });
 
   it("renders review comment contexts as structured cards instead of raw tags", async () => {

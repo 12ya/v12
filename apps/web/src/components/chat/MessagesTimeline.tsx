@@ -1396,12 +1396,11 @@ function WorkGroupToggleTimelineRow({
   row: Extract<TimelineRow, { kind: "work-toggle" }>;
 }) {
   const ctx = use(TimelineRowCtx);
-  const labelNoun = row.onlyToolEntries ? "tool call" : "log entry";
-
+  const DisclosureIcon = row.expanded ? ChevronDownIcon : ChevronRightIcon;
   return (
     <button
       type="button"
-      className="flex w-full cursor-pointer items-center gap-1.5 rounded-md px-0.5 py-0.5 text-left text-[12px] leading-5 transition-colors duration-150 hover:bg-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70"
+      className="group flex w-full cursor-pointer items-center gap-1.5 rounded-md px-0.5 py-0.5 text-left text-[12px] leading-5 text-muted-foreground transition-colors duration-150 hover:text-foreground/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70"
       aria-expanded={row.expanded}
       onClick={(event) => {
         const anchorElement =
@@ -1409,24 +1408,11 @@ function WorkGroupToggleTimelineRow({
         ctx.onToggleWorkGroup(row.groupId, anchorElement);
       }}
     >
-      <span className="flex size-5 shrink-0 items-center justify-center text-muted-foreground/65">
-        <ChevronDownIcon
-          className={cn(
-            "size-3.5 shrink-0 opacity-70 transition-transform duration-200",
-            row.expanded && "rotate-180",
-          )}
-        />
+      <span className="flex size-5 shrink-0 items-center justify-center text-muted-foreground/75">
+        <WrenchIcon className="size-3.5 stroke-[1.8]" aria-hidden />
       </span>
-      {row.expanded ? (
-        <span className="font-medium text-foreground/82">
-          Show fewer {row.onlyToolEntries ? "tool calls" : "log entries"}
-        </span>
-      ) : (
-        <span className="font-medium text-foreground/82">
-          +{row.hiddenCount} previous {labelNoun}
-          {row.hiddenCount === 1 ? "" : "s"}
-        </span>
-      )}
+      <span className="min-w-0 truncate">{row.summary}</span>
+      <DisclosureIcon className="size-3 shrink-0 opacity-60" aria-hidden />
     </button>
   );
 }
@@ -2099,41 +2085,6 @@ function buildToolCallExpandedBody(
   return blocks.length > 0 ? blocks.join("\n\n") : null;
 }
 
-function workEntryCategory(
-  workEntry: TimelineWorkEntry,
-): "command" | "file-read" | "file-change" | "web" | "other" {
-  if (workEntry.requestKind === "command" || workEntry.itemType === "command_execution") {
-    return "command";
-  }
-  if (workEntry.requestKind === "file-read" || workEntry.itemType === "image_view") {
-    return "file-read";
-  }
-  if (
-    workEntry.requestKind === "file-change" ||
-    workEntry.itemType === "file_change" ||
-    (workEntry.changedFiles?.length ?? 0) > 0
-  ) {
-    return "file-change";
-  }
-  if (workEntry.itemType === "web_search") return "web";
-  return "other";
-}
-
-function workEntryCategoryClass(workEntry: TimelineWorkEntry): string {
-  switch (workEntryCategory(workEntry)) {
-    case "command":
-      return "border-s-sky-500/45 bg-sky-500/[0.025]";
-    case "file-read":
-      return "border-s-cyan-500/45 bg-cyan-500/[0.025]";
-    case "file-change":
-      return "border-s-amber-500/45 bg-amber-500/[0.025]";
-    case "web":
-      return "border-s-indigo-500/45 bg-indigo-500/[0.025]";
-    case "other":
-      return "border-s-border/50";
-  }
-}
-
 function workEntryStatusLabel(workEntry: TimelineWorkEntry): string | null {
   if (workEntry.sourceActivityKind === "user-input.requested") return "Waiting";
   switch (workEntry.toolLifecycleStatus) {
@@ -2267,8 +2218,7 @@ const SimpleWorkEntryRow = memo(function SimpleWorkEntryRow(props: {
   return (
     <div
       className={cn(
-        "flex flex-col rounded-md border-s-2 px-1.5 py-1 transition-colors",
-        workEntryCategoryClass(workEntry),
+        "group flex flex-col rounded-md px-0.5 py-px transition-colors",
         canExpand &&
           "cursor-pointer hover:bg-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70",
       )}
@@ -2290,7 +2240,14 @@ const SimpleWorkEntryRow = memo(function SimpleWorkEntryRow(props: {
               )}
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-px text-muted-foreground/55">
+          <div
+            className={cn(
+              "flex shrink-0 items-center gap-px text-muted-foreground/55 transition-opacity",
+              showFailedIndicator || statusLabel === "Running"
+                ? "opacity-100"
+                : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100",
+            )}
+          >
             {compactMetadata.length > 0 ? (
               <span className="me-1 text-[10px] tabular-nums">{compactMetadata.join(" · ")}</span>
             ) : null}

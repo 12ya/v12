@@ -5,6 +5,7 @@ import {
   deriveMessagesTimelineRows,
   normalizeCompactToolLabel,
   resolveAssistantMessageCopyState,
+  summarizeWorkLogGroup,
 } from "./MessagesTimeline.logic";
 
 describe("computeMessageDurationStart", () => {
@@ -203,6 +204,36 @@ describe("normalizeCompactToolLabel", () => {
 
   it("removes trailing completion wording from other labels", () => {
     expect(normalizeCompactToolLabel("Read file completed")).toBe("Read file");
+  });
+});
+
+describe("summarizeWorkLogGroup", () => {
+  it("combines tool categories into a compact activity sentence", () => {
+    expect(
+      summarizeWorkLogGroup([
+        {
+          id: "read-1",
+          createdAt: "2026-01-01T00:00:00Z",
+          label: "Read file",
+          tone: "tool",
+          requestKind: "file-read",
+        },
+        {
+          id: "command-1",
+          createdAt: "2026-01-01T00:00:01Z",
+          label: "Ran command",
+          tone: "tool",
+          itemType: "command_execution",
+        },
+        {
+          id: "tool-1",
+          createdAt: "2026-01-01T00:00:02Z",
+          label: "Called MCP tool",
+          tone: "tool",
+          itemType: "mcp_tool_call",
+        },
+      ]),
+    ).toBe("Read a file, ran a command, used a tool");
   });
 });
 
@@ -994,18 +1025,19 @@ describe("deriveMessagesTimelineRows", () => {
       expandedWorkGroupIds: new Set(["work-group:work-entry-1"]),
     });
 
-    expect(collapsedRows.map((row) => row.id)).toEqual(["work-3", "work-toggle:work-entry-1"]);
+    expect(collapsedRows.map((row) => row.id)).toEqual(["work-toggle:work-entry-1"]);
     expect(collapsedRows.find((row) => row.kind === "work-toggle")).toMatchObject({
       groupId: "work-group:work-entry-1",
-      hiddenCount: 2,
+      hiddenCount: 3,
       expanded: false,
       onlyToolEntries: true,
+      summary: "Used 3 tools",
     });
     expect(expandedRows.map((row) => row.id)).toEqual([
+      "work-toggle:work-entry-1",
       "work-1",
       "work-2",
       "work-3",
-      "work-toggle:work-entry-1",
     ]);
     expect(expandedRows.find((row) => row.kind === "work-toggle")).toMatchObject({
       expanded: true,

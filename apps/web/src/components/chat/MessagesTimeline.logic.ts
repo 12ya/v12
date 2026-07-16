@@ -101,6 +101,7 @@ export type MessagesTimelineRow =
       hiddenCount: number;
       expanded: boolean;
       onlyToolEntries: boolean;
+      summary: string;
     }
   | {
       kind: "turn-fold";
@@ -156,6 +157,54 @@ export function computeMessageDurationStart(
 
 export function normalizeCompactToolLabel(value: string): string {
   return value.replace(/\s+(?:complete|completed)\s*$/i, "").trim();
+}
+
+type WorkSummaryKind = "command" | "file-read" | "file-change" | "web" | "tool";
+
+function workSummaryKind(entry: WorkLogEntry): WorkSummaryKind {
+  if (entry.requestKind === "command" || entry.itemType === "command_execution") return "command";
+  if (entry.requestKind === "file-read" || entry.itemType === "image_view") return "file-read";
+  if (
+    entry.requestKind === "file-change" ||
+    entry.itemType === "file_change" ||
+    (entry.changedFiles?.length ?? 0) > 0
+  ) {
+    return "file-change";
+  }
+  if (entry.itemType === "web_search") return "web";
+  return "tool";
+}
+
+/** Builds the terse, past-tense disclosure label used above a run of tool activity. */
+export function summarizeWorkLogGroup(entries: ReadonlyArray<WorkLogEntry>): string {
+  const counts = new Map<WorkSummaryKind, number>();
+  for (const entry of entries) {
+    const kind = workSummaryKind(entry);
+    counts.set(kind, (counts.get(kind) ?? 0) + 1);
+  }
+
+  const phrases: string[] = [];
+  for (const [kind, count] of counts) {
+    switch (kind) {
+      case "command":
+        phrases.push(count === 1 ? "Ran a command" : `Ran ${count} commands`);
+        break;
+      case "file-read":
+        phrases.push(count === 1 ? "Read a file" : `Read ${count} files`);
+        break;
+      case "file-change":
+        phrases.push(count === 1 ? "Edited a file" : `Edited ${count} files`);
+        break;
+      case "web":
+        phrases.push(count === 1 ? "Searched the web" : `Searched the web ${count} times`);
+        break;
+      case "tool":
+        phrases.push(count === 1 ? "Used a tool" : `Used ${count} tools`);
+        break;
+    }
+  }
+
+  return phrases.map((phrase, index) => (index === 0 ? phrase : phrase.toLowerCase())).join(", ");
 }
 
 export function resolveAssistantMessageCopyState({
@@ -442,9 +491,18 @@ export function deriveMessagesTimelineRows(input: {
         } else {
           const groupId = `work-group:${timelineEntry.id}`;
           const expanded = input.expandedWorkGroupIds?.has(groupId) ?? false;
-          const hiddenEntries = visibleGroupedEntries.slice(0, -MAX_VISIBLE_WORK_LOG_ENTRIES);
-          const visibleEntries = visibleGroupedEntries.slice(-MAX_VISIBLE_WORK_LOG_ENTRIES);
-          const renderedEntries = expanded ? [...hiddenEntries, ...visibleEntries] : visibleEntries;
+          const renderedEntries = expanded ? visibleGroupedEntries : [];
+
+          nextRows.push({
+            kind: "work-toggle",
+            id: `work-toggle:${timelineEntry.id}`,
+            createdAt: timelineEntry.createdAt,
+            groupId,
+            hiddenCount: visibleGroupedEntries.length,
+            expanded,
+            onlyToolEntries: visibleGroupedEntries.every((entry) => workLogEntryIsToolLike(entry)),
+            summary: summarizeWorkLogGroup(visibleGroupedEntries),
+          });
 
           for (const workEntry of renderedEntries) {
             nextRows.push({
@@ -454,16 +512,6 @@ export function deriveMessagesTimelineRows(input: {
               groupedEntries: [workEntry],
             });
           }
-
-          nextRows.push({
-            kind: "work-toggle",
-            id: `work-toggle:${timelineEntry.id}`,
-            createdAt: timelineEntry.createdAt,
-            groupId,
-            hiddenCount: hiddenEntries.length,
-            expanded,
-            onlyToolEntries: visibleGroupedEntries.every((entry) => workLogEntryIsToolLike(entry)),
-          });
         }
       }
       index = cursor - 1;
