@@ -790,7 +790,6 @@ describe("resolveThreadRowClassName", () => {
     const className = resolveThreadRowClassName({
       isActive: true,
       isSelected: true,
-      isDraft: true,
     });
     expect(className).toContain("bg-primary/22");
     expect(className).toContain("hover:bg-primary/26");
@@ -802,7 +801,6 @@ describe("resolveThreadRowClassName", () => {
     const className = resolveThreadRowClassName({
       isActive: false,
       isSelected: true,
-      isDraft: true,
     });
     expect(className).toContain("bg-primary/15");
     expect(className).toContain("hover:bg-primary/19");
@@ -814,31 +812,18 @@ describe("resolveThreadRowClassName", () => {
     const className = resolveThreadRowClassName({
       isActive: true,
       isSelected: false,
-      isDraft: true,
     });
     expect(className).toContain("bg-accent/85");
     expect(className).toContain("hover:bg-accent");
   });
 
-  it("highlights an inactive thread that contains unsent text", () => {
+  it("uses the default palette for an inactive, unselected thread", () => {
     const className = resolveThreadRowClassName({
       isActive: false,
       isSelected: false,
-      isDraft: true,
     });
-    expect(className).toContain("bg-amber-500/8");
-    expect(className).toContain("hover:bg-amber-500/13");
-    expect(className).not.toContain("text-muted-foreground");
-  });
-
-  it("does not highlight an inactive thread without unsent text", () => {
-    const className = resolveThreadRowClassName({
-      isActive: false,
-      isSelected: false,
-      isDraft: false,
-    });
-    expect(className).not.toContain("bg-amber-500/8");
     expect(className).toContain("text-muted-foreground");
+    expect(className).toContain("hover:bg-accent");
   });
 });
 

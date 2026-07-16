@@ -5392,7 +5392,6 @@ function ChatViewContent(props: ChatViewProps) {
     },
     [activeThread, activeThreadKey, scheduleComposerFocus],
   );
-  const onShowTasks = useCallback(() => setPlanSidebarOpen(true), []);
   const onOpenTaskSource = useCallback(
     (task: ContextualTask) => {
       if (!activeThread) return;
@@ -5616,7 +5615,6 @@ function ChatViewContent(props: ChatViewProps) {
                 onRevertUserMessage={onRevertUserMessage}
                 onForkMessage={onForkMessage}
                 onAddSelectionTask={onAddSelectionTask}
-                onShowTasks={onShowTasks}
                 isRevertingCheckpoint={isRevertingCheckpoint}
                 onImageExpand={onExpandTimelineImage}
                 markdownCwd={gitCwd ?? undefined}

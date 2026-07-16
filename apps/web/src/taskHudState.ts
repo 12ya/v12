@@ -55,6 +55,11 @@ interface TaskHudStoreState {
   readonly removeTask: (planKey: string, taskId: string) => void;
   readonly setTaskOrder: (planKey: string, taskIds: readonly string[]) => void;
   readonly addContextTask: (threadKey: string, task: ContextualTask) => void;
+  readonly setContextTaskInstruction: (
+    threadKey: string,
+    taskId: string,
+    instruction: string,
+  ) => void;
   readonly setContextTaskCompleted: (threadKey: string, taskId: string, completed: boolean) => void;
   readonly removeContextTask: (threadKey: string, taskId: string) => void;
   readonly consumeContextTasks: (threadKey: string, taskIds: readonly string[]) => void;
@@ -217,6 +222,15 @@ export const useTaskHudStore = create<TaskHudStoreState>()(
             ...state.contextTasksByThreadKey,
             [threadKey]: [...(state.contextTasksByThreadKey[threadKey] ?? []), task].slice(
               -MAX_PERSISTED_CONTEXT_TASKS,
+            ),
+          },
+        })),
+      setContextTaskInstruction: (threadKey, taskId, instruction) =>
+        set((state) => ({
+          contextTasksByThreadKey: {
+            ...state.contextTasksByThreadKey,
+            [threadKey]: (state.contextTasksByThreadKey[threadKey] ?? []).map((task) =>
+              task.id === taskId ? { ...task, instruction } : task,
             ),
           },
         })),

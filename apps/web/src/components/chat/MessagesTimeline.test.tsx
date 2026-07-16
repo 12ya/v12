@@ -222,6 +222,7 @@ function buildUserTimelineEntry(text: string) {
 describe("MessagesTimeline", () => {
   it("allows selected text to be saved as a task without optional context", async () => {
     const {
+      groupContextTaskOrdinalsByQuote,
       groupContextTasksBySourceMessageId,
       resolveSelectionTaskInstruction,
       shouldSaveSelectionTaskContextOnKeyDown,
@@ -293,6 +294,27 @@ describe("MessagesTimeline", () => {
     const groupedTasks = groupContextTasksBySourceMessageId(tasks);
     expect(groupedTasks.get(firstMessageId)).toEqual(tasks.slice(0, 2));
     expect(groupedTasks.get(secondMessageId)).toEqual(tasks.slice(2));
+
+    const ordinalByTaskId = new Map(tasks.map((task, index) => [task.id, index + 1] as const));
+    expect(groupContextTaskOrdinalsByQuote(tasks, ordinalByTaskId)).toEqual(
+      new Map([
+        ["First quote", [1]],
+        ["Second quote", [2]],
+        ["Third quote", [3]],
+      ]),
+    );
+    expect(
+      groupContextTaskOrdinalsByQuote(
+        [...tasks, { ...tasks[0]!, id: "task-4" }],
+        new Map([...ordinalByTaskId, ["task-4", 4]]),
+      ),
+    ).toEqual(
+      new Map([
+        ["First quote", [1, 4]],
+        ["Second quote", [2]],
+        ["Third quote", [3]],
+      ]),
+    );
   });
 
   it("uses LegendList isNearEnd when deciding whether the live edge is visible", async () => {

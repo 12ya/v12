@@ -392,7 +392,6 @@ export function resolveSidebarComposerBadge(input: {
 export function resolveThreadRowClassName(input: {
   isActive: boolean;
   isSelected: boolean;
-  isDraft: boolean;
 }): string {
   const baseClassName =
     "h-6 w-full translate-x-0 cursor-pointer justify-start px-2 text-left select-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring sm:h-7";
@@ -415,13 +414,6 @@ export function resolveThreadRowClassName(input: {
     return cn(
       baseClassName,
       "bg-accent/85 text-foreground font-medium hover:bg-accent hover:text-foreground dark:bg-accent/55 dark:hover:bg-accent/70",
-    );
-  }
-
-  if (input.isDraft) {
-    return cn(
-      baseClassName,
-      "bg-amber-500/8 text-foreground hover:bg-amber-500/13 dark:bg-amber-500/10 dark:hover:bg-amber-500/16",
     );
   }
 

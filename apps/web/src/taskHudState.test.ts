@@ -70,6 +70,27 @@ describe("task HUD state", () => {
     expect(useTaskHudStore.getState().contextTasksByThreadKey["env-1:thread-1"]).toEqual([]);
   });
 
+  it("updates a pending annotation instruction", () => {
+    const task = {
+      id: "pending-task",
+      instruction: "Original instruction",
+      quote: "Selected text",
+      sourceThreadId: ThreadId.make("thread-1"),
+      sourceMessageId: MessageId.make("message-1"),
+      sourceAuthor: "assistant" as const,
+      sourceCreatedAt: "2026-07-15T00:00:00.000Z",
+      completed: false,
+      pendingSend: true,
+    };
+    const store = useTaskHudStore.getState();
+    store.addContextTask("env-1:thread-1", task);
+    store.setContextTaskInstruction("env-1:thread-1", task.id, "Edited instruction");
+
+    expect(useTaskHudStore.getState().contextTasksByThreadKey["env-1:thread-1"]).toEqual([
+      { ...task, instruction: "Edited instruction" },
+    ]);
+  });
+
   it("hides sent annotations left in persisted state", () => {
     expect(
       filterPendingContextTasks([

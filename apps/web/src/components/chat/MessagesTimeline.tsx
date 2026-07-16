@@ -139,7 +139,7 @@ interface TimelineRowSharedState {
   anchorMessageId: MessageId | null;
   sourceHighlightMessageId: MessageId | null;
   contextTasksBySourceMessageId: ReadonlyMap<MessageId, readonly ContextualTask[]>;
-  onShowTasks: () => void;
+  contextTaskOrdinalById: ReadonlyMap<string, number>;
   onRevertUserMessage: (messageId: MessageId) => void;
   onForkMessage: (messageId: MessageId, initialPrompt?: string) => void;
   onAddSelectionTask: (input: {
@@ -189,7 +189,6 @@ interface MessagesTimelineProps {
   onRevertUserMessage: (messageId: MessageId) => void;
   onForkMessage: (messageId: MessageId, initialPrompt?: string) => void;
   onAddSelectionTask?: TimelineRowSharedState["onAddSelectionTask"];
-  onShowTasks?: () => void;
   isRevertingCheckpoint: boolean;
   onImageExpand: (preview: ExpandedImagePreview) => void;
   activeThreadEnvironmentId: EnvironmentId;
@@ -225,7 +224,6 @@ export const MessagesTimeline = memo(function MessagesTimeline({
   onRevertUserMessage,
   onForkMessage,
   onAddSelectionTask = NOOP_ADD_SELECTION_TASK,
-  onShowTasks = NOOP_SHOW_TASKS,
   isRevertingCheckpoint,
   onImageExpand,
   activeThreadEnvironmentId,
@@ -250,6 +248,10 @@ export const MessagesTimeline = memo(function MessagesTimeline({
   );
   const contextTasksBySourceMessageId = useMemo(
     () => groupContextTasksBySourceMessageId(contextTasks),
+    [contextTasks],
+  );
+  const contextTaskOrdinalById = useMemo(
+    () => new Map(contextTasks.map((task, index) => [task.id, index + 1] as const)),
     [contextTasks],
   );
   const [expandedTurnIds, setExpandedTurnIds] = useState<ReadonlySet<TurnId>>(new Set());
@@ -455,7 +457,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
       anchorMessageId,
       sourceHighlightMessageId,
       contextTasksBySourceMessageId,
-      onShowTasks,
+      contextTaskOrdinalById,
       onRevertUserMessage,
       onForkMessage,
       onAddSelectionTask,
@@ -475,7 +477,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
       anchorMessageId,
       sourceHighlightMessageId,
       contextTasksBySourceMessageId,
-      onShowTasks,
+      contextTaskOrdinalById,
       onRevertUserMessage,
       onForkMessage,
       onAddSelectionTask,
@@ -621,9 +623,27 @@ const TimelineRowContent = memo(function TimelineRowContent({ row }: { row: Time
 
 interface TaskSourceAnchor {
   readonly key: string;
-  readonly count: number;
+  readonly ordinals: readonly number[];
   readonly left: number;
   readonly top: number;
+}
+
+export function groupContextTaskOrdinalsByQuote(
+  tasks: readonly ContextualTask[],
+  ordinalByTaskId: ReadonlyMap<string, number>,
+): ReadonlyMap<string, readonly number[]> {
+  const groups = new Map<string, number[]>();
+  for (const task of tasks) {
+    const ordinal = ordinalByTaskId.get(task.id);
+    if (ordinal === undefined) continue;
+    const quoteOrdinals = groups.get(task.quote);
+    if (quoteOrdinals) {
+      quoteOrdinals.push(ordinal);
+    } else {
+      groups.set(task.quote, [ordinal]);
+    }
+  }
+  return groups;
 }
 
 function collectTaskSourceTextNodes(root: Node): Text[] {
@@ -702,14 +722,16 @@ function TaskSourceMarkersOverlay({
 }) {
   const ctx = use(TimelineRowCtx);
   const tasks = ctx.contextTasksBySourceMessageId.get(messageId) ?? EMPTY_CONTEXT_TASKS;
-  const taskGroups = useMemo(() => {
-    const groups = new Map<string, number>();
-    for (const task of tasks) {
-      groups.set(task.quote, (groups.get(task.quote) ?? 0) + 1);
-    }
-    return groups;
-  }, [tasks]);
+  const taskGroups = useMemo(
+    () => groupContextTaskOrdinalsByQuote(tasks, ctx.contextTaskOrdinalById),
+    [ctx.contextTaskOrdinalById, tasks],
+  );
   const [anchors, setAnchors] = useState<readonly TaskSourceAnchor[]>([]);
+  const [editingTask, setEditingTask] = useState<{
+    readonly task: ContextualTask;
+    readonly anchorRect: SelectionAnchorRect;
+    readonly markerLabel: string;
+  } | null>(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -720,9 +742,9 @@ function TaskSourceMarkersOverlay({
 
     const measure = () => {
       const next: TaskSourceAnchor[] = [];
-      for (const [quote, count] of taskGroups) {
+      for (const [quote, ordinals] of taskGroups) {
         const position = measureTaskSourceAnchor(container, quote);
-        if (position) next.push({ key: quote, count, ...position });
+        if (position) next.push({ key: quote, ordinals, ...position });
       }
       setAnchors((current) => {
         if (
@@ -730,7 +752,7 @@ function TaskSourceMarkersOverlay({
           current.every(
             (anchor, index) =>
               anchor.key === next[index]?.key &&
-              anchor.count === next[index]?.count &&
+              anchor.ordinals.join(",") === next[index]?.ordinals.join(",") &&
               Math.abs(anchor.left - (next[index]?.left ?? 0)) < 0.5 &&
               Math.abs(anchor.top - (next[index]?.top ?? 0)) < 0.5,
           )
@@ -759,23 +781,49 @@ function TaskSourceMarkersOverlay({
         <button
           key={anchor.key}
           type="button"
-          aria-label={`${anchor.count} task${anchor.count === 1 ? "" : "s"} from this selection`}
+          aria-label={`Task ${anchor.ordinals.join(", ")} from this selection`}
           data-source-highlight={highlighted ? "true" : undefined}
           data-task-source-marker="true"
           className={cn(
-            "absolute z-10 flex size-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-background bg-blue-500 font-semibold text-[10px] text-white shadow-sm transition-[scale,box-shadow] hover:scale-110",
+            "absolute z-10 flex h-5 min-w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-background bg-blue-500 px-1 font-semibold text-[10px] text-white shadow-sm transition-[scale,box-shadow] hover:scale-110",
             highlighted ? "scale-110 shadow-[0_0_0_4px_rgb(59_130_246/0.2)]" : null,
           )}
           style={{ left: anchor.left, top: anchor.top }}
           onPointerUp={(event) => event.stopPropagation()}
           onClick={(event) => {
             event.stopPropagation();
-            ctx.onShowTasks();
+            const task = tasks.find((candidate) => candidate.quote === anchor.key);
+            if (!task) return;
+            setEditingTask({
+              task,
+              anchorRect: event.currentTarget.getBoundingClientRect(),
+              markerLabel: String(ctx.contextTaskOrdinalById.get(task.id) ?? 1),
+            });
           }}
         >
-          {anchor.count}
+          {anchor.ordinals.join(",")}
         </button>
       ))}
+      {editingTask ? (
+        <SelectionActionBar
+          quote={editingTask.task.quote}
+          anchorRect={editingTask.anchorRect}
+          initialInstruction={
+            editingTask.task.instruction === editingTask.task.quote
+              ? ""
+              : editingTask.task.instruction
+          }
+          initiallyEditing
+          markerLabel={editingTask.markerLabel}
+          onCancel={() => setEditingTask(null)}
+          onSave={(instruction) => {
+            useTaskHudStore
+              .getState()
+              .setContextTaskInstruction(ctx.routeThreadKey, editingTask.task.id, instruction);
+            setEditingTask(null);
+          }}
+        />
+      ) : null}
     </>
   );
 }
@@ -992,7 +1040,6 @@ function ForkMessageButton({ messageId }: { messageId: MessageId }) {
 
 function TurnFoldTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "turn-fold" }> }) {
   const ctx = use(TimelineRowCtx);
-  const Icon = row.expanded ? ChevronDownIcon : ChevronRightIcon;
 
   return (
     <div className="border-b border-border/60 pb-2 pt-1">
@@ -1004,7 +1051,12 @@ function TurnFoldTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "turn-
         className="flex cursor-pointer select-none items-center gap-1 rounded-md px-1 text-xs text-muted-foreground tabular-nums transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70"
       >
         <span>{row.label}</span>
-        <Icon className="size-3.5" />
+        <ChevronRightIcon
+          className={cn(
+            "size-3.5 transition-transform duration-200 ease-out motion-reduce:transition-none",
+            row.expanded && "rotate-90",
+          )}
+        />
       </button>
     </div>
   );
@@ -1167,11 +1219,14 @@ function readSelectionWithin(
 function SelectionActionBar(props: {
   quote: string;
   anchorRect: SelectionAnchorRect;
+  initialInstruction?: string;
+  initiallyEditing?: boolean;
+  markerLabel?: string;
   onSave: (instruction: string) => void;
   onCancel: () => void;
 }) {
-  const [instruction, setInstruction] = useState("");
-  const [editingContext, setEditingContext] = useState(false);
+  const [instruction, setInstruction] = useState(props.initialInstruction ?? "");
+  const [editingContext, setEditingContext] = useState(props.initiallyEditing ?? false);
   const instructionRef = useRef<HTMLTextAreaElement>(null);
   const virtualAnchor = useMemo(
     () => ({ getBoundingClientRect: () => props.anchorRect }),
@@ -1200,7 +1255,7 @@ function SelectionActionBar(props: {
           {editingContext ? (
             <div className="relative flex min-h-32 flex-col p-3">
               <span className="absolute top-1/2 -left-8 flex size-6 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white bg-blue-500 font-semibold text-[11px] text-white shadow-sm">
-                1
+                {props.markerLabel ?? "1"}
               </span>
               <textarea
                 autoFocus
@@ -2255,6 +2310,7 @@ const SimpleWorkEntryRow = memo(function SimpleWorkEntryRow(props: {
         role: "button" as const,
         tabIndex: 0 as const,
         "aria-label": displayText,
+        "aria-expanded": expanded,
         onClick: () => setExpanded((v) => !v),
         onKeyDown: (e: KeyboardEvent<HTMLDivElement>) => {
           if (e.key === "Enter" || e.key === " ") {

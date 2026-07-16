@@ -750,7 +750,6 @@ export const SidebarThreadRow = memo(function SidebarThreadRow(props: SidebarThr
         className={`${resolveThreadRowClassName({
           isActive,
           isSelected,
-          isDraft: composerBadge === "Draft",
         })} relative isolate`}
         onClick={handleRowClick}
         onDoubleClick={handleRowDoubleClick}
@@ -809,7 +808,11 @@ export const SidebarThreadRow = memo(function SidebarThreadRow(props: SidebarThr
           {composerBadge && (
             <span
               data-testid={`thread-${composerBadge.toLowerCase()}-${thread.id}`}
-              className="shrink-0 rounded-full bg-amber-500/12 px-1.5 py-0.5 text-[9px] font-medium text-amber-700 dark:text-amber-300"
+              className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-medium ${
+                composerBadge === "Draft"
+                  ? "bg-amber-500/12 text-amber-700 dark:text-amber-300"
+                  : "bg-blue-500/12 text-blue-700 dark:text-blue-300"
+              }`}
             >
               {composerBadge}
             </span>
