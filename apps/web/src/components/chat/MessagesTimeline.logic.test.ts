@@ -570,6 +570,23 @@ describe("deriveMessagesTimelineRows", () => {
     expect(
       expandedRows.find((row) => row.kind === "turn-fold" && row.expanded === true),
     ).toBeDefined();
+
+    const closingRows = deriveMessagesTimelineRows({
+      timelineEntries,
+      expandedTurnIds: new Set(["turn-1" as never]),
+      collapsingTurnIds: new Set(["turn-1" as never]),
+      isWorking: false,
+      activeTurnStartedAt: null,
+      turnDiffSummaryByAssistantMessageId: new Map(),
+      revertTurnCountByUserMessageId: new Map(),
+    });
+    expect(closingRows.map((row) => row.id)).toEqual(expandedRows.map((row) => row.id));
+    expect(closingRows.find((row) => row.kind === "turn-fold")?.expanded).toBe(false);
+    expect(
+      closingRows
+        .filter((row) => row.id === "assistant-thought-entry" || row.id === "work-entry-1")
+        .every((row) => row.foldState === "closing"),
+    ).toBe(true);
   });
 
   it("derives a sane duration for a steer-superseded turn with one instant commentary message", () => {

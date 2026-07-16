@@ -168,7 +168,7 @@ const TIMELINE_LIST_FOOTER = <div className="h-3 sm:h-4" />;
 const EMPTY_TIMELINE_SKILLS: ReadonlyArray<Pick<ServerProviderSkill, "name" | "displayName">> = [];
 const EMPTY_CONTEXT_TASKS: readonly ContextualTask[] = Object.freeze([]);
 const NOOP_ADD_SELECTION_TASK: TimelineRowSharedState["onAddSelectionTask"] = () => {};
-const NOOP_SHOW_TASKS = () => {};
+const TURN_FOLD_ANIMATION_MS = 200;
 
 // ---------------------------------------------------------------------------
 // Props (public API)
@@ -255,19 +255,82 @@ export const MessagesTimeline = memo(function MessagesTimeline({
     [contextTasks],
   );
   const [expandedTurnIds, setExpandedTurnIds] = useState<ReadonlySet<TurnId>>(new Set());
+  const [collapsingTurnIds, setCollapsingTurnIds] = useState<ReadonlySet<TurnId>>(new Set());
+  const expandedTurnIdsRef = useRef(expandedTurnIds);
+  const collapsingTurnIdsRef = useRef(collapsingTurnIds);
+  const turnFoldTimersRef = useRef(new Map<TurnId, ReturnType<typeof setTimeout>>());
   const [expandedWorkGroupIds, setExpandedWorkGroupIds] = useState<ReadonlySet<string>>(new Set());
 
-  const onToggleTurnFold = useCallback((turnId: TurnId) => {
-    setExpandedTurnIds((existing) => {
-      const next = new Set(existing);
-      if (next.has(turnId)) {
-        next.delete(turnId);
-      } else {
-        next.add(turnId);
+  const updateExpandedTurnIds = useCallback(
+    (update: (existing: ReadonlySet<TurnId>) => ReadonlySet<TurnId>) => {
+      const next = update(expandedTurnIdsRef.current);
+      expandedTurnIdsRef.current = next;
+      setExpandedTurnIds(next);
+    },
+    [],
+  );
+  const updateCollapsingTurnIds = useCallback(
+    (update: (existing: ReadonlySet<TurnId>) => ReadonlySet<TurnId>) => {
+      const next = update(collapsingTurnIdsRef.current);
+      collapsingTurnIdsRef.current = next;
+      setCollapsingTurnIds(next);
+    },
+    [],
+  );
+  const onToggleTurnFold = useCallback(
+    (turnId: TurnId) => {
+      const pendingTimer = turnFoldTimersRef.current.get(turnId);
+      if (pendingTimer) {
+        clearTimeout(pendingTimer);
+        turnFoldTimersRef.current.delete(turnId);
       }
-      return next;
-    });
-  }, []);
+
+      if (collapsingTurnIdsRef.current.has(turnId)) {
+        updateCollapsingTurnIds((existing) => {
+          const next = new Set(existing);
+          next.delete(turnId);
+          return next;
+        });
+        return;
+      }
+
+      if (!expandedTurnIdsRef.current.has(turnId)) {
+        updateExpandedTurnIds((existing) => {
+          const next = new Set(existing);
+          next.add(turnId);
+          return next;
+        });
+        return;
+      }
+
+      updateCollapsingTurnIds((existing) => {
+        const next = new Set(existing);
+        next.add(turnId);
+        return next;
+      });
+      const timer = setTimeout(() => {
+        turnFoldTimersRef.current.delete(turnId);
+        updateExpandedTurnIds((existing) => {
+          const next = new Set(existing);
+          next.delete(turnId);
+          return next;
+        });
+        updateCollapsingTurnIds((existing) => {
+          const next = new Set(existing);
+          next.delete(turnId);
+          return next;
+        });
+      }, TURN_FOLD_ANIMATION_MS);
+      turnFoldTimersRef.current.set(turnId, timer);
+    },
+    [updateCollapsingTurnIds, updateExpandedTurnIds],
+  );
+  useEffect(
+    () => () => {
+      for (const timer of turnFoldTimersRef.current.values()) clearTimeout(timer);
+    },
+    [],
+  );
   const onToggleWorkGroup = useCallback(
     (groupId: string, anchorElement?: HTMLElement) => {
       const anchorBottomBeforeToggle = anchorElement?.getBoundingClientRect().bottom ?? null;
@@ -313,7 +376,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
     }
     if (latestTurn.turnId === previous.turnId) {
       if (previous.state === "running" && latestTurn.state === "interrupted") {
-        setExpandedTurnIds((existing) => {
+        updateExpandedTurnIds((existing) => {
           const next = new Set(existing);
           next.add(latestTurn.turnId);
           return next;
@@ -321,7 +384,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
       }
       return;
     }
-    setExpandedTurnIds((existing) => {
+    updateExpandedTurnIds((existing) => {
       if (!existing.has(previous.turnId)) {
         return existing;
       }
@@ -329,7 +392,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
       next.delete(previous.turnId);
       return next;
     });
-  }, [latestTurn]);
+  }, [latestTurn, updateExpandedTurnIds]);
 
   const rawRows = useMemo(
     () =>
@@ -338,6 +401,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
         latestTurn,
         runningTurnId,
         expandedTurnIds,
+        collapsingTurnIds,
         expandedWorkGroupIds,
         isWorking,
         activeTurnStartedAt,
@@ -349,6 +413,7 @@ export const MessagesTimeline = memo(function MessagesTimeline({
       latestTurn,
       runningTurnId,
       expandedTurnIds,
+      collapsingTurnIds,
       expandedWorkGroupIds,
       isWorking,
       activeTurnStartedAt,
@@ -591,7 +656,7 @@ type TimelineWorkEntry = Extract<MessagesTimelineRow, { kind: "work" }>["grouped
 type TimelineRow = MessagesTimelineRow;
 
 const TimelineRowContent = memo(function TimelineRowContent({ row }: { row: TimelineRow }) {
-  return (
+  const content = (
     <div
       className={cn(
         // Commentary (non-terminal assistant) rows carry no metadata row, so
@@ -603,10 +668,6 @@ const TimelineRowContent = memo(function TimelineRowContent({ row }: { row: Time
           : "pb-4",
         row.kind === "message" && row.message.role === "assistant" ? "group/assistant" : null,
       )}
-      data-timeline-row-id={row.id}
-      data-timeline-row-kind={row.kind}
-      data-message-id={row.kind === "message" ? row.message.id : undefined}
-      data-message-role={row.kind === "message" ? row.message.role : undefined}
     >
       {row.kind === "work" ? <WorkGroupSection groupedEntries={row.groupedEntries} /> : null}
       {row.kind === "work-toggle" ? <WorkGroupToggleTimelineRow row={row} /> : null}
@@ -619,7 +680,52 @@ const TimelineRowContent = memo(function TimelineRowContent({ row }: { row: Time
       {row.kind === "working" ? <WorkingTimelineRow row={row} /> : null}
     </div>
   );
+
+  return (
+    <div
+      data-timeline-row-id={row.id}
+      data-timeline-row-kind={row.kind}
+      data-message-id={row.kind === "message" ? row.message.id : undefined}
+      data-message-role={row.kind === "message" ? row.message.role : undefined}
+    >
+      {row.foldState ? (
+        <FoldedTimelineRowTransition closing={row.foldState === "closing"}>
+          {content}
+        </FoldedTimelineRowTransition>
+      ) : (
+        content
+      )}
+    </div>
+  );
 });
+
+function FoldedTimelineRowTransition({
+  children,
+  closing,
+}: {
+  children: ReactNode;
+  closing: boolean;
+}) {
+  const [entered, setEntered] = useState(false);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setEntered(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  const visible = entered && !closing;
+  return (
+    <div
+      aria-hidden={!visible}
+      className={cn(
+        "grid transition-[grid-template-rows,opacity] duration-200 ease-out motion-reduce:transition-none",
+        visible ? "grid-rows-[1fr] opacity-100" : "pointer-events-none grid-rows-[0fr] opacity-0",
+      )}
+    >
+      <div className="min-h-0 overflow-hidden">{children}</div>
+    </div>
+  );
+}
 
 interface TaskSourceAnchor {
   readonly key: string;
@@ -2322,125 +2428,131 @@ const SimpleWorkEntryRow = memo(function SimpleWorkEntryRow(props: {
     : {};
 
   return (
-    <div
-      className={cn(
-        "group flex flex-col rounded-md px-0.5 py-px transition-colors",
-        canExpand &&
-          "cursor-pointer hover:bg-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70",
-      )}
-      {...rowToggleProps}
-    >
-      <div className="flex select-none items-center gap-1.5 transition-[opacity,translate] duration-200">
-        <span className={iconWrapperClass}>
-          <WorkEntryIconSvg
-            name={entryIconName}
-            className="block size-3.5 shrink-0 stroke-[1.8] opacity-80"
-          />
-        </span>
-        <div className="flex min-w-0 flex-1 items-center gap-1.5">
-          <div className="min-w-0 flex-1 overflow-hidden">
-            <p className="flex min-w-0 w-full items-baseline gap-1.5 text-[12px] leading-5">
-              <span className={cn("min-w-0 shrink truncate", headingClass)}>{heading}</span>
-              {preview && (
-                <span className="min-w-0 flex-1 truncate text-muted-foreground/55">{preview}</span>
+    <Collapsible open={expanded}>
+      <div
+        className={cn(
+          "group flex flex-col rounded-md px-0.5 py-px transition-colors",
+          canExpand &&
+            "cursor-pointer hover:bg-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70",
+        )}
+        {...rowToggleProps}
+      >
+        <div className="flex select-none items-center gap-1.5 transition-[opacity,translate] duration-200">
+          <span className={iconWrapperClass}>
+            <WorkEntryIconSvg
+              name={entryIconName}
+              className="block size-3.5 shrink-0 stroke-[1.8] opacity-80"
+            />
+          </span>
+          <div className="flex min-w-0 flex-1 items-center gap-1.5">
+            <div className="min-w-0 flex-1 overflow-hidden">
+              <p className="flex min-w-0 w-full items-baseline gap-1.5 text-[12px] leading-5">
+                <span className={cn("min-w-0 shrink truncate", headingClass)}>{heading}</span>
+                {preview && (
+                  <span className="min-w-0 flex-1 truncate text-muted-foreground/55">
+                    {preview}
+                  </span>
+                )}
+              </p>
+            </div>
+            <div
+              className={cn(
+                "flex shrink-0 items-center gap-px text-muted-foreground/55 transition-opacity",
+                showFailedIndicator || statusLabel === "Running"
+                  ? "opacity-100"
+                  : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100",
               )}
-            </p>
-          </div>
-          <div
-            className={cn(
-              "flex shrink-0 items-center gap-px text-muted-foreground/55 transition-opacity",
-              showFailedIndicator || statusLabel === "Running"
-                ? "opacity-100"
-                : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100",
-            )}
-          >
-            {compactMetadata.length > 0 ? (
-              <span className="me-1 text-[10px] tabular-nums">{compactMetadata.join(" · ")}</span>
-            ) : null}
-            {statusLabel ? (
-              <span className="me-1 text-[10px] font-medium uppercase tracking-wide">
-                {statusLabel}
-              </span>
-            ) : null}
-            {expandedBody ? (
-              <span onClick={stopRowToggle} onPointerDown={stopRowToggle}>
-                <MessageCopyButton
-                  text={expandedBody}
-                  size="icon-xs"
-                  variant="ghost"
-                  className="size-4"
-                />
-              </span>
-            ) : null}
-            <span
-              className="flex size-4 shrink-0 items-center justify-center"
-              aria-hidden={!canExpand}
             >
-              {canExpand ? (
-                <ChevronDownIcon
-                  className={cn(
-                    "size-3 shrink-0 opacity-70 transition-transform duration-200",
-                    expanded && "rotate-180",
-                  )}
-                  aria-hidden
-                />
+              {compactMetadata.length > 0 ? (
+                <span className="me-1 text-[10px] tabular-nums">{compactMetadata.join(" · ")}</span>
               ) : null}
-            </span>
-            <span className="flex size-4 shrink-0 items-center justify-center">
-              {showFailedIndicator ? (
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <span
-                        className="flex size-4 items-center justify-center"
-                        aria-label="Tool call failed"
-                      />
-                    }
-                  >
-                    <XIcon className="block size-3 shrink-0 text-destructive" aria-hidden />
-                  </TooltipTrigger>
-                  <TooltipPopup>Failed</TooltipPopup>
-                </Tooltip>
-              ) : showSuccessIndicator ? (
-                <Tooltip>
-                  <TooltipTrigger
-                    render={<span className="flex size-4 items-center justify-center" />}
-                  >
-                    <span className="inline-flex size-4 items-center justify-center">
-                      <CheckIcon
-                        className="block size-3 shrink-0 stroke-current"
-                        stroke="currentColor"
-                        aria-hidden
-                      />
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipPopup>Completed</TooltipPopup>
-                </Tooltip>
-              ) : showNeutralIndicator ? (
-                <Tooltip>
-                  <TooltipTrigger
-                    render={<span className="flex size-4 items-center justify-center" />}
-                  >
-                    <MinusIcon className="block size-3 shrink-0 opacity-70" aria-hidden />
-                  </TooltipTrigger>
-                  <TooltipPopup>Empty</TooltipPopup>
-                </Tooltip>
+              {statusLabel ? (
+                <span className="me-1 text-[10px] font-medium uppercase tracking-wide">
+                  {statusLabel}
+                </span>
               ) : null}
-            </span>
+              {expandedBody ? (
+                <span onClick={stopRowToggle} onPointerDown={stopRowToggle}>
+                  <MessageCopyButton
+                    text={expandedBody}
+                    size="icon-xs"
+                    variant="ghost"
+                    className="size-4"
+                  />
+                </span>
+              ) : null}
+              <span
+                className="flex size-4 shrink-0 items-center justify-center"
+                aria-hidden={!canExpand}
+              >
+                {canExpand ? (
+                  <ChevronDownIcon
+                    className={cn(
+                      "size-3 shrink-0 opacity-70 transition-transform duration-200",
+                      expanded && "rotate-180",
+                    )}
+                    aria-hidden
+                  />
+                ) : null}
+              </span>
+              <span className="flex size-4 shrink-0 items-center justify-center">
+                {showFailedIndicator ? (
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <span
+                          className="flex size-4 items-center justify-center"
+                          aria-label="Tool call failed"
+                        />
+                      }
+                    >
+                      <XIcon className="block size-3 shrink-0 text-destructive" aria-hidden />
+                    </TooltipTrigger>
+                    <TooltipPopup>Failed</TooltipPopup>
+                  </Tooltip>
+                ) : showSuccessIndicator ? (
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={<span className="flex size-4 items-center justify-center" />}
+                    >
+                      <span className="inline-flex size-4 items-center justify-center">
+                        <CheckIcon
+                          className="block size-3 shrink-0 stroke-current"
+                          stroke="currentColor"
+                          aria-hidden
+                        />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipPopup>Completed</TooltipPopup>
+                  </Tooltip>
+                ) : showNeutralIndicator ? (
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={<span className="flex size-4 items-center justify-center" />}
+                    >
+                      <MinusIcon className="block size-3 shrink-0 opacity-70" aria-hidden />
+                    </TooltipTrigger>
+                    <TooltipPopup>Empty</TooltipPopup>
+                  </Tooltip>
+                ) : null}
+              </span>
+            </div>
           </div>
         </div>
+        {canExpand && expandedBody ? (
+          <CollapsiblePanel>
+            <div
+              className="mt-1 ms-7 cursor-default border-s border-border/45 ps-3 pt-0.5"
+              onClick={stopRowToggle}
+              onPointerDown={stopRowToggle}
+            >
+              <pre className="max-h-64 cursor-text overflow-auto whitespace-pre-wrap break-words font-mono text-[11px] leading-relaxed text-muted-foreground select-text">
+                {expandedBody}
+              </pre>
+            </div>
+          </CollapsiblePanel>
+        ) : null}
       </div>
-      {expanded && canExpand && expandedBody ? (
-        <div
-          className="mt-1 ms-7 cursor-default border-s border-border/45 ps-3 pt-0.5"
-          onClick={stopRowToggle}
-          onPointerDown={stopRowToggle}
-        >
-          <pre className="max-h-64 cursor-text overflow-auto whitespace-pre-wrap break-words font-mono text-[11px] leading-relaxed text-muted-foreground select-text">
-            {expandedBody}
-          </pre>
-        </div>
-      ) : null}
-    </div>
+    </Collapsible>
   );
 });

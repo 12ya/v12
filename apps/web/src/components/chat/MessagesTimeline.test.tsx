@@ -628,6 +628,8 @@ describe("MessagesTimeline", () => {
     expect(markup).toContain("Succeeded");
     expect(markup).toContain("1.3s");
     expect(markup).toContain("exit 0");
+    expect(markup).toContain('data-slot="collapsible"');
+    expect(markup).toContain('aria-expanded="false"');
   });
 
   it("renders review comment contexts as structured cards instead of raw tags", async () => {

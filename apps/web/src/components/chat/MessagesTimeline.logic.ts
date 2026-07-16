@@ -86,7 +86,7 @@ export type TimelineLatestTurn = Pick<
   "turnId" | "state" | "startedAt" | "completedAt"
 >;
 
-export type MessagesTimelineRow =
+export type MessagesTimelineRow = (
   | {
       kind: "work";
       id: string;
@@ -130,7 +130,8 @@ export type MessagesTimelineRow =
       createdAt: string;
       proposedPlan: ProposedPlan;
     }
-  | { kind: "working"; id: string; createdAt: string | null };
+  | { kind: "working"; id: string; createdAt: string | null }
+) & { foldState?: "open" | "closing" | undefined };
 
 export interface StableMessagesTimelineRowsState {
   byId: Map<string, MessagesTimelineRow>;
@@ -410,6 +411,7 @@ export function deriveMessagesTimelineRows(input: {
   latestTurn?: TimelineLatestTurn | null;
   runningTurnId?: TurnId | null;
   expandedTurnIds?: ReadonlySet<TurnId>;
+  collapsingTurnIds?: ReadonlySet<TurnId>;
   expandedWorkGroupIds?: ReadonlySet<string>;
   isWorking: boolean;
   activeTurnStartedAt: string | null;
@@ -432,13 +434,26 @@ export function deriveMessagesTimelineRows(input: {
     unsettledTurnId,
   });
   const collapsedEntryIds = new Set<string>();
+  const foldByHiddenEntryId = new Map<
+    string,
+    typeof foldsByAnchorEntryId extends ReadonlyMap<string, infer Fold> ? Fold : never
+  >();
   for (const fold of foldsByAnchorEntryId.values()) {
-    if (!input.expandedTurnIds?.has(fold.turnId)) {
-      for (const entryId of fold.hiddenEntryIds) {
+    const foldIsVisible =
+      (input.expandedTurnIds?.has(fold.turnId) ?? false) ||
+      (input.collapsingTurnIds?.has(fold.turnId) ?? false);
+    for (const entryId of fold.hiddenEntryIds) {
+      foldByHiddenEntryId.set(entryId, fold);
+      if (!foldIsVisible) {
         collapsedEntryIds.add(entryId);
       }
     }
   }
+  const foldStateForEntry = (entryId: string): "open" | "closing" | undefined => {
+    const fold = foldByHiddenEntryId.get(entryId);
+    if (!fold) return undefined;
+    return input.collapsingTurnIds?.has(fold.turnId) ? "closing" : "open";
+  };
 
   for (let index = 0; index < input.timelineEntries.length; index += 1) {
     const timelineEntry = input.timelineEntries[index];
@@ -454,7 +469,9 @@ export function deriveMessagesTimelineRows(input: {
         createdAt: turnFold.createdAt,
         turnId: turnFold.turnId,
         label: turnFold.label,
-        expanded: input.expandedTurnIds?.has(turnFold.turnId) ?? false,
+        expanded:
+          (input.expandedTurnIds?.has(turnFold.turnId) ?? false) &&
+          !(input.collapsingTurnIds?.has(turnFold.turnId) ?? false),
       });
     }
 
@@ -488,6 +505,7 @@ export function deriveMessagesTimelineRows(input: {
             id: timelineEntry.id,
             createdAt: timelineEntry.createdAt,
             groupedEntries: visibleGroupedEntries,
+            foldState: foldStateForEntry(timelineEntry.id),
           });
         } else {
           const groupId = `work-group:${timelineEntry.id}`;
@@ -502,6 +520,7 @@ export function deriveMessagesTimelineRows(input: {
             onlyToolEntries: visibleGroupedEntries.every((entry) => workLogEntryIsToolLike(entry)),
             summary: summarizeWorkLogGroup(visibleGroupedEntries),
             groupedEntries: visibleGroupedEntries,
+            foldState: foldStateForEntry(timelineEntry.id),
           });
         }
       }
@@ -515,6 +534,7 @@ export function deriveMessagesTimelineRows(input: {
         id: timelineEntry.id,
         createdAt: timelineEntry.createdAt,
         proposedPlan: timelineEntry.proposedPlan,
+        foldState: foldStateForEntry(timelineEntry.id),
       });
       continue;
     }
@@ -552,6 +572,7 @@ export function deriveMessagesTimelineRows(input: {
         timelineEntry.message.role === "user"
           ? input.revertTurnCountByUserMessageId.get(timelineEntry.message.id)
           : undefined,
+      foldState: foldStateForEntry(timelineEntry.id),
     });
   }
 
@@ -589,6 +610,7 @@ export function computeStableMessagesTimelineRows(
 /** Shallow field comparison per row variant — avoids deep equality cost. */
 function isRowUnchanged(a: MessagesTimelineRow, b: MessagesTimelineRow): boolean {
   if (a.kind !== b.kind || a.id !== b.id) return false;
+  if (a.foldState !== b.foldState) return false;
 
   switch (a.kind) {
     case "working":
