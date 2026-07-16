@@ -2,6 +2,7 @@ import {
   CommandId,
   ORCHESTRATION_WS_METHODS,
   type ClientOrchestrationCommand,
+  type ThreadId,
 } from "@v12/contracts";
 import * as Crypto from "effect/Crypto";
 import * as DateTime from "effect/DateTime";
@@ -60,6 +61,25 @@ export class LocalMultitaskConfigError extends Schema.TaggedErrorClass<LocalMult
 ) {}
 
 type DispatchTag = typeof ORCHESTRATION_WS_METHODS.dispatchCommand;
+type LocalMultitaskDispatchError =
+  | EnvironmentRpcFailure<DispatchTag>
+  | EnvironmentRpcUnavailableError;
+export type LocalMultitaskTurnResult =
+  | {
+      readonly threadId: ThreadId;
+      readonly status: "failed";
+      readonly error: LocalMultitaskDispatchError;
+    }
+  | {
+      readonly threadId: ThreadId;
+      readonly status: "started";
+      readonly sequence: EnvironmentRpcSuccess<DispatchTag>["sequence"];
+    };
+export type StartLocalMultitaskEffect = Effect.Effect<
+  readonly LocalMultitaskTurnResult[],
+  LocalMultitaskConfigError,
+  Crypto.Crypto | EnvironmentSupervisor
+>;
 type CommandEffect = Effect.Effect<
   EnvironmentRpcSuccess<DispatchTag>,
   EnvironmentRpcFailure<DispatchTag> | EnvironmentRpcUnavailableError,
@@ -229,47 +249,46 @@ export const startThreadTurn: (input: StartThreadTurnInput) => CommandEffect = E
  * Individual dispatch failures are returned per child so one bad worktree does not
  * cancel siblings that are already starting.
  */
-export const startLocalMultitask = Effect.fn("EnvironmentCommands.startLocalMultitask")(function* (
-  input: StartLocalMultitaskInput,
-) {
-  const maxConcurrency = input.maxConcurrency ?? 3;
-  if (!Number.isInteger(maxConcurrency) || maxConcurrency < 1 || maxConcurrency > 8) {
-    return yield* new LocalMultitaskConfigError({
-      message: "maxConcurrency must be an integer between 1 and 8.",
-    });
-  }
-  if (input.turns.length === 0) {
-    return yield* new LocalMultitaskConfigError({
-      message: "Local multitask requires at least one child turn.",
-    });
-  }
-  const threadIds = new Set(input.turns.map((turn) => turn.threadId));
-  if (threadIds.size !== input.turns.length) {
-    return yield* new LocalMultitaskConfigError({
-      message: "Local multitask child thread IDs must be unique.",
-    });
-  }
+export const startLocalMultitask: (input: StartLocalMultitaskInput) => StartLocalMultitaskEffect =
+  Effect.fn("EnvironmentCommands.startLocalMultitask")(function* (input) {
+    const maxConcurrency = input.maxConcurrency ?? 3;
+    if (!Number.isInteger(maxConcurrency) || maxConcurrency < 1 || maxConcurrency > 8) {
+      return yield* new LocalMultitaskConfigError({
+        message: "maxConcurrency must be an integer between 1 and 8.",
+      });
+    }
+    if (input.turns.length === 0) {
+      return yield* new LocalMultitaskConfigError({
+        message: "Local multitask requires at least one child turn.",
+      });
+    }
+    const threadIds = new Set(input.turns.map((turn) => turn.threadId));
+    if (threadIds.size !== input.turns.length) {
+      return yield* new LocalMultitaskConfigError({
+        message: "Local multitask child thread IDs must be unique.",
+      });
+    }
 
-  return yield* Effect.forEach(
-    input.turns,
-    (turn) =>
-      startThreadTurn(turn).pipe(
-        Effect.match({
-          onFailure: (error) => ({
-            threadId: turn.threadId,
-            status: "failed" as const,
-            error,
+    return yield* Effect.forEach(
+      input.turns,
+      (turn) =>
+        startThreadTurn(turn).pipe(
+          Effect.match({
+            onFailure: (error) => ({
+              threadId: turn.threadId,
+              status: "failed" as const,
+              error,
+            }),
+            onSuccess: (result) => ({
+              threadId: turn.threadId,
+              status: "started" as const,
+              sequence: result.sequence,
+            }),
           }),
-          onSuccess: (result) => ({
-            threadId: turn.threadId,
-            status: "started" as const,
-            sequence: result.sequence,
-          }),
-        }),
-      ),
-    { concurrency: maxConcurrency },
-  );
-});
+        ),
+      { concurrency: maxConcurrency },
+    );
+  });
 
 export const interruptThreadTurn: (input: InterruptThreadTurnInput) => CommandEffect = Effect.fn(
   "EnvironmentCommands.interruptThreadTurn",
