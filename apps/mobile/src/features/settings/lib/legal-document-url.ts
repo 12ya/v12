@@ -1,4 +1,4 @@
-const DEFAULT_MARKETING_SITE_URL = "https://t3.codes";
+const DEFAULT_MARKETING_SITE_URL = "https://v12code.com";
 
 function resolveMarketingSiteUrl(override: string | undefined): URL {
   try {

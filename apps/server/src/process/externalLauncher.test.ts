@@ -155,6 +155,68 @@ it.effect("discovers editors through the service API", () =>
   }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)),
 );
 
+it.effect("discovers a macOS editor app when its CLI is not on PATH", () =>
+  Effect.gen(function* () {
+    const fileSystem = yield* FileSystem.FileSystem;
+    const path = yield* Path.Path;
+    const homeDir = yield* fileSystem.makeTempDirectoryScoped({ prefix: "v12code-home-" });
+    yield* fileSystem.makeDirectory(path.join(homeDir, "Applications", "Visual Studio Code.app"), {
+      recursive: true,
+    });
+
+    const editors = yield* Effect.gen(function* () {
+      const launcher = yield* ExternalLauncher.ExternalLauncher;
+      return yield* launcher.resolveAvailableEditors();
+    }).pipe(Effect.provide(testLayer({ platform: "darwin", env: { HOME: homeDir, PATH: "" } })));
+
+    assert.equal(editors.includes("vscode"), true);
+  }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)),
+);
+
+it.effect("launches a macOS editor app when its CLI is not on PATH", () =>
+  Effect.gen(function* () {
+    const fileSystem = yield* FileSystem.FileSystem;
+    const path = yield* Path.Path;
+    const homeDir = yield* fileSystem.makeTempDirectoryScoped({ prefix: "v12code-home-" });
+    const binDir = yield* fileSystem.makeTempDirectoryScoped({ prefix: "v12code-bin-" });
+    yield* fileSystem.makeDirectory(path.join(homeDir, "Applications", "Cursor.app"), {
+      recursive: true,
+    });
+    const openPath = path.join(binDir, "open");
+    yield* fileSystem.writeFileString(openPath, "#!/bin/sh\n");
+    yield* fileSystem.chmod(openPath, 0o755);
+
+    let spawned: ChildProcess.StandardCommand | undefined;
+    yield* Effect.gen(function* () {
+      const launcher = yield* ExternalLauncher.ExternalLauncher;
+      yield* launcher.launchEditor({
+        editor: "cursor",
+        cwd: "/workspace/src/index.ts:12:4",
+      });
+    }).pipe(
+      Effect.provide(
+        testLayer({
+          platform: "darwin",
+          env: { HOME: homeDir, PATH: binDir },
+          onSpawn: (command) => {
+            spawned = command;
+          },
+        }),
+      ),
+    );
+
+    assert.ok(spawned);
+    assert.equal(spawned.command, "open");
+    assert.deepEqual(spawned.args, [
+      "-a",
+      "Cursor",
+      "--args",
+      "--goto",
+      "/workspace/src/index.ts:12:4",
+    ]);
+  }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)),
+);
+
 it.effect("rejects unknown editors through the service API", () =>
   Effect.gen(function* () {
     const launcher = yield* ExternalLauncher.ExternalLauncher;

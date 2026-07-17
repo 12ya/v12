@@ -47,7 +47,7 @@ winget install V12Code.V12Code
 #### macOS (Homebrew)
 
 ```bash
-brew install --cask 12ya/tap/v12code-code
+brew install --cask 12ya/tap/v12code
 ```
 
 #### Arch Linux (AUR)

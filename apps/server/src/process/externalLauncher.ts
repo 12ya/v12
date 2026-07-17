@@ -104,10 +104,66 @@ const CommandLookupEnvConfig = Config.all({
   Path: Config.string("Path").pipe(Config.option),
   path: Config.string("path").pipe(Config.option),
   PATHEXT: Config.string("PATHEXT").pipe(Config.option),
+  HOME: Config.string("HOME").pipe(Config.option),
 }).pipe(Config.map(compactEnv));
 
 const readBrowserLaunchEnv = BrowserLaunchEnvConfig.pipe(Effect.orElseSucceed(() => ({})));
 const readCommandLookupEnv = CommandLookupEnvConfig.pipe(Effect.orElseSucceed(() => ({})));
+
+const MAC_EDITOR_APPLICATIONS = {
+  cursor: ["Cursor"],
+  trae: ["Trae"],
+  kiro: ["Kiro"],
+  vscode: ["Visual Studio Code"],
+  "vscode-insiders": ["Visual Studio Code - Insiders"],
+  vscodium: ["VSCodium"],
+  zed: ["Zed"],
+  antigravity: ["Antigravity", "Google Antigravity"],
+  idea: ["IntelliJ IDEA", "IntelliJ IDEA Ultimate", "IntelliJ IDEA Community Edition"],
+  aqua: ["Aqua"],
+  clion: ["CLion"],
+  datagrip: ["DataGrip"],
+  dataspell: ["DataSpell"],
+  goland: ["GoLand"],
+  phpstorm: ["PhpStorm"],
+  pycharm: ["PyCharm"],
+  rider: ["Rider"],
+  rubymine: ["RubyMine"],
+  rustrover: ["RustRover"],
+  webstorm: ["WebStorm"],
+} as const satisfies Partial<Record<EditorId, ReadonlyArray<string>>>;
+
+const resolveInstalledMacApplication = Effect.fn("externalLauncher.resolveInstalledMacApplication")(
+  function* (
+    editor: EditorId,
+    env: NodeJS.ProcessEnv,
+  ): Effect.fn.Return<Option.Option<string>, never, FileSystem.FileSystem | Path.Path> {
+    const applicationNames =
+      MAC_EDITOR_APPLICATIONS[editor as keyof typeof MAC_EDITOR_APPLICATIONS];
+    if (!applicationNames) return Option.none();
+
+    const fileSystem = yield* FileSystem.FileSystem;
+    const path = yield* Path.Path;
+    const applicationDirectories = [
+      "/Applications",
+      "/System/Applications",
+      ...(env.HOME ? [path.join(env.HOME, "Applications")] : []),
+    ];
+
+    for (const applicationName of applicationNames) {
+      for (const applicationDirectory of applicationDirectories) {
+        const applicationPath = path.join(applicationDirectory, `${applicationName}.app`);
+        const exists = yield* fileSystem.stat(applicationPath).pipe(
+          Effect.as(true),
+          Effect.orElseSucceed(() => false),
+        );
+        if (exists) return Option.some(applicationName);
+      }
+    }
+
+    return Option.none();
+  },
+);
 
 function parseTargetPathAndPosition(target: string): Option.Option<TargetPathAndPosition> {
   const match = TARGET_WITH_POSITION_PATTERN.exec(target);
@@ -276,7 +332,11 @@ const buildAvailableEditors = Effect.fn("externalLauncher.buildAvailableEditors"
     }
 
     const command = yield* resolveAvailableCommand(editor.commands, env);
-    if (Option.isSome(command)) {
+    const application =
+      platform === "darwin"
+        ? yield* resolveInstalledMacApplication(editor.id, env)
+        : Option.none<string>();
+    if (Option.isSome(command) || Option.isSome(application)) {
       available.push(editor.id);
     }
   }
@@ -336,14 +396,28 @@ const resolveEditorLaunch = Effect.fn("resolveEditorLaunch")(function* (
   }
 
   if (editorDef.commands) {
-    const command = Option.getOrElse(
-      yield* resolveAvailableCommand(editorDef.commands, env),
-      () => editorDef.commands[0],
-    );
+    const availableCommand = yield* resolveAvailableCommand(editorDef.commands, env);
+    if (Option.isNone(availableCommand) && platform === "darwin") {
+      const application = yield* resolveInstalledMacApplication(editorDef.id, env);
+      if (Option.isSome(application)) {
+        return {
+          editor: editorDef.id,
+          target: input.cwd,
+          command: "open",
+          args: [
+            "-a",
+            application.value,
+            "--args",
+            ...resolveCommandEditorArgs(editorDef, input.cwd),
+          ],
+        };
+      }
+    }
+
     return {
       editor: editorDef.id,
       target: input.cwd,
-      command,
+      command: Option.getOrElse(availableCommand, () => editorDef.commands[0]),
       args: resolveEditorArgs(editorDef, input.cwd),
     };
   }

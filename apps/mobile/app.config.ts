@@ -334,7 +334,7 @@ const config: ExpoConfig = {
       projectId: "d763fcb8-d37c-41ea-a773-b54a0ab4a454",
     },
   },
-  owner: "pingdotgg",
+  owner: "12ya",
 };
 
 export default config;
