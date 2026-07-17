@@ -30,6 +30,10 @@ class V12CodeTerminalModule : Module() {
         view.focusRequest = focusRequest
       }
 
+      Prop("autoFocus") { view: V12CodeTerminalView, autoFocus: Boolean ->
+        view.autoFocus = autoFocus
+      }
+
       Prop("appearanceScheme") { view: V12CodeTerminalView, appearanceScheme: String ->
         view.appearanceScheme = appearanceScheme
       }

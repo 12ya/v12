@@ -13,6 +13,7 @@
     "start:desktop": "vp run --filter @v12code/desktop start",
     "start:marketing": "vp run --filter @v12code/marketing preview",
     "start:mock-update-server": "node scripts/mock-update-server.ts",
+    "screenshots:mobile": "node scripts/mobile-showcase.ts",
     "build": "vp run --filter './apps/*' --filter './packages/*' --filter './oxlint-plugin-v12code' --filter './scripts' build",
     "build:marketing": "vp run --filter @v12code/marketing build",
     "build:desktop": "vp run --filter @v12code/desktop --filter v12code build",

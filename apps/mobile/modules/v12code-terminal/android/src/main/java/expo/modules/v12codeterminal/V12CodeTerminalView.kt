@@ -76,6 +76,17 @@ class V12CodeTerminalView(context: Context, appContext: AppContext) : ExpoView(c
       }
     }
 
+  var autoFocus: Boolean = true
+    set(value) {
+      field = value
+      if (value) {
+        requestKeyboardFocus()
+      } else {
+        inputView.clearFocus()
+        hideKeyboard()
+      }
+    }
+
   var backgroundColorHex: String = "#24292E"
     set(value) {
       field = value
@@ -366,6 +377,13 @@ class V12CodeTerminalView(context: Context, appContext: AppContext) : ExpoView(c
       Context.INPUT_METHOD_SERVICE
     ) as? InputMethodManager
     inputMethodManager?.showSoftInput(inputView, InputMethodManager.SHOW_IMPLICIT)
+  }
+
+  private fun hideKeyboard() {
+    val inputMethodManager = context.getSystemService(
+      Context.INPUT_METHOD_SERVICE
+    ) as? InputMethodManager
+    inputMethodManager?.hideSoftInputFromWindow(windowToken, 0)
   }
 
   private fun applyTheme() {
